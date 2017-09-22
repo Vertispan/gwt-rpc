@@ -9,6 +9,7 @@ import com.vertispan.serial.processor.UnableToCompleteException;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
@@ -96,7 +97,7 @@ public class Processor extends AbstractProcessor {
 
         // continue processing with the full list of types if there was a change
         //TODO this is a little amateurish, try to keep the data collection more separate from the codegen...
-        Map<TypeElement, List<TypeElement>> subtypes = buildTypeTree(allTypes);
+        Map<TypeElement, Set<TypeElement>> subtypes = buildTypeTree(allTypes);
         for (Element element : roundEnv.getElementsAnnotatedWith(SerializationWiring.class)) {
 
             SerializableTypeOracleBuilder readStob = new SerializableTypeOracleBuilder(
@@ -176,8 +177,42 @@ public class Processor extends AbstractProcessor {
         return method.getParameters().isEmpty() && types.isSameType(method.getReturnType(), serializer.asType());
     }
 
-    private Map<TypeElement, List<TypeElement>> buildTypeTree(Set<String> allTypes) {
-        return new HashMap<>();
+    private Map<TypeElement, Set<TypeElement>> buildTypeTree(Set<String> allTypes) {
+        // not sure we can do it sooner, so lets remove all unreachable types here, and build the tree
+        Set<TypeElement> existingTypes = allTypes.stream()
+                .map(typeName -> elements.getTypeElement(typeName))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        // for each type, if not already present, put it and all parents in the map
+        HashMap<TypeElement, Set<TypeElement>> map = new HashMap<>();
+        existingTypes.forEach(type -> appendWithParent(type, map));
+
+        return map;
+    }
+    private void appendWithParent(TypeElement type, Map<TypeElement, Set<TypeElement>> map) {
+        TypeMirror superclass = type.getSuperclass();
+        if (superclass.getKind() == TypeKind.NONE) {
+            //top of the tree, we're done
+            return;
+        }
+        assert superclass.getKind() == TypeKind.DECLARED;
+        TypeElement superclassElement = (TypeElement) ((DeclaredType) superclass).asElement();
+        boolean added = map.computeIfAbsent(superclassElement, ignore -> new HashSet<>()).add(type);
+        if (!added) {
+            //we've already looked at this type, which means we've already added interfaces and parents too, give up early
+            return;
+        }
+        appendWithParent(superclassElement, map);
+
+        List<? extends TypeMirror> interfaces = type.getInterfaces();
+        for (TypeMirror anInterface : interfaces) {
+            TypeElement interfaceElement = (TypeElement) ((DeclaredType) anInterface).asElement();
+            map.computeIfAbsent(interfaceElement, ignore -> new HashSet<>()).add(type);
+
+            appendWithParent(interfaceElement, map);
+        }
+
+
     }
 
     private void writeTypes(FileObject updated, Set<String> allTypes) throws IOException {

@@ -714,7 +714,7 @@ public class SerializableTypeOracleBuilder {
      * @throws UnableToCompleteException if we fail to find one of our special
      *           types
      */
-    public SerializableTypeOracleBuilder(Types types, Elements elements, Map<TypeElement, List<TypeElement>> knownSubtypes, Messager messager)
+    public SerializableTypeOracleBuilder(Types types, Elements elements, Map<TypeElement, Set<TypeElement>> knownSubtypes, Messager messager)
             /*throws UnableToCompleteException */{
         this.messager = messager;
         this.types = new SerializingTypes(types, elements, knownSubtypes);
