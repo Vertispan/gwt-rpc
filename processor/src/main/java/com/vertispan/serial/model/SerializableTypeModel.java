@@ -7,6 +7,7 @@ import com.vertispan.serial.processor.SerializingTypes;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,14 +38,17 @@ public class SerializableTypeModel {
 
         //readFoo/writeFoo in stream reader and stream writer
         public String getStreamMethodName() {
-            TypeKind kind = getter.getReturnType().getKind();
-            if (kind.isPrimitive()) {
-                return kind.name().substring(0, 1) + kind.name().substring(1).toLowerCase();
-            } else if (ClassName.get(getter.getReturnType()).toString().equals("java.lang.String")) {
-                return "String";
-            } else {
-                return "Object";
-            }
+            return getStreamMethodSuffix(getter.getReturnType());
+        }
+
+    }
+    public static String getStreamMethodSuffix(TypeMirror type) {
+        if (type.getKind().isPrimitive()) {
+            return type.getKind().name().substring(0, 1) + type.getKind().name().substring(1).toLowerCase();
+        } else if (ClassName.get(type).toString().equals("java.lang.String")) {
+            return "String";
+        } else {
+            return "Object";
         }
     }
 
@@ -65,14 +69,7 @@ public class SerializableTypeModel {
 
         //readFoo/writeFoo in stream reader and stream writer
         public String getStreamMethodName() {
-            TypeKind kind = field.asType().getKind();
-            if (kind.isPrimitive()) {
-                return kind.name().substring(0, 1) + kind.name().substring(1).toLowerCase();
-            } else if (ClassName.get(field.asType()).toString().equals("java.lang.String")) {
-                return "String";
-            } else {
-                return "Object";
-            }
+            return getStreamMethodSuffix(field.asType());
         }
     }
 

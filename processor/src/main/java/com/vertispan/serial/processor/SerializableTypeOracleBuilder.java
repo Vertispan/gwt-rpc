@@ -818,7 +818,7 @@ public class SerializableTypeOracleBuilder {
         Set<TypeMirror> fieldSerializableTypes = new TreeSet<>(JTYPE_COMPARATOR);
 
         for (TypeInfoComputed tic : typeToTypeInfoComputed.values()) {
-            if (tic.getType().getKind() != TypeKind.DECLARED) {
+            if (tic.getType().getKind() != TypeKind.DECLARED && tic.getType().getKind() != TypeKind.ARRAY) {
                 continue;
             }
             TypeMirror type = types.getTypes().erasure(tic.getType());
@@ -1635,7 +1635,10 @@ public class SerializableTypeOracleBuilder {
      */
         Set<TypeMirror> supersOfInstantiableTypes = new LinkedHashSet<>();
         for (TypeInfoComputed tic : typeToTypeInfoComputed.values()) {
-            if (tic.isInstantiable() && tic.getType().getKind() == TypeKind.DECLARED) {
+            if (!tic.isInstantiable()) {
+                continue;
+            }
+            if (tic.getType().getKind() == TypeKind.DECLARED) {
                 DeclaredType sup = (DeclaredType) types.getTypes().erasure(tic.getType());//JClassType.getErasedType
                 while (sup != null) {
                     supersOfInstantiableTypes.add(types.getTypes().erasure(sup));
@@ -1646,6 +1649,9 @@ public class SerializableTypeOracleBuilder {
                     }
                     sup = (DeclaredType) superclass;
                 }
+            } else if (tic.getType().getKind() == TypeKind.ARRAY) {
+                supersOfInstantiableTypes.add(tic.getType());
+                supersOfInstantiableTypes.add(types.getJavaLangObject().asType());
             }
         }
 

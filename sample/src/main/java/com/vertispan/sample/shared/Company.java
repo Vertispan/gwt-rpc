@@ -8,6 +8,8 @@ public class Company implements HasAddress, Serializable {
     private Person owner;
     private Address address;
 
+    int[] numbers;
+
     public String getName() {
         return name;
     }
