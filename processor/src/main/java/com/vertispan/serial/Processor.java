@@ -1,11 +1,12 @@
 package com.vertispan.serial;
 
-import com.google.auto.common.MoreTypes;
 import com.google.auto.service.AutoService;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
 import com.squareup.javapoet.*;
+import com.squareup.javapoet.TypeSpec.Builder;
 import com.vertispan.gwtapt.JTypeUtils;
+import com.vertispan.serial.impl.TypeSerializerImpl;
 import com.vertispan.serial.model.SerializableTypeModel;
 import com.vertispan.serial.model.SerializableTypeModel.Field;
 import com.vertispan.serial.model.SerializableTypeModel.Property;
@@ -35,7 +36,8 @@ public class Processor extends AbstractProcessor {
 
     private TypeElement serializationStreamReader;
     private TypeElement serializationStreamWriter;
-    private TypeElement serializer;
+    private TypeElement typeSerializer;
+    private TypeElement fieldSerializer;
     private TypeElement serializationWiring;
 
     private Filer filer;
@@ -68,7 +70,8 @@ public class Processor extends AbstractProcessor {
 
         serializationStreamReader = elements.getTypeElement(SerializationStreamReader.class.getName());
         serializationStreamWriter = elements.getTypeElement(SerializationStreamWriter.class.getName());
-        serializer = elements.getTypeElement(Serializer.class.getName());
+        typeSerializer = elements.getTypeElement(TypeSerializer.class.getName());
+        fieldSerializer = elements.getTypeElement(FieldSerializer.class.getName());
         serializationWiring = elements.getTypeElement(SerializationWiring.class.getName());
     }
 
@@ -180,26 +183,117 @@ public class Processor extends AbstractProcessor {
         }
 
 
-
+        String prefix = serializationInterface.getSimpleName().toString();
+        String packageName = elements.getPackageOf(serializationInterface).getQualifiedName().toString();
         //write interface impl
         //TODO it would be lovely to have a metamodel...
+        writeSerializerImpl(prefix, packageName, serializationInterface);
 
         //write type serializer, pointing at required field serializers and their appropriate use in each direction
         //TODO consider only doing this once, later, so we can be sure classes are still needed? not sure...
-
-
+        writeTypeSerializer(bidiOracle, prefix, packageName);
         
     }
 
-    private void writeArraySerializer(TypeMirror arrayType, SerializingTypes serializingTypes, SerializableTypeOracle bidiOracle) throws IOException {
+    private void writeSerializerImpl(String prefix, String packageName, Element serializationInterface) throws IOException {
+        Builder implTypeBuilder = TypeSpec.classBuilder(prefix + "_Impl")
+                .addAnnotation(AnnotationSpec.builder(Generated.class).addMember("value", "\"$L\"", Processor.class.getCanonicalName()).build())
+                .addSuperinterface(ClassName.get(serializationInterface.asType()))
+                .addModifiers(Modifier.PUBLIC);
+
+        //exactly one method should return a TypeSerializer
+
+        //the rest are either read or write methods
+        //TODO again, metamodel?
+        
+
+        for (ExecutableElement method : ElementFilter.methodsIn(serializationInterface.getEnclosedElements())) {
+            if (method.getModifiers().contains(Modifier.STATIC) || method.getModifiers().contains(Modifier.DEFAULT)) {
+                continue;
+            }
+            if (types.isSameType(method.getReturnType(), typeSerializer.asType())) {
+                implTypeBuilder.addMethod(MethodSpec.methodBuilder(method.getSimpleName().toString())
+                        .returns(ClassName.get(typeSerializer))
+                        .addModifiers(Modifier.PUBLIC)
+                        .addStatement("return new $L_TypeSerializer()", prefix)
+                        .build());
+            } else {
+                //read or write
+                if (method.getReturnType().getKind() == TypeKind.VOID) {
+                    TypeMirror writtenType = method.getParameters().get(0).asType();
+                    //write(OneObject, SSW)
+                    implTypeBuilder.addMethod(MethodSpec.methodBuilder(method.getSimpleName().toString())
+                            .returns(TypeName.VOID)
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(ClassName.get(writtenType), "instance")
+                            .addParameter(SerializationStreamWriter.class, "writer")
+                            .beginControlFlow("try")
+                            .addStatement("writer.write$L(instance)", SerializableTypeModel.getStreamMethodSuffix(writtenType))
+                            .nextControlFlow("catch ($T ex)", SerializationException.class)
+                            .addStatement("throw new IllegalStateException(ex)")
+                            .endControlFlow()
+                            .build());
+                } else {
+                    TypeMirror readType = method.getReturnType();
+                    //OneObject read(SSR)
+                    implTypeBuilder.addMethod(MethodSpec.methodBuilder(method.getSimpleName().toString())
+                            .returns(ClassName.get(readType))
+                            .addModifiers(Modifier.PUBLIC)
+                            .addParameter(SerializationStreamReader.class, "reader")
+                            .beginControlFlow("try")
+                            .addStatement("return ($T) reader.read$L()", ClassName.get(readType), SerializableTypeModel.getStreamMethodSuffix(readType))
+                            .nextControlFlow("catch ($T ex)", SerializationException.class)
+                            .addStatement("throw new IllegalStateException(ex)")
+                            .endControlFlow()
+                            .build());
+                }
+            }
+
+        }
+
+
+        JavaFile.builder(packageName, implTypeBuilder.build()).build().writeTo(filer);
+    }
+
+    private void writeTypeSerializer(SerializableTypeOracle bidiOracle, String prefix, String packageName) throws IOException {
+        Builder typeSerializer = TypeSpec.classBuilder(prefix + "_TypeSerializer")
+                .addAnnotation(AnnotationSpec.builder(Generated.class).addMember("value", "\"$L\"", Processor.class.getCanonicalName()).build())
+                .superclass(TypeSerializerImpl.class)
+                .addModifiers(Modifier.PUBLIC);
+
+        //TODO this isn't optimal, but is easy to write quickly
+        typeSerializer.addField(FieldSpec.builder(
+                ParameterizedTypeName.get(Map.class, String.class, FieldSerializer.class),
+                "fieldSerializer",
+                Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC).initializer("new $T()", ClassName.get(HashMap.class)).build());
+
+        CodeBlock.Builder clinit = CodeBlock.builder();
+        for (TypeMirror serializableType : bidiOracle.getSerializableTypes()) {
+            clinit.addStatement("fieldSerializer.put($S, new $T())", ClassName.get(serializableType).toString(), getFieldSerializer(serializableType));
+        }
+        typeSerializer.addStaticBlock(clinit
+                .build());
+
+        typeSerializer.addMethod(MethodSpec.methodBuilder("serializer")
+                .addModifiers(Modifier.PROTECTED)
+                .addAnnotation(Override.class)
+                .addParameter(String.class, "name")
+                .returns(FieldSerializer.class)
+                .addStatement("return fieldSerializer.get(name)")
+                .build());
+        JavaFile.builder(packageName, typeSerializer.build()).build().writeTo(filer);
+    }
+
+    private void writeArraySerializer(TypeMirror arrayType, SerializingTypes serializingTypes, SerializableTypeOracle stob) throws IOException {
         int rank = JTypeUtils.getRank(arrayType);
         assert rank > 0;
         TypeMirror componentType = JTypeUtils.getLeafType(arrayType);
 
         String packageName = arraySerializerPackage(componentType);
-        String fieldSerializerName = arraySerializerName(componentType, rank);
+        ClassName fieldSerializerName = getFieldSerializer(arrayType);
 
         TypeSpec.Builder fieldSerializerType = TypeSpec.classBuilder(fieldSerializerName)
+                .addSuperinterface(ClassName.get(fieldSerializer))
                 .addAnnotation(AnnotationSpec.builder(Generated.class).addMember("value", "\"$L\"", Processor.class.getCanonicalName()).build())
                 .addModifiers(Modifier.PUBLIC);//TODO originating element if it is an element
 
@@ -251,6 +345,9 @@ public class Processor extends AbstractProcessor {
                 .addStatement("return new $T[length]$L", ClassName.get(componentType), extraArrayRank);
 
         fieldSerializerType.addMethod(instantiateMethodBuilder.build());
+
+        writeDelegateMethods(fieldSerializerType, ClassName.get(arrayType), true, true, true);
+
         JavaFile file = JavaFile.builder(packageName, fieldSerializerType.build()).build();
 
         try {
@@ -262,10 +359,24 @@ public class Processor extends AbstractProcessor {
 
     private String arraySerializerPackage(TypeMirror componentType) {
         if (componentType.getKind().isPrimitive()) {
-            return elements.getPackageOf(serializer).toString();
+            return elements.getPackageOf(typeSerializer).toString();
         }
         assert componentType.getKind() == TypeKind.DECLARED;
         return elements.getPackageOf(types.asElement(componentType)).toString();
+    }
+
+    private ClassName getFieldSerializer(TypeMirror type) {
+        if (type.getKind() == TypeKind.ARRAY) {
+            return ClassName.get(
+                    arraySerializerPackage(JTypeUtils.getLeafType(type)),
+                    arraySerializerName(JTypeUtils.getLeafType(type), JTypeUtils.getRank(type))
+            );
+        }
+        assert type.getKind() == TypeKind.DECLARED;
+        return getFieldSerializer((TypeElement) types.asElement(type));
+    }
+    private ClassName getFieldSerializer(TypeElement type) {
+        return ClassName.get(elements.getPackageOf(type).getQualifiedName().toString(), type.getSimpleName() + "_FieldSerializer");
     }
 
     private String arraySerializerName(TypeMirror componentType, int rank) {
@@ -281,11 +392,16 @@ public class Processor extends AbstractProcessor {
         SerializableTypeModel model = SerializableTypeModel.create(serializingTypes, typeElement);
 
         TypeSpec.Builder fieldSerializerType = TypeSpec.classBuilder(model.getFieldSerializerName())
+                .addSuperinterface(ClassName.get(fieldSerializer))
                 .addAnnotation(AnnotationSpec.builder(Generated.class).addMember("value", "\"$L\"", Processor.class.getCanonicalName()).build())
                 .addModifiers(Modifier.PUBLIC)
                 .addOriginatingElement(typeElement);
+        boolean writeSerialize = false, writeDeserialize = false, writeInstantiate = false;
         if (typeElement.getKind() != ElementKind.ENUM) {
             assert typeElement.getKind() == ElementKind.CLASS;
+
+            writeSerialize = true;
+            writeDeserialize = true;
 
             //write field accessors for violator stuff
             //TODO support private fields, not just the easy stuff. (then we can support final and other good fun)
@@ -307,7 +423,7 @@ public class Processor extends AbstractProcessor {
 
             //walk up to superclass, if any
             if (typeElement.getSuperclass().getKind() != TypeKind.NONE && stob.isSerializable(typeElement.getSuperclass())) {
-                deserializeMethodBuilder.addStatement("$L.deserialize(reader, instance)", model.getSuperclassFieldSerializerName());
+                deserializeMethodBuilder.addStatement("$L.deserialize(reader, instance)", getFieldSerializer(model.getType()));
             }
 
             fieldSerializerType.addMethod(deserializeMethodBuilder.build());
@@ -330,13 +446,14 @@ public class Processor extends AbstractProcessor {
 
             //walk up to superclass, if any
             if (typeElement.getSuperclass().getKind() != TypeKind.NONE && stob.isSerializable(typeElement.getSuperclass())) {
-                deserializeMethodBuilder.addStatement("$L.serialize(writer, instance)", model.getSuperclassFieldSerializerName());
+                deserializeMethodBuilder.addStatement("$L.serialize(writer, instance)", getFieldSerializer(model.getType()));
             }
             
             fieldSerializerType.addMethod(serializeMethodBuilder.build());
         }
         //maybe write instantiate (if not abstract, and has default ctor) OR is an enum
         if (typeElement.getKind() == ElementKind.ENUM || (!typeElement.getModifiers().contains(Modifier.ABSTRACT) && JTypeUtils.isDefaultInstantiable(typeElement))) {
+            writeInstantiate = true;
             MethodSpec.Builder instantiateMethodBuilder = MethodSpec.methodBuilder("instantiate")
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .returns(ClassName.get(typeElement))
@@ -352,7 +469,7 @@ public class Processor extends AbstractProcessor {
             fieldSerializerType.addMethod(instantiateMethodBuilder.build());
         }
 
-        //TODO do we need a non static impl? gwt does it, ostensibly for use from the jvm (legacy dev mode?)
+        writeDelegateMethods(fieldSerializerType, ClassName.get(typeElement), writeSerialize, writeDeserialize, writeInstantiate);
 
         String packageName = elements.getPackageOf(typeElement).getQualifiedName().toString();
         JavaFile file = JavaFile.builder(packageName, fieldSerializerType.build()).build();
@@ -361,6 +478,42 @@ public class Processor extends AbstractProcessor {
             file.writeTo(filer);
         } catch (FilerException ignore) {
             // someone already wrote this type - doesn't matter, should be consistent no matter who did it
+        }
+    }
+
+
+    private void writeDelegateMethods(Builder fieldSerializerType, TypeName dataType, boolean writeSerialize, boolean writeDeserialize, boolean writeInstantiate) {
+        if (writeSerialize) {
+            fieldSerializerType.addMethod(MethodSpec.methodBuilder("serial")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .addParameter(SerializationStreamWriter.class, "writer")
+                    .addParameter(Object.class, "instance")
+                    .returns(TypeName.VOID)
+                    .addException(SerializationException.class)
+                    .addStatement("serialize(writer, ($T) instance)", dataType)
+                    .build());
+        }
+        if (writeDeserialize) {
+            fieldSerializerType.addMethod(MethodSpec.methodBuilder("deserial")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .addParameter(SerializationStreamReader.class, "reader")
+                    .addParameter(Object.class, "instance")
+                    .returns(TypeName.VOID)
+                    .addException(SerializationException.class)
+                    .addStatement("deserialize(reader, ($T)instance)", dataType)
+                    .build());
+        }
+        if (writeInstantiate) {
+            fieldSerializerType.addMethod(MethodSpec.methodBuilder("create")
+                    .addModifiers(Modifier.PUBLIC)
+                    .addAnnotation(Override.class)
+                    .addParameter(SerializationStreamReader.class, "reader")
+                    .returns(Object.class)
+                    .addException(SerializationException.class)
+                    .addStatement("return instantiate(reader)")
+                    .build());
         }
     }
 
@@ -378,7 +531,7 @@ public class Processor extends AbstractProcessor {
 
     // zero-arg method, returns the serializer that can be used
     private boolean isSerializerFactoryMethod(ExecutableElement method) {
-        return method.getParameters().isEmpty() && types.isSameType(method.getReturnType(), serializer.asType());
+        return method.getParameters().isEmpty() && types.isSameType(method.getReturnType(), typeSerializer.asType());
     }
 
     private Map<TypeElement, Set<TypeElement>> buildTypeTree(Set<String> allTypes) {

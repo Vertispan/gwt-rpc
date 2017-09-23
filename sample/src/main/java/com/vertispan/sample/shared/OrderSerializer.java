@@ -3,12 +3,15 @@ package com.vertispan.sample.shared;
 import com.vertispan.serial.SerializationStreamReader;
 import com.vertispan.serial.SerializationStreamWriter;
 import com.vertispan.serial.SerializationWiring;
-import com.vertispan.serial.Serializer;
+import com.vertispan.serial.TypeSerializer;
 
 @SerializationWiring
 public interface OrderSerializer {
-    Serializer createSerializer();
+    static OrderSerializer create() {
+        return new OrderSerializer_Impl();
+    }
 
+    TypeSerializer createSerializer();
 
     void writeInvoice(Invoice invoice, SerializationStreamWriter writer);
 

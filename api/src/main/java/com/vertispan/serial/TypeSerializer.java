@@ -4,7 +4,7 @@ package com.vertispan.serial;
  * Contract for any class that can serialize and restore class into a
  * serialization stream.
  */
-public interface Serializer {
+public interface TypeSerializer {
 
     /**
      * Restore an instantiated object from the serialized stream.

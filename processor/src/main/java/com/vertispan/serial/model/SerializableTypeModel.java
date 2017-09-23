@@ -172,8 +172,4 @@ public class SerializableTypeModel {
     public String getFieldSerializerName() {
         return type.getSimpleName() + "_FieldSerializer";
     }
-
-    public String getSuperclassFieldSerializerName() {
-        return ClassName.get(type.getSuperclass()) + "_FieldSerializer";
-    }
 }
