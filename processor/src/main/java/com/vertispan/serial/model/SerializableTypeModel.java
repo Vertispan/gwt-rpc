@@ -13,9 +13,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class SerializableTypeModel {
-    public String getFieldSerializerName() {
-        return type.getSimpleName() + "_FieldSerializer";
-    }
 
     public static class Property {
         private final ExecutableElement setter;
@@ -173,5 +170,13 @@ public class SerializableTypeModel {
 
     public List<Field> getFields() {
         return fields;
+    }
+
+    public String getFieldSerializerName() {
+        return type.getSimpleName() + "_FieldSerializer";
+    }
+
+    public String getSuperclassFieldSerializerName() {
+        return ClassName.get(type.getSuperclass()) + "_FieldSerializer";
     }
 }

@@ -3,16 +3,12 @@ package com.vertispan.serial;
 import com.google.auto.service.AutoService;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
 import com.squareup.javapoet.*;
 import com.vertispan.gwtapt.JTypeUtils;
 import com.vertispan.serial.model.SerializableTypeModel;
 import com.vertispan.serial.model.SerializableTypeModel.Field;
 import com.vertispan.serial.model.SerializableTypeModel.Property;
-import com.vertispan.serial.processor.SerializableTypeOracle;
-import com.vertispan.serial.processor.SerializableTypeOracleBuilder;
-import com.vertispan.serial.processor.SerializingTypes;
-import com.vertispan.serial.processor.UnableToCompleteException;
+import com.vertispan.serial.processor.*;
 
 import javax.annotation.Generated;
 import javax.annotation.processing.*;
@@ -167,8 +163,9 @@ public class Processor extends AbstractProcessor {
 
     private void writeImpl(SerializableTypeOracle writeOracle, SerializableTypeOracle readOracle, Element serializationInterface, SerializingTypes serializingTypes) throws IOException {
 
+        SerializableTypeOracle bidiOracle = new SerializableTypeOracleUnion(Sets.newHashSet(readOracle, writeOracle));
         //write field serializers
-        SetView<TypeMirror> allTypes = Sets.union(Sets.newHashSet(writeOracle.getSerializableTypes()), Sets.newHashSet(readOracle.getSerializableTypes()));
+        TypeMirror[] allTypes = bidiOracle.getSerializableTypes();
         for (TypeMirror serializableType : allTypes) {
             if (serializableType.getKind() == TypeKind.ARRAY) {
                 //TODO
@@ -176,7 +173,7 @@ public class Processor extends AbstractProcessor {
             }
             assert serializableType.getKind() == TypeKind.DECLARED : serializableType.getKind();
             //get the element itself and write it
-            writeFieldSerializer(((TypeElement) ((DeclaredType) serializableType).asElement()), serializingTypes);
+            writeFieldSerializer(((TypeElement) ((DeclaredType) serializableType).asElement()), serializingTypes, bidiOracle);
         }
 
 
@@ -191,7 +188,7 @@ public class Processor extends AbstractProcessor {
         
     }
 
-    private void writeFieldSerializer(TypeElement typeElement, SerializingTypes serializingTypes) throws IOException {
+    private void writeFieldSerializer(TypeElement typeElement, SerializingTypes serializingTypes, SerializableTypeOracle stob) throws IOException {
         //collect fields (err, properties for now) 
         SerializableTypeModel model = SerializableTypeModel.create(serializingTypes, typeElement);
 
@@ -221,7 +218,10 @@ public class Processor extends AbstractProcessor {
                 serializeMethodBuilder.addStatement("instance.$L = ($T) reader.read$L()", field.getField().getSimpleName(), field.getTypeName(), field.getStreamMethodName());
             }
 
-            //TODO superclass
+            //walk up to superclass, if any
+            if (typeElement.getSuperclass().getKind() != TypeKind.NONE && stob.isSerializable(typeElement.getSuperclass())) {
+                serializeMethodBuilder.addStatement("$L.serialize(reader, instance)", model.getSuperclassFieldSerializerName());
+            }
 
             fieldSerializerType.addMethod(serializeMethodBuilder.build());
 
@@ -242,7 +242,10 @@ public class Processor extends AbstractProcessor {
                 deserializeMethodBuilder.addStatement("writer.write$L(instance.$L)", field.getStreamMethodName(), field.getField().getSimpleName());
             }
 
-            //TODO superclass
+            //walk up to superclass, if any
+            if (typeElement.getSuperclass().getKind() != TypeKind.NONE && stob.isSerializable(typeElement.getSuperclass())) {
+                serializeMethodBuilder.addStatement("$L.deserialize(writer, instance)", model.getSuperclassFieldSerializerName());
+            }
             
             fieldSerializerType.addMethod(deserializeMethodBuilder.build());
         }

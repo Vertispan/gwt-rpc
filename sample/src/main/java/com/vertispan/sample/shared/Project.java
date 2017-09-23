@@ -1,6 +1,14 @@
 package com.vertispan.sample.shared;
 
-import java.io.Serializable;
+public class Project extends LineItem {
 
-public class Project implements Serializable {
+    private double scopeInHours;
+
+    public double getScopeInHours() {
+        return scopeInHours;
+    }
+
+    public void setScopeInHours(double scopeInHours) {
+        this.scopeInHours = scopeInHours;
+    }
 }
