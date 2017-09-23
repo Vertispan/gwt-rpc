@@ -2,10 +2,19 @@ package com.vertispan.serial;
 
 import com.google.auto.service.AutoService;
 import com.google.common.base.Charsets;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
+import com.squareup.javapoet.*;
+import com.vertispan.gwtapt.JTypeUtils;
+import com.vertispan.serial.model.SerializableTypeModel;
+import com.vertispan.serial.model.SerializableTypeModel.Field;
+import com.vertispan.serial.model.SerializableTypeModel.Property;
 import com.vertispan.serial.processor.SerializableTypeOracle;
 import com.vertispan.serial.processor.SerializableTypeOracleBuilder;
+import com.vertispan.serial.processor.SerializingTypes;
 import com.vertispan.serial.processor.UnableToCompleteException;
 
+import javax.annotation.Generated;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
@@ -87,7 +96,7 @@ public class Processor extends AbstractProcessor {
                 // write the new list of types to the file
                 FileObject updated = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "", knownTypesFilename);
                 writeTypes(updated, allTypes);
-                //TODO  seems poor form to think no one might process based on us...
+                //TODO seems poor form to think no one might process based on us...
                 return false;
             }
         } catch (IOException e) {
@@ -100,17 +109,14 @@ public class Processor extends AbstractProcessor {
         Map<TypeElement, Set<TypeElement>> subtypes = buildTypeTree(allTypes);
         for (Element element : roundEnv.getElementsAnnotatedWith(SerializationWiring.class)) {
 
+            SerializingTypes serializingTypes = new SerializingTypes(processingEnv.getTypeUtils(), processingEnv.getElementUtils(), subtypes);
             SerializableTypeOracleBuilder readStob = new SerializableTypeOracleBuilder(
-                    processingEnv.getTypeUtils(),
                     processingEnv.getElementUtils(),
-                    subtypes,
-                    messager
+                    messager, serializingTypes
             );
             SerializableTypeOracleBuilder writeStob = new SerializableTypeOracleBuilder(
-                    processingEnv.getTypeUtils(),
                     processingEnv.getElementUtils(),
-                    subtypes,
-                    messager
+                    messager, serializingTypes
             );
 
             // For each method that isn't createSerializer, it either reads or it writes. Methods of type
@@ -148,16 +154,126 @@ public class Processor extends AbstractProcessor {
                 return false;
             }
 
-
-            writeImpl(writeOracle, readOracle, element);
+            try {
+                writeImpl(writeOracle, readOracle, element, serializingTypes);
+            } catch (IOException ex) {
+                throw new UncheckedIOException(ex);
+            }
         }
 
 
         return false;
     }
 
-    private void writeImpl(SerializableTypeOracle writeOracle, SerializableTypeOracle readOracle, Element type) {
+    private void writeImpl(SerializableTypeOracle writeOracle, SerializableTypeOracle readOracle, Element serializationInterface, SerializingTypes serializingTypes) throws IOException {
+
+        //write field serializers
+        SetView<TypeMirror> allTypes = Sets.union(Sets.newHashSet(writeOracle.getSerializableTypes()), Sets.newHashSet(readOracle.getSerializableTypes()));
+        for (TypeMirror serializableType : allTypes) {
+            if (serializableType.getKind() == TypeKind.ARRAY) {
+                //TODO
+                continue;
+            }
+            assert serializableType.getKind() == TypeKind.DECLARED : serializableType.getKind();
+            //get the element itself and write it
+            writeFieldSerializer(((TypeElement) ((DeclaredType) serializableType).asElement()), serializingTypes);
+        }
+
+
+
+        //write interface impl
+        //TODO it would be lovely to have a metamodel...
+
+        //write type serializer, pointing at required field serializers and their appropriate use in each direction
+        //TODO consider only doing this once, later, so we can be sure classes are still needed? not sure...
+
+
         
+    }
+
+    private void writeFieldSerializer(TypeElement typeElement, SerializingTypes serializingTypes) throws IOException {
+        //collect fields (err, properties for now) 
+        SerializableTypeModel model = SerializableTypeModel.create(serializingTypes, typeElement);
+
+        TypeSpec.Builder fieldSerializerType = TypeSpec.classBuilder(model.getFieldSerializerName())
+                .addAnnotation(AnnotationSpec.builder(Generated.class).addMember("value", "\"$L\"", Processor.class.getCanonicalName()).build())
+                .addModifiers(Modifier.PUBLIC)
+                .addOriginatingElement(typeElement);
+        if (typeElement.getKind() != ElementKind.ENUM) {
+            assert typeElement.getKind() == ElementKind.CLASS;
+
+            //if custom field serializer exists, skip deserialize, serialize, and possibly instantiate
+            //write field accessors
+            //TODO support fields, not just getter/setters (then we can support final and other good fun)
+
+            //write serialize method
+            MethodSpec.Builder serializeMethodBuilder = MethodSpec.methodBuilder("serialize")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .returns(TypeName.VOID)
+                    .addParameter(SerializationStreamReader.class, "reader")
+                    .addParameter(ClassName.get(typeElement), "instance")
+                    .addException(SerializationException.class);
+
+            for (Property property : model.getProperties()) {
+                serializeMethodBuilder.addStatement("instance.$L(($T) reader.read$L())", property.getSetter().getSimpleName(), property.getTypeName(), property.getStreamMethodName());
+            }
+            for (Field field : model.getFields()) {
+                serializeMethodBuilder.addStatement("instance.$L = ($T) reader.read$L()", field.getField().getSimpleName(), field.getTypeName(), field.getStreamMethodName());
+            }
+
+            //TODO superclass
+
+            fieldSerializerType.addMethod(serializeMethodBuilder.build());
+
+
+            //write deserialize
+            MethodSpec.Builder deserializeMethodBuilder = MethodSpec.methodBuilder("deserialize")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .returns(TypeName.VOID)
+                    .addParameter(SerializationStreamWriter.class, "writer")
+                    .addParameter(ClassName.get(typeElement), "instance")
+                    .addException(SerializationException.class);
+
+
+            for (Property property : model.getProperties()) {
+                deserializeMethodBuilder.addStatement("writer.write$L(instance.$L())", property.getStreamMethodName(), property.getGetter().getSimpleName());
+            }
+            for (Field field : model.getFields()) {
+                deserializeMethodBuilder.addStatement("writer.write$L(instance.$L)", field.getStreamMethodName(), field.getField().getSimpleName());
+            }
+
+            //TODO superclass
+            
+            fieldSerializerType.addMethod(deserializeMethodBuilder.build());
+        }
+        //maybe write instantiate (if not abstract, and has default ctor) OR is an enum
+        if (typeElement.getKind() == ElementKind.ENUM || (!typeElement.getModifiers().contains(Modifier.ABSTRACT) && JTypeUtils.isDefaultInstantiable(typeElement))) {
+            MethodSpec.Builder instantiateMethodBuilder = MethodSpec.methodBuilder("instantiate")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .returns(ClassName.get(typeElement))
+                    .addParameter(SerializationStreamReader.class, "reader")
+                    .addException(SerializationException.class);
+            //TODO support private and delegate to violator
+
+            if (typeElement.getKind() == ElementKind.ENUM) {
+                instantiateMethodBuilder.addStatement("return $T.values()[reader.readInt()]", ClassName.get(typeElement));
+            } else {
+                instantiateMethodBuilder.addStatement("return new $T()", ClassName.get(typeElement));
+            }
+            fieldSerializerType.addMethod(instantiateMethodBuilder.build());
+        }
+
+
+        //TODO do we need a non static impl? gwt does it, ostensibly for use from the jvm (legacy dev mode?)
+
+        String packageName = elements.getPackageOf(typeElement).getQualifiedName().toString();
+        JavaFile file = JavaFile.builder(packageName, fieldSerializerType.build()).build();
+
+        try {
+            file.writeTo(filer);
+        } catch (FilerException ignore) {
+            // someone already wrote this type - doesn't matter, should be consistent no matter who did it
+        }
     }
 
     // returns an object, to be read from the reader. Note that objects don't _have_ to be read this way, but it is an easy option

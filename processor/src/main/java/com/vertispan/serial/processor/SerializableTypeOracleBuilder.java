@@ -345,6 +345,7 @@ public class SerializableTypeOracleBuilder {
         if (customSerializer == null) {
             // If the type is in the java.lang or java.util packages then it will be
             // mapped into com.google.gwt.user.client.rpc.core package
+            //TODO supprt arbitrary, layered mappings, or just go for it in the main package, since we're building our own jre too
             customSerializer =
                     typeOracle.getElements().getTypeElement("com.google.gwt.user.client.rpc.core." + customFieldSerializerName);
         }
@@ -537,14 +538,14 @@ public class SerializableTypeOracleBuilder {
      * Returns <code>true</code> if the field qualifies for serialization without
      * considering its type.
      */
-    static boolean shouldConsiderForSerialization(VariableElement field) {
+    public static boolean shouldConsiderForSerialization(VariableElement field) {
         if (field.getModifiers().contains(Modifier.STATIC)
                 || field.getModifiers().contains(Modifier.TRANSIENT)
                 || hasGwtTransientAnnotation(field)) {
             return false;
         }
 
-        //always serialize final fields
+        //in this new impl, we always serialize final fields
 //        if (field.isFinal() && !Shared.shouldSerializeFinalFields(logger, context)) {
 //            logFinalField(logger, context, field);
 //            return false;
@@ -714,10 +715,10 @@ public class SerializableTypeOracleBuilder {
      * @throws UnableToCompleteException if we fail to find one of our special
      *           types
      */
-    public SerializableTypeOracleBuilder(Types types, Elements elements, Map<TypeElement, Set<TypeElement>> knownSubtypes, Messager messager)
+    public SerializableTypeOracleBuilder(Elements elements, Messager messager, SerializingTypes serializingTypes)
             /*throws UnableToCompleteException */{
         this.messager = messager;
-        this.types = new SerializingTypes(types, elements, knownSubtypes);
+        this.types = serializingTypes;
         this.typeParameterExposureComputer = new TypeParameterExposureComputer(this.types, typeFilter, messager);
 //        typeConstrainer = new TypeConstrainer(this.types);
 

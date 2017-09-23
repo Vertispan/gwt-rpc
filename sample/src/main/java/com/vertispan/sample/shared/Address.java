@@ -1,4 +1,13 @@
 package com.vertispan.sample.shared;
 
-public class Address {
+import java.io.Serializable;
+
+public class Address implements Serializable {
+    String line1;
+
+    String city;
+    String region;
+    String country;
+
+    String postalCode;
 }
