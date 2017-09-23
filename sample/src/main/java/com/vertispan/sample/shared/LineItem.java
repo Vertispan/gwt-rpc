@@ -6,7 +6,6 @@ public class LineItem implements Serializable {
     private double price;//yes yes i know.
     private String name;
 
-
     public double getPrice() {
         return price;
     }

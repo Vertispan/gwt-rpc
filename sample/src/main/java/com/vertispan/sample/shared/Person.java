@@ -1,8 +1,9 @@
 package com.vertispan.sample.shared;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Person implements HasAddress {
+public class Person implements HasAddress, Serializable {
     private String name;
     private Date birthday;
     private Address address;

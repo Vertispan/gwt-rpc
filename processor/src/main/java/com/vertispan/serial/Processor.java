@@ -103,7 +103,7 @@ public class Processor extends AbstractProcessor {
         // continue processing with the full list of types if there was a change
         //TODO this is a little amateurish, try to keep the data collection more separate from the codegen...
         Map<TypeElement, Set<TypeElement>> subtypes = buildTypeTree(allTypes);
-        for (Element element : roundEnv.getElementsAnnotatedWith(SerializationWiring.class)) {
+        for (Element element : roundEnv.getElementsAnnotatedWith(serializationWiring)) {
 
             SerializingTypes serializingTypes = new SerializingTypes(processingEnv.getTypeUtils(), processingEnv.getElementUtils(), subtypes);
             SerializableTypeOracleBuilder readStob = new SerializableTypeOracleBuilder(
@@ -199,9 +199,8 @@ public class Processor extends AbstractProcessor {
         if (typeElement.getKind() != ElementKind.ENUM) {
             assert typeElement.getKind() == ElementKind.CLASS;
 
-            //if custom field serializer exists, skip deserialize, serialize, and possibly instantiate
-            //write field accessors
-            //TODO support fields, not just getter/setters (then we can support final and other good fun)
+            //write field accessors for violator stuff
+            //TODO support private fields, not just the easy stuff. (then we can support final and other good fun)
 
             //write serialize method
             MethodSpec.Builder serializeMethodBuilder = MethodSpec.methodBuilder("serialize")
@@ -224,7 +223,6 @@ public class Processor extends AbstractProcessor {
             }
 
             fieldSerializerType.addMethod(serializeMethodBuilder.build());
-
 
             //write deserialize
             MethodSpec.Builder deserializeMethodBuilder = MethodSpec.methodBuilder("deserialize")
@@ -265,7 +263,6 @@ public class Processor extends AbstractProcessor {
             }
             fieldSerializerType.addMethod(instantiateMethodBuilder.build());
         }
-
 
         //TODO do we need a non static impl? gwt does it, ostensibly for use from the jvm (legacy dev mode?)
 
