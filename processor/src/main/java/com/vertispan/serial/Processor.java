@@ -127,6 +127,9 @@ public class Processor extends AbstractProcessor {
             // Pretty gross, but it will get us off the ground...
 
             for (ExecutableElement method : ElementFilter.methodsIn(element.getEnclosedElements())) {
+                if (method.getModifiers().contains(Modifier.STATIC) || method.getModifiers().contains(Modifier.DEFAULT)) {
+                    continue;
+                }
                 if (isReadMethod(method)) {
                     readStob.addRootType(method.getReturnType());
                 } else if (isWriteMethod(method)) {
@@ -359,10 +362,10 @@ public class Processor extends AbstractProcessor {
 
     private String arraySerializerPackage(TypeMirror componentType) {
         if (componentType.getKind().isPrimitive()) {
-            return elements.getPackageOf(typeSerializer).toString();
+            return elements.getPackageOf(typeSerializer).getQualifiedName().toString();
         }
         assert componentType.getKind() == TypeKind.DECLARED;
-        return elements.getPackageOf(types.asElement(componentType)).toString();
+        return elements.getPackageOf(types.asElement(componentType)).getQualifiedName().toString();
     }
 
     private ClassName getFieldSerializer(TypeMirror type) {
