@@ -1,29 +1,81 @@
 package com.vertispan.serial.processor;
 
+import com.google.common.base.Preconditions;
+
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Stream;
 
+/**
+ * Wraps two serializable type oracles, using one as "read" and one as "write", allowing
+ * questions to be asked about which directions a type could be sent
+ */
 public class SerializableTypeOracleUnion implements SerializableTypeOracle {
-    private final Set<SerializableTypeOracle> subOracles;
 
-    public SerializableTypeOracleUnion(Set<SerializableTypeOracle> subOracles) {
-        this.subOracles = Collections.unmodifiableSet(subOracles);
+    private final SerializableTypeOracle read;
+    private final SerializableTypeOracle write;
+
+    public SerializableTypeOracleUnion(SerializableTypeOracle read, SerializableTypeOracle write) {
+        this.read = read;
+        this.write = write;
     }
 
     @Override
     public TypeMirror[] getSerializableTypes() {
-        return subOracles.stream().flatMap(oracle -> Stream.of(oracle.getSerializableTypes())).distinct().toArray(TypeMirror[]::new);
+        return Stream.of(read, write).flatMap(oracle -> Stream.of(oracle.getSerializableTypes())).distinct().toArray(TypeMirror[]::new);
     }
 
     @Override
     public boolean isSerializable(TypeMirror type) {
-        return subOracles.stream().anyMatch(oracle -> oracle.isSerializable(type));
+        return Stream.of(read, write).anyMatch(oracle -> oracle.isSerializable(type));
     }
 
     @Override
     public boolean maybeInstantiated(TypeMirror type) {
-        return subOracles.stream().anyMatch(oracle -> oracle.maybeInstantiated(type));
+        return Stream.of(read, write).anyMatch(oracle -> oracle.maybeInstantiated(type));
     }
+
+    /**
+     * Gets the specific subclass, with just the ability to serialize, instantiate, deserialize based on the contained oracles
+     * @param type
+     * @return
+     */
+    public String getSpecificFieldSerializer(TypeMirror type) {
+        boolean canSerialize = write.isSerializable(type);
+        boolean canDeserialize = read.isSerializable(type);
+        boolean canInstantiate = read.maybeInstantiated(type);
+
+        //TODO this is terrible, factor it out nicely, and share logic/naming with
+        //com.vertispan.serial.Processor.writeInstanceMethods()
+
+        if (canSerialize) {
+            if (canDeserialize) {
+                if (canInstantiate) {
+                    return "WriteInstantiateReadInstantiate";
+                } else {
+                    return "WriteInstantiateReadSuperclass";
+                }
+            } else {
+//                assert !canInstantiate : "Can instantiate, but not deserialize " + type;
+                Preconditions.checkState(!canInstantiate, "Can instantiate, but not deserialize " + type);
+                return "WriteOnly";
+            }
+        } else {
+            if (canDeserialize) {
+                if (canInstantiate) {
+                    return "ReadOnlyInstantiate";
+                } else {
+                    return "ReadOnlySuperclass";
+                }
+            } else {
+                Preconditions.checkState(false, "Can't serialize or deserialize " + type);
+//                assert false : "can't serialize or deserialize!";
+            }
+        }
+
+        throw new RuntimeException("something is broken, run with asserts");
+    }
+
 }

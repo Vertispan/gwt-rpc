@@ -1,18 +1,23 @@
 package com.vertispan.serial.processor;
 
+import com.squareup.javapoet.TypeName;
+
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import java.util.Set;
 
 final class SerializableTypeOracleImpl implements SerializableTypeOracle {
 
     private final Set<TypeMirror> possiblyInstantiatedTypes;
     private final Set<TypeMirror> serializableTypesSet;
+    private final Types types;
 
     public SerializableTypeOracleImpl(Set<TypeMirror> serializableTypes,
-                                      Set<TypeMirror> possiblyInstantiatedTypes) {
+                                      Set<TypeMirror> possiblyInstantiatedTypes, Types types) {
 
         serializableTypesSet = serializableTypes;
         this.possiblyInstantiatedTypes = possiblyInstantiatedTypes;
+        this.types = types;
     }
 
     public TypeMirror[] getSerializableTypes() {
@@ -23,7 +28,8 @@ final class SerializableTypeOracleImpl implements SerializableTypeOracle {
      * Returns <code>true</code> if the type's fields can be serializede.
      */
     public boolean isSerializable(TypeMirror type) {
-        return serializableTypesSet.contains(type);
+        String typeName = TypeName.get(types.erasure(type)).toString();
+        return serializableTypesSet.stream().anyMatch(candidate -> TypeName.get(candidate).toString().equals(typeName));
     }
 
     /**
@@ -31,6 +37,7 @@ final class SerializableTypeOracleImpl implements SerializableTypeOracle {
      * instantiated on the other side.
      */
     public boolean maybeInstantiated(TypeMirror type) {
-        return possiblyInstantiatedTypes.contains(type);
+        String typeName = TypeName.get(types.erasure(type)).toString();
+        return possiblyInstantiatedTypes.stream().anyMatch(candidate -> TypeName.get(candidate).toString().equals(typeName));
     }
 }

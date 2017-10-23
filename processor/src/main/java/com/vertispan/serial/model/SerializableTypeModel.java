@@ -6,7 +6,6 @@ import com.vertispan.serial.processor.SerializableTypeOracleBuilder;
 import com.vertispan.serial.processor.SerializingTypes;
 
 import javax.lang.model.element.*;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;

@@ -849,7 +849,7 @@ public class SerializableTypeOracleBuilder {
 
 //        logSerializableTypes(logger, fieldSerializableTypes);
 
-        return new SerializableTypeOracleImpl(fieldSerializableTypes, possiblyInstantiatedTypes);
+        return new SerializableTypeOracleImpl(fieldSerializableTypes, possiblyInstantiatedTypes, types.getTypes());
     }
 
 //    /**
