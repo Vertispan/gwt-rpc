@@ -68,22 +68,24 @@ public abstract class AbstractSerializationStreamReader extends
 
     private ArrayList<Object> seenArray = new ArrayList<Object>();
 
-    /**
-     * Prepare to read the stream.
-     *
-     * @param encoded unused true if the stream is encoded
-     */
-    public void prepareToRead(String encoded) throws SerializationException {
-        seenArray.clear();
-
-        // Read the stream version number
-        //
-        setVersion(readInt());
-
-        // Read the flags from the stream
-        //
-        setFlags(readInt());
-    }
+    //TODO set some standards on all wrapped input like version and int?
+    //TODO allow reusing/rereading a stream (as in "seenArray.clear()")?
+//    /**
+//     * Prepare to read the stream.
+//     *
+//     * @param encoded unused true if the stream is encoded
+//     */
+//    public void prepareToRead(String encoded) throws SerializationException {
+//        seenArray.clear();
+//
+//        // Read the stream version number
+//        //
+//        setVersion(readInt());
+//
+//        // Read the flags from the stream
+//        //
+//        setFlags(readInt());
+//    }
 
     public final Object readObject() throws SerializationException {
         int token = readInt();

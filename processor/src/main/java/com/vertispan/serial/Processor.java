@@ -343,7 +343,7 @@ public class Processor extends AbstractProcessor {
                 .addParameter(SerializationStreamReader.class, "reader")
                 .addException(SerializationException.class)
                 .addStatement("int length = reader.readInt()")
-                .addStatement("//TODO avoid explosive growth attack, 'claim' length remaining elements")//TODO finish this after adding a method to the reader type
+                .addStatement("reader.claimItems(length)")
                 .addStatement("return new $T[length]$L", ClassName.get(componentType), extraArrayRank);
 
         fieldSerializerType.addMethod(instantiateMethodBuilder.build());

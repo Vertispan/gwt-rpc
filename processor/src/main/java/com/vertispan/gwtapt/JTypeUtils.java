@@ -14,6 +14,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Some JClassType/JType bits that we take for granted in GWT Generators, expressed
+ * in TypeMirror/Element.
+ */
 public class JTypeUtils {
     public static TypeMirror getLeafType(TypeMirror possibleArray) {
         TypeMirror next = possibleArray;

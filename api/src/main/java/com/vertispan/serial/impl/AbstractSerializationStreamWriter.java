@@ -53,8 +53,8 @@ public abstract class AbstractSerializationStreamWriter extends
         stringTable.clear();
     }
 
-    @Override
-    public abstract String toString();
+//    @Override
+//    public abstract String toString();
 
     public void writeBoolean(boolean fieldValue) {
         append(fieldValue ? "1" : "0");
