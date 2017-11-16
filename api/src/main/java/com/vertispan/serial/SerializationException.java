@@ -3,7 +3,7 @@ package com.vertispan.serial;
 /**
  * Base exception type for errors relating to the serialization stream.
  */
-public class SerializationException extends Exception {
+public class SerializationException extends com.google.gwt.user.client.rpc.SerializationException {
 
     public SerializationException() {
     }

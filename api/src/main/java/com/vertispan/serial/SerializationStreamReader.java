@@ -19,7 +19,7 @@ package com.vertispan.serial;
  *
  * @see SerializationStreamWriter
  */
-public interface SerializationStreamReader {
+public interface SerializationStreamReader extends com.google.gwt.user.client.rpc.SerializationStreamReader {
 
     /**
      * Reads the next piece of data in the stream as if it were a boolean.

@@ -7,7 +7,7 @@ package com.vertispan.serial;
  *
  * @see SerializationStreamReader
  */
-public interface SerializationStreamWriter {
+public interface SerializationStreamWriter extends com.google.gwt.user.client.rpc.SerializationStreamWriter {
 
     /**
      *
