@@ -637,7 +637,8 @@ public class Processor extends AbstractProcessor {
 
     private void writeTypes(FileObject updated, Set<String> allTypes) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(updated.openOutputStream(), Charsets.UTF_8))) {
-            //TODO preamble, notice about what the file is for??
+            writer.append("# Generated file, describing known types in the current project to\n");
+            writer.append("# allow incremental code generation\n");
 
             for (String type : allTypes) {
                 writer.write(type);
@@ -657,11 +658,28 @@ public class Processor extends AbstractProcessor {
             Set<String> lines = new HashSet<>();
             String line;
             while ((line = reader.readLine()) != null) {
+                if (line.startsWith("#")) {
+                    continue;
+                }
                 lines.add(line);
             }
             return lines;
         }
     }
+    private Collection<? extends String> readTypes(String knownSubtypes) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(knownSubtypes), Charsets.UTF_8))) {
+            Set<String> lines = new HashSet<>();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("#")) {
+                    continue;
+                }
+                lines.add(line);
+            }
+            return lines;
+        }
+    }
+
 
     /**
      * Simple scanner to find only enums and classes - things the user might create or edit which we need to notice

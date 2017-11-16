@@ -45,7 +45,9 @@ public class SerializingTypes {
         //recursively add more
         int len = subtypes.size();
         for (int i = 0; i < len; i++) {
-            subtypes.addAll(getSubtypes(subtypes.get(i)));
+            TypeElement subtype = subtypes.get(i);
+            subtypes.add(subtype);
+            subtypes.addAll(getSubtypes(subtype));
         }
 
         return subtypes;
