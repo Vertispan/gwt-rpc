@@ -20,6 +20,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.vertispan.serial</groupId>
+      <artifactId>gwt-jre-serializers</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>21.0</version>

@@ -20,8 +20,8 @@
   <modules>
     <module>api</module>
     <module>processor</module>
-    <module>sample</module>
     <module>gwt-jre-serializers</module>
+    <module>sample</module>
   </modules>
 
   <build>
