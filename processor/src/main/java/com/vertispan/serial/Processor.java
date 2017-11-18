@@ -30,6 +30,9 @@ import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @todo this should probably be at least 2-4 other classes, not just one.
+ */
 @AutoService(javax.annotation.processing.Processor.class)
 public class Processor extends AbstractProcessor {
     private static final String knownTypesFilename = "knownTypes.txt";
@@ -61,12 +64,28 @@ public class Processor extends AbstractProcessor {
     }
 
     @Override
+    public Set<String> getSupportedOptions() {
+        return Collections.singleton("serial.knownSubtypes");
+    }
+
+    @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
+
         filer = processingEnv.getFiler();
         messager = processingEnv.getMessager();
         types = processingEnv.getTypeUtils();
         elements = processingEnv.getElementUtils();
+
+        try {
+            String knownSubtypes = processingEnv.getOptions().get("serial.knownSubtypes");
+            if (knownSubtypes != null) {
+                allTypes.addAll(readTypes(knownSubtypes));
+            }
+        } catch (IOException e) {
+            messager.printMessage(Kind.ERROR, "Failed to read from " + knownTypesFilename);
+            e.printStackTrace();
+        }
 
         serializationStreamReader = elements.getTypeElement(SerializationStreamReader.class.getName());
         serializationStreamWriter = elements.getTypeElement(SerializationStreamWriter.class.getName());
@@ -602,6 +621,11 @@ public class Processor extends AbstractProcessor {
         Set<TypeElement> existingTypes = allTypes.stream()
                 .map(typeName -> elements.getTypeElement(typeName))
                 .filter(Objects::nonNull)
+                .flatMap(elt -> {
+                    Set<TypeElement> types = new HashSet<>();
+                    new Scanner().scan(Collections.singleton(elt), types);
+                    return types.stream();
+                })
                 .collect(Collectors.toSet());
         // for each type, if not already present, put it and all parents in the map
         HashMap<TypeElement, Set<TypeElement>> map = new HashMap<>();

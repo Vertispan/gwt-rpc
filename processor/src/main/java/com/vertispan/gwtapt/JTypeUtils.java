@@ -1,6 +1,7 @@
 package com.vertispan.gwtapt;
 
 import com.google.auto.common.MoreTypes;
+import com.squareup.javapoet.ClassName;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -44,12 +45,12 @@ public class JTypeUtils {
      * @return
      */
     public static DeclaredType asParameterizationOf(Types types,
-                                                    TypeMirror intfType,
-                                                    TypeMirror subType) {
+                                                    TypeMirror subType,
+                                                    TypeMirror intfType) {
         for (TypeMirror supertype : getFlattenedSupertypeHierarchy(types, subType)) {
             if (supertype instanceof DeclaredType) {
                 DeclaredType parameterized = (DeclaredType) supertype;
-                if (MoreTypes.asElement(intfType).equals(parameterized.asElement())) {//dodgy bit here, forcing them raw to compare their base types, is this safe?
+                if (ClassName.get(intfType).equals(ClassName.get(parameterized))) {//dodgy bit here, forcing them raw to compare their base types, is this safe?
                     // Found the desired supertype
                     return parameterized;
                 }
