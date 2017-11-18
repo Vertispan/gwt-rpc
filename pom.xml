@@ -22,6 +22,7 @@
     <module>processor</module>
     <module>gwt-jre-serializers</module>
     <module>sample</module>
+    <module>discovery</module>
   </modules>
 
   <build>
