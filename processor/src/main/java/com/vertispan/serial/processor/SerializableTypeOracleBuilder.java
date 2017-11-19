@@ -327,7 +327,7 @@ public class SerializableTypeOracleBuilder {
             return null;
         }
 
-        String customFieldSerializerName = getCustomFieldSerializerName(type);
+        String customFieldSerializerName = getCustomFieldSerializerName(typeOracle.getTypes().erasure(type));
         return findCustomFieldSerializer(typeOracle, customFieldSerializerName);
     }
 

@@ -1,11 +1,12 @@
 package com.vertispan.sample.shared;
 
 import java.util.HashSet;
+import java.util.Set;
 
 public class Project extends LineItem {
 
     private double scopeInHours;
-    private HashSet<Person> assignees;
+    private Set<Person> assignees;
 
     public double getScopeInHours() {
         return scopeInHours;
@@ -15,11 +16,11 @@ public class Project extends LineItem {
         this.scopeInHours = scopeInHours;
     }
 
-    public HashSet<Person> getAssignees() {
+    public Set<Person> getAssignees() {
         return assignees;
     }
 
-    public void setAssignees(HashSet<Person> assignees) {
+    public void setAssignees(Set<Person> assignees) {
         this.assignees = assignees;
     }
 }

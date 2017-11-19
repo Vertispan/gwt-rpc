@@ -13,6 +13,7 @@ import javax.lang.model.util.Types;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Checks that a custom serializer is valid.
@@ -38,7 +39,8 @@ public class CustomFieldSerializerValidator {
 
     public static ExecutableElement getDeserializationMethod(Types types, TypeElement serializer, TypeElement serializee) {
         return getMethod(types, "deserialize", SerializationStreamReader.class.getName(), serializer,
-                serializee);
+                serializee)
+                .orElseGet(() -> getMethod(types, "deserialize", com.google.gwt.user.client.rpc.SerializationStreamReader.class.getName(), serializer, serializee).orElse(null));
     }
 
     public static ExecutableElement getInstantiationMethod(Types types, TypeElement serializer, TypeElement serializee) {
@@ -51,8 +53,9 @@ public class CustomFieldSerializerValidator {
                 continue;
             }
 
-            if (!ClassName.get(parameters.get(0).asType()).toString().equals(
-                    SerializationStreamReader.class.getName())) {
+            String paramZero = ClassName.get(parameters.get(0).asType()).toString();
+            if (!paramZero.equals(SerializationStreamReader.class.getName())
+                    && !paramZero.equals(com.google.gwt.user.client.rpc.SerializationStreamReader.class.getName())) {
                 // First param is not a stream class
                 continue;
             }
@@ -76,7 +79,8 @@ public class CustomFieldSerializerValidator {
     }
 
     public static ExecutableElement getSerializationMethod(Types types, TypeElement serializer, TypeElement serializee) {
-        return getMethod(types, "serialize", SerializationStreamWriter.class.getName(), serializer, serializee);
+        return getMethod(types, "serialize", SerializationStreamWriter.class.getName(), serializer, serializee)
+                .orElseGet(() -> getMethod(types, "serialize", com.google.gwt.user.client.rpc.SerializationStreamWriter.class.getName(), serializer, serializee).orElse(null));
     }
 
     public static boolean hasDeserializationMethod(Types types, TypeElement serializer, TypeElement serializee) {
@@ -162,8 +166,8 @@ public class CustomFieldSerializerValidator {
         }
     }
 
-    private static ExecutableElement getMethod(Types types, String methodName, String streamClassName,
-                                               TypeElement serializer, TypeElement serializee) {
+    private static Optional<ExecutableElement> getMethod(Types types, String methodName, String streamClassName,
+                                                         TypeElement serializer, TypeElement serializee) {
         ExecutableElement[] overloads = ElementFilter.methodsIn(serializer.getEnclosedElements()).stream().filter(m -> m.getSimpleName().toString().equals(methodName)).toArray(ExecutableElement[]::new);
         for (ExecutableElement overload : overloads) {
             List<? extends VariableElement> parameters = overload.getParameters();
@@ -190,12 +194,12 @@ public class CustomFieldSerializerValidator {
             if (types.isAssignable(type, serializee.asType())) {
                 if (isValidCustomFieldSerializerMethod(overload)
                         && overload.getReturnType().getKind() == TypeKind.VOID) {
-                    return overload;
+                    return Optional.of(overload);
                 }
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
     private static boolean isValidCustomFieldSerializerMethod(ExecutableElement method) {

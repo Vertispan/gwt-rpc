@@ -10,7 +10,7 @@ public interface TypeSerializer {
      * Restore an instantiated object from the serialized stream.
      */
     void deserialize(SerializationStreamReader stream, Object instance,
-                     String typeSignature) throws SerializationException;
+                     String typeSignature) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException;
 
     /**
      * Return the serialization signature for the given type.
@@ -21,11 +21,11 @@ public interface TypeSerializer {
      * Instantiate an object of the given typeName from the serialized stream.
      */
     Object instantiate(SerializationStreamReader stream, String typeSignature)
-            throws SerializationException;
+            throws SerializationException, com.google.gwt.user.client.rpc.SerializationException;
 
     /**
      * Save an instance into the serialization stream.
      */
     void serialize(SerializationStreamWriter stream, Object instance,
-                   String typeSignature) throws SerializationException;
+                   String typeSignature) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException;
 }

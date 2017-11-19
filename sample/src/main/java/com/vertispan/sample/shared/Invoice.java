@@ -2,9 +2,10 @@ package com.vertispan.sample.shared;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Invoice implements Serializable {
-    private ArrayList<LineItem> lineItems;
+    private List<LineItem> lineItems;
 
     private Company client;
 
@@ -16,11 +17,11 @@ public class Invoice implements Serializable {
         this.client = client;
     }
 
-    public ArrayList<LineItem> getLineItems() {
+    public List<LineItem> getLineItems() {
         return lineItems;
     }
 
-    public void setLineItems(ArrayList<LineItem> lineItems) {
+    public void setLineItems(List<LineItem> lineItems) {
         this.lineItems = lineItems;
     }
 }

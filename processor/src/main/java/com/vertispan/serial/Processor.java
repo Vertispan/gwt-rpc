@@ -324,6 +324,7 @@ public class Processor extends AbstractProcessor {
                 .returns(TypeName.VOID)
                 .addParameter(SerializationStreamReader.class, "reader")
                 .addParameter(ClassName.get(arrayType), "instance")
+                .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                 .addException(SerializationException.class);
 
         //TODO for readObject, share the Object_Array_CustomFieldSerializer
@@ -341,6 +342,7 @@ public class Processor extends AbstractProcessor {
                 .returns(TypeName.VOID)
                 .addParameter(SerializationStreamWriter.class, "writer")
                 .addParameter(ClassName.get(arrayType), "instance")
+                .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                 .addException(SerializationException.class);
 
         serializeMethodBuilder
@@ -360,6 +362,7 @@ public class Processor extends AbstractProcessor {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(ClassName.get(arrayType))
                 .addParameter(SerializationStreamReader.class, "reader")
+                .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                 .addException(SerializationException.class)
                 .addStatement("int length = reader.readInt()")
                 .addStatement("reader.claimItems(length)")
@@ -449,18 +452,23 @@ public class Processor extends AbstractProcessor {
                     .returns(TypeName.VOID)
                     .addParameter(SerializationStreamReader.class, "reader")
                     .addParameter(ClassName.get(typeElement), "instance")
+                    .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                     .addException(SerializationException.class);
 
-            for (Property property : model.getProperties()) {
-                deserializeMethodBuilder.addStatement("instance.$L(($T) reader.read$L())", property.getSetter().getSimpleName(), property.getTypeName(), property.getStreamMethodName());
-            }
-            for (Field field : model.getFields()) {
-                deserializeMethodBuilder.addStatement("instance.$L = ($T) reader.read$L()", field.getField().getSimpleName(), field.getTypeName(), field.getStreamMethodName());
-            }
+            if (model.getCustomFieldSerializer() != null) {
+                deserializeMethodBuilder.addStatement("$L.deserialize(reader, instance)", model.getCustomFieldSerializer());
+            } else {
+                for (Property property : model.getProperties()) {
+                    deserializeMethodBuilder.addStatement("instance.$L(($T) reader.read$L())", property.getSetter().getSimpleName(), property.getTypeName(), property.getStreamMethodName());
+                }
+                for (Field field : model.getFields()) {
+                    deserializeMethodBuilder.addStatement("instance.$L = ($T) reader.read$L()", field.getField().getSimpleName(), field.getTypeName(), field.getStreamMethodName());
+                }
 
-            //walk up to superclass, if any
-            if (typeElement.getSuperclass().getKind() != TypeKind.NONE && stob.isSerializable(typeElement.getSuperclass())) {
-                deserializeMethodBuilder.addStatement("$L.deserialize(reader, instance)", getFieldSerializer(model.getType(), null));
+                //walk up to superclass, if any
+                if (typeElement.getSuperclass().getKind() != TypeKind.NONE && stob.isSerializable(typeElement.getSuperclass())) {
+                    deserializeMethodBuilder.addStatement("$L.deserialize(reader, instance)", getFieldSerializer(typeElement.getSuperclass(), null));
+                }
             }
 
             fieldSerializerType.addMethod(deserializeMethodBuilder.build());
@@ -471,40 +479,53 @@ public class Processor extends AbstractProcessor {
                     .returns(TypeName.VOID)
                     .addParameter(SerializationStreamWriter.class, "writer")
                     .addParameter(ClassName.get(typeElement), "instance")
+                    .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                     .addException(SerializationException.class);
 
+            if (model.getCustomFieldSerializer() != null) {
+                serializeMethodBuilder.addStatement("$L.serialize(writer, instance)", model.getCustomFieldSerializer());
+            } else {
+                for (Property property : model.getProperties()) {
+                    serializeMethodBuilder.addStatement("writer.write$L(instance.$L())", property.getStreamMethodName(), property.getGetter().getSimpleName());
+                }
+                for (Field field : model.getFields()) {
+                    serializeMethodBuilder.addStatement("writer.write$L(instance.$L)", field.getStreamMethodName(), field.getField().getSimpleName());
+                }
 
-            for (Property property : model.getProperties()) {
-                serializeMethodBuilder.addStatement("writer.write$L(instance.$L())", property.getStreamMethodName(), property.getGetter().getSimpleName());
-            }
-            for (Field field : model.getFields()) {
-                serializeMethodBuilder.addStatement("writer.write$L(instance.$L)", field.getStreamMethodName(), field.getField().getSimpleName());
-            }
-
-            //walk up to superclass, if any
-            if (typeElement.getSuperclass().getKind() != TypeKind.NONE && stob.isSerializable(typeElement.getSuperclass())) {
-                deserializeMethodBuilder.addStatement("$L.serialize(writer, instance)", getFieldSerializer(model.getType(), null));
+                //walk up to superclass, if any
+                if (typeElement.getSuperclass().getKind() != TypeKind.NONE && stob.isSerializable(typeElement.getSuperclass())) {
+                    deserializeMethodBuilder.addStatement("$L.serialize(writer, instance)", getFieldSerializer(typeElement.getSuperclass(), null));
+                }
             }
             
             fieldSerializerType.addMethod(serializeMethodBuilder.build());
         }
         //maybe write instantiate (if not abstract, and has default ctor) OR is an enum
-        if (typeElement.getKind() == ElementKind.ENUM || (!typeElement.getModifiers().contains(Modifier.ABSTRACT) && JTypeUtils.isDefaultInstantiable(typeElement))) {
-            writeInstantiate = true;
-            MethodSpec.Builder instantiateMethodBuilder = MethodSpec.methodBuilder("instantiate")
-                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                    .returns(ClassName.get(typeElement))
-                    .addParameter(SerializationStreamReader.class, "reader")
-                    .addException(SerializationException.class);
-            //TODO support private and delegate to violator
+        MethodSpec.Builder instantiateMethodBuilder = MethodSpec.methodBuilder("instantiate")
+                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                .returns(ClassName.get(typeElement))
+                .addParameter(SerializationStreamReader.class, "reader")
+                .addException(com.google.gwt.user.client.rpc.SerializationException.class)
+                .addException(SerializationException.class);
 
-            if (typeElement.getKind() == ElementKind.ENUM) {
-                instantiateMethodBuilder.addStatement("return $T.values()[reader.readInt()]", ClassName.get(typeElement));
+        if (model.getCustomFieldSerializer() != null && CustomFieldSerializerValidator.hasInstantiationMethod(types, model.getCustomFieldSerializer(), typeElement)) {
+            instantiateMethodBuilder.addStatement("return $L.instantiate(reader)", model.getCustomFieldSerializer());
+        } else {
+            if (typeElement.getKind() == ElementKind.ENUM || (!typeElement.getModifiers().contains(Modifier.ABSTRACT) && JTypeUtils.isDefaultInstantiable(typeElement))) {
+                writeInstantiate = true;
+                //TODO support private and delegate to violator
+
+                if (typeElement.getKind() == ElementKind.ENUM) {
+                    instantiateMethodBuilder.addStatement("return $T.values()[reader.readInt()]", ClassName.get(typeElement));
+                } else {
+                    instantiateMethodBuilder.addStatement("return new $T()", ClassName.get(typeElement));
+                }
             } else {
-                instantiateMethodBuilder.addStatement("return new $T()", ClassName.get(typeElement));
+                //TODO actually handle writeInstantiate
+                instantiateMethodBuilder.addStatement("throw new IllegalStateException(\"Not instantiable\")");
             }
-            fieldSerializerType.addMethod(instantiateMethodBuilder.build());
         }
+        fieldSerializerType.addMethod(instantiateMethodBuilder.build());
 
         writeInstanceMethods(fieldSerializerType, ClassName.get(typeElement), writeSerialize, writeDeserialize, writeInstantiate);
 
@@ -570,6 +591,7 @@ public class Processor extends AbstractProcessor {
                     .addParameter(SerializationStreamWriter.class, "writer")
                     .addParameter(Object.class, "instance")
                     .returns(TypeName.VOID)
+                    .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                     .addException(SerializationException.class)
                     .addStatement("serialize(writer, ($T) instance)", dataType)
                     .build());
@@ -581,6 +603,7 @@ public class Processor extends AbstractProcessor {
                     .addParameter(SerializationStreamReader.class, "reader")
                     .addParameter(Object.class, "instance")
                     .returns(TypeName.VOID)
+                    .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                     .addException(SerializationException.class)
                     .addStatement("deserialize(reader, ($T)instance)", dataType)
                     .build());
@@ -591,6 +614,7 @@ public class Processor extends AbstractProcessor {
                     .addAnnotation(Override.class)
                     .addParameter(SerializationStreamReader.class, "reader")
                     .returns(Object.class)
+                    .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                     .addException(SerializationException.class)
                     .addStatement("return instantiate(reader)")
                     .build());
@@ -619,13 +643,15 @@ public class Processor extends AbstractProcessor {
     private Map<TypeElement, Set<TypeElement>> buildTypeTree(Set<String> allTypes) {
         // not sure we can do it sooner, so lets remove all unreachable types here, and build the tree
         Set<TypeElement> existingTypes = allTypes.stream()
-                .map(typeName -> elements.getTypeElement(typeName))
-                .filter(Objects::nonNull)
-                .flatMap(elt -> {
-                    Set<TypeElement> types = new HashSet<>();
-                    new Scanner().scan(Collections.singleton(elt), types);
-                    return types.stream();
+                .map(typeName -> {
+                    try {
+                        return elements.getTypeElement(typeName);
+                    } catch (Exception e) {
+                        //ignore this type, we can't see the type, possibly something emulated?
+                        return null;
+                    }
                 })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         // for each type, if not already present, put it and all parents in the map
         HashMap<TypeElement, Set<TypeElement>> map = new HashMap<>();

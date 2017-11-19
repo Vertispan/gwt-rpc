@@ -12,13 +12,13 @@ package com.vertispan.serial;
  */
 public interface FieldSerializer {
     default <T> void deserial(SerializationStreamReader reader, T instance) throws
-            SerializationException {
+            SerializationException, com.google.gwt.user.client.rpc.SerializationException {
         //default implementation does nothing
     }
-    default <T> void serial(SerializationStreamWriter writer, T instance) throws SerializationException {
+    default <T> void serial(SerializationStreamWriter writer, T instance) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException {
         //default implementation does nothing
     }
-    default Object create(SerializationStreamReader reader) throws SerializationException {
+    default Object create(SerializationStreamReader reader) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException {
         //default implementation throws an exception to indicate that deserialization isn't possible
         throw new IllegalStateException("Cannot create an instance of this type - abstract, has no default constructor, or only subtypes are whitelisted");
     }

@@ -6,7 +6,7 @@ public abstract class TypeSerializerImpl implements TypeSerializer {
     protected abstract FieldSerializer serializer(String name);
 
     @Override
-    public void deserialize(SerializationStreamReader stream, Object instance, String typeSignature) throws SerializationException {
+    public void deserialize(SerializationStreamReader stream, Object instance, String typeSignature) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException {
         serializer(typeSignature).deserial(stream, instance);
     }
 
@@ -16,12 +16,12 @@ public abstract class TypeSerializerImpl implements TypeSerializer {
     }
 
     @Override
-    public Object instantiate(SerializationStreamReader stream, String typeSignature) throws SerializationException {
+    public Object instantiate(SerializationStreamReader stream, String typeSignature) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException {
         return serializer(typeSignature).create(stream);
     }
 
     @Override
-    public void serialize(SerializationStreamWriter stream, Object instance, String typeSignature) throws SerializationException {
+    public void serialize(SerializationStreamWriter stream, Object instance, String typeSignature) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException {
         serializer(typeSignature).serial(stream, instance);
     }
 }
