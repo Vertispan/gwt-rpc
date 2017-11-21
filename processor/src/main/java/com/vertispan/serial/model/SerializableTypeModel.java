@@ -2,10 +2,13 @@ package com.vertispan.serial.model;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import com.vertispan.serial.processor.CustomFieldSerializerValidator;
 import com.vertispan.serial.processor.SerializableTypeOracleBuilder;
 import com.vertispan.serial.processor.SerializingTypes;
 
 import javax.lang.model.element.*;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
@@ -72,11 +75,16 @@ public class SerializableTypeModel {
         }
     }
 
-    private TypeElement type;
-    private TypeElement customFieldSerializer;
-    private List<Property> properties;
-    private List<Field> fields;//TODO do we need a real field? and how do we handle private?
+    private final SerializingTypes types;
 
+    private final TypeMirror type;
+    private final TypeElement customFieldSerializer;
+    private final List<Property> properties;
+    private final List<Field> fields;//TODO do we need a real field? and how do we handle private?
+
+    public static SerializableTypeModel array(TypeMirror serializableType) {
+        return new SerializableTypeModel(null, serializableType, null, Collections.emptyList(), Collections.emptyList());
+    }
 
     public static SerializableTypeModel create(SerializingTypes types, TypeElement serializableType) {
         TypeElement customFieldSerializer = SerializableTypeOracleBuilder.findCustomFieldSerializer(types, serializableType.asType());
@@ -85,7 +93,7 @@ public class SerializableTypeModel {
 
         if (serializableType.getKind() == ElementKind.ENUM) {
             //nothing to serialize
-            return new SerializableTypeModel(serializableType, customFieldSerializer, Collections.emptyList(), Collections.emptyList());
+            return new SerializableTypeModel(types, serializableType.asType(), customFieldSerializer, Collections.emptyList(), Collections.emptyList());
         }
 
         //rules of STOB are to look for fields,
@@ -115,7 +123,7 @@ public class SerializableTypeModel {
                 assert false : "field " + field + " is private";
             }
         }
-        return new SerializableTypeModel(serializableType, customFieldSerializer, properties, fields);
+        return new SerializableTypeModel(types, serializableType.asType(), customFieldSerializer, properties, fields);
     }
 
     private static ExecutableElement setter(VariableElement field) {
@@ -145,15 +153,19 @@ public class SerializableTypeModel {
     }
 
 
-    private SerializableTypeModel(TypeElement type, TypeElement customFieldSerializer, List<Property> properties, List<Field> fields) {
+    private SerializableTypeModel(SerializingTypes types, TypeMirror type, TypeElement customFieldSerializer, List<Property> properties, List<Field> fields) {
+        this.types = types;
         this.type = type;
         this.customFieldSerializer = customFieldSerializer;
         this.properties = properties;
         this.fields = fields;
     }
 
-    public TypeElement getType() {
-        return type;
+    public TypeName getTypeName() {
+        if (type.getKind() == TypeKind.DECLARED) {
+            return ClassName.get(types.getTypes().erasure(type));
+        }
+        return ClassName.get(type);
     }
 
     public TypeElement getCustomFieldSerializer() {
@@ -169,6 +181,31 @@ public class SerializableTypeModel {
     }
 
     public String getFieldSerializerName() {
-        return type.getSimpleName() + "_FieldSerializer";
+        assert type.getKind() == TypeKind.DECLARED : "Can't create field serializer name for " + type.getKind();
+        Element element = types.getTypes().asElement(type);
+        StringBuilder name = new StringBuilder("FieldSerializer");
+        do {
+            name.insert(0, element.getSimpleName() + "_");
+            element = element.getEnclosingElement();
+        } while (element.getKind() != ElementKind.PACKAGE);
+        return name.toString();
     }
+
+    public TypeName getDeserializeMethodParamType() {
+        if (customFieldSerializer == null) {
+            return getTypeName();
+        }
+        ExecutableElement method = CustomFieldSerializerValidator.getDeserializationMethod(types.getTypes(), customFieldSerializer, type);
+        return ClassName.get(types.getTypes().erasure(method.getParameters().get(1).asType()));
+    }
+    public TypeName getSerializeMethodParamType() {
+        if (customFieldSerializer == null) {
+            return getTypeName();
+        }
+        ExecutableElement method = CustomFieldSerializerValidator.getSerializationMethod(types.getTypes(), customFieldSerializer, type);
+        return ClassName.get(types.getTypes().erasure(method.getParameters().get(1).asType()));
+    }
+
+
+
 }

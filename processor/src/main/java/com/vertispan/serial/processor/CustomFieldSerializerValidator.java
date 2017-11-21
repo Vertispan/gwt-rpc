@@ -37,13 +37,13 @@ public class CustomFieldSerializerValidator {
                 .findAny().orElse(null);
     }
 
-    public static ExecutableElement getDeserializationMethod(Types types, TypeElement serializer, TypeElement serializee) {
+    public static ExecutableElement getDeserializationMethod(Types types, TypeElement serializer, TypeMirror serializee) {
         return getMethod(types, "deserialize", SerializationStreamReader.class.getName(), serializer,
                 serializee)
                 .orElseGet(() -> getMethod(types, "deserialize", com.google.gwt.user.client.rpc.SerializationStreamReader.class.getName(), serializer, serializee).orElse(null));
     }
 
-    public static ExecutableElement getInstantiationMethod(Types types, TypeElement serializer, TypeElement serializee) {
+    public static ExecutableElement getInstantiationMethod(Types types, TypeElement serializer, TypeMirror serializee) {
         ExecutableElement[] overloads = ElementFilter.methodsIn(serializer.getEnclosedElements()).stream().filter(m -> m.getSimpleName().toString().equals("instantiate")).toArray(ExecutableElement[]::new);
         for (ExecutableElement overload : overloads) {
             List<? extends VariableElement> parameters = overload.getParameters();
@@ -70,7 +70,7 @@ public class CustomFieldSerializerValidator {
                 continue;
             }
 
-            if (types.isAssignable(type, serializee.asType())) {
+            if (types.isAssignable(serializee, type)) {
                 return overload;
             }
         }
@@ -78,20 +78,20 @@ public class CustomFieldSerializerValidator {
         return null;
     }
 
-    public static ExecutableElement getSerializationMethod(Types types, TypeElement serializer, TypeElement serializee) {
+    public static ExecutableElement getSerializationMethod(Types types, TypeElement serializer, TypeMirror serializee) {
         return getMethod(types, "serialize", SerializationStreamWriter.class.getName(), serializer, serializee)
                 .orElseGet(() -> getMethod(types, "serialize", com.google.gwt.user.client.rpc.SerializationStreamWriter.class.getName(), serializer, serializee).orElse(null));
     }
 
-    public static boolean hasDeserializationMethod(Types types, TypeElement serializer, TypeElement serializee) {
+    public static boolean hasDeserializationMethod(Types types, TypeElement serializer, TypeMirror serializee) {
         return getDeserializationMethod(types, serializer, serializee) != null;
     }
 
-    public static boolean hasInstantiationMethod(Types types, TypeElement serializer, TypeElement serializee) {
+    public static boolean hasInstantiationMethod(Types types, TypeElement serializer, TypeMirror serializee) {
         return getInstantiationMethod(types, serializer, serializee) != null;
     }
 
-    public static boolean hasSerializationMethod(Types types, TypeElement serializer, TypeElement serializee) {
+    public static boolean hasSerializationMethod(Types types, TypeElement serializer, TypeMirror serializee) {
         return getSerializationMethod(types, serializer, serializee) != null;
     }
 
@@ -100,12 +100,21 @@ public class CustomFieldSerializerValidator {
      * serializer.
      *
      * @param serializer the class which performs the serialization
-     * @param serializee the class being serialized
+     * @param serializeeMirror the class being serialized
      * @return list of error messages, if any, associated with the custom field
      *         serializer
      */
-    public static List<String> validate(Types types, TypeElement serializer, TypeElement serializee) {
+    public static List<String> validate(Types types, TypeElement serializer, TypeMirror serializeeMirror) {
         List<String> reasons = new ArrayList<String>();
+
+        Element serializee = types.asElement(serializeeMirror);
+        if (serializee == null) {
+            reasons.add(serializeeMirror.getKind() + " types cannot have custom field serializers");
+            return reasons;
+        }
+        // If it isn't a declared type, we aren't interested, custom field serializers can't be used for
+        // arrays, primitives, etc.
+
 
         if (serializee.getKind() == ElementKind.ENUM) {
             /*
@@ -117,28 +126,28 @@ public class CustomFieldSerializerValidator {
             return reasons;
         }
 
-        if (!hasDeserializationMethod(types, serializer, serializee)) {
+        if (!hasDeserializationMethod(types, serializer, serializeeMirror)) {
             // No valid deserialize method was found.
             reasons.add(MessageFormat.format(NO_DESERIALIZE_METHOD, ClassName.get(serializer),
-                    SerializationStreamReader.class.getName(), ClassName.get(serializee)));
+                    SerializationStreamReader.class.getName(), ClassName.get(serializeeMirror)));
         } else {
             checkTooMany("deserialize", serializer, reasons);
         }
 
-        if (!hasSerializationMethod(types, serializer, serializee)) {
+        if (!hasSerializationMethod(types, serializer, serializeeMirror)) {
             // No valid serialize method was found.
             reasons.add(MessageFormat.format(NO_SERIALIZE_METHOD, ClassName.get(serializer),
-                    SerializationStreamWriter.class.getName(), ClassName.get(serializee)));
+                    SerializationStreamWriter.class.getName(), ClassName.get(serializeeMirror)));
         } else {
             checkTooMany("serialize", serializer, reasons);
         }
 
-        if (!hasInstantiationMethod(types, serializer, serializee)) {
+        if (!hasInstantiationMethod(types, serializer, serializeeMirror)) {
             boolean defaultInstantiable = JTypeUtils.isDefaultInstantiable(serializee);
             if (!defaultInstantiable && !serializee.getModifiers().contains(Modifier.ABSTRACT)) {
                 // Not default instantiable and no instantiate method was found.
                 reasons.add(MessageFormat.format(NO_INSTANTIATE_METHOD,
-                        ClassName.get(serializer), ClassName.get(serializee),
+                        ClassName.get(serializer), ClassName.get(serializeeMirror),
                         SerializationStreamReader.class.getName()));
             }
         } else {
@@ -167,7 +176,7 @@ public class CustomFieldSerializerValidator {
     }
 
     private static Optional<ExecutableElement> getMethod(Types types, String methodName, String streamClassName,
-                                                         TypeElement serializer, TypeElement serializee) {
+                                                         TypeElement serializer, TypeMirror serializee) {
         ExecutableElement[] overloads = ElementFilter.methodsIn(serializer.getEnclosedElements()).stream().filter(m -> m.getSimpleName().toString().equals(methodName)).toArray(ExecutableElement[]::new);
         for (ExecutableElement overload : overloads) {
             List<? extends VariableElement> parameters = overload.getParameters();
@@ -191,7 +200,7 @@ public class CustomFieldSerializerValidator {
 
             // TODO: if isArray answered yes to isClass this cast would not be
             // necessary
-            if (types.isAssignable(type, serializee.asType())) {
+            if (types.isAssignable(serializee, type)) {
                 if (isValidCustomFieldSerializerMethod(overload)
                         && overload.getReturnType().getKind() == TypeKind.VOID) {
                     return Optional.of(overload);

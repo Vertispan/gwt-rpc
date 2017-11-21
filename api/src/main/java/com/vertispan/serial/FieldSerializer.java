@@ -11,11 +11,11 @@ package com.vertispan.serial;
  * serialization/deserialization.
  */
 public interface FieldSerializer {
-    default <T> void deserial(SerializationStreamReader reader, T instance) throws
+    default void deserial(SerializationStreamReader reader, Object instance) throws
             SerializationException, com.google.gwt.user.client.rpc.SerializationException {
         //default implementation does nothing
     }
-    default <T> void serial(SerializationStreamWriter writer, T instance) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException {
+    default void serial(SerializationStreamWriter writer, Object instance) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException {
         //default implementation does nothing
     }
     default Object create(SerializationStreamReader reader) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException {

@@ -504,7 +504,7 @@ public class SerializableTypeOracleBuilder {
             TypeElement manualSerializer = findCustomFieldSerializer(types, type);
             assert (manualSerializer != null);
 
-            List<String> fieldProblems = CustomFieldSerializerValidator.validate(types.getTypes(), manualSerializer, (TypeElement)((DeclaredType) type).asElement());
+            List<String> fieldProblems = CustomFieldSerializerValidator.validate(types.getTypes(), manualSerializer, type);
             if (!fieldProblems.isEmpty()) {
                 for (String problem : fieldProblems) {
                     problems.add(type, problem, Priority.FATAL);

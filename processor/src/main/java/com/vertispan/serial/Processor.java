@@ -2,7 +2,6 @@ package com.vertispan.serial;
 
 import com.google.auto.service.AutoService;
 import com.google.common.base.Charsets;
-import com.google.common.collect.Sets;
 import com.squareup.javapoet.*;
 import com.squareup.javapoet.TypeSpec.Builder;
 import com.vertispan.gwtapt.JTypeUtils;
@@ -370,7 +369,7 @@ public class Processor extends AbstractProcessor {
 
         fieldSerializerType.addMethod(instantiateMethodBuilder.build());
 
-        writeInstanceMethods(fieldSerializerType, ClassName.get(arrayType), true, true, true);
+        writeInstanceMethods(fieldSerializerType, SerializableTypeModel.array(arrayType), true, true, true);
 
         JavaFile file = JavaFile.builder(packageName, fieldSerializerType.build()).build();
 
@@ -409,8 +408,15 @@ public class Processor extends AbstractProcessor {
         return getFieldSerializer((TypeElement) types.asElement(type), bidiOracle);
     }
     private ClassName getFieldSerializer(TypeElement type, SerializableTypeOracleUnion bidiOracle) {
+        //TODO push this into STM, share the impl
+
         String packageName = elements.getPackageOf(type).getQualifiedName().toString();
-        String outerClassName = type.getSimpleName() + "_FieldSerializer";
+        String outerClassName = "FieldSerializer";
+        Element elt = type;
+        do {
+            outerClassName = elt.getSimpleName() + "_" + outerClassName;
+            elt = elt.getEnclosingElement();
+        } while (elt.getKind() != ElementKind.PACKAGE);
         //TODO no more null check
         if (bidiOracle == null) {
             return ClassName.get(packageName, outerClassName);
@@ -451,13 +457,15 @@ public class Processor extends AbstractProcessor {
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .returns(TypeName.VOID)
                     .addParameter(SerializationStreamReader.class, "reader")
-                    .addParameter(ClassName.get(typeElement), "instance")
+//                    .addParameter(ClassName.get(typeElement), "instance")//this will be handled once we know what type we are dealing with below
                     .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                     .addException(SerializationException.class);
 
             if (model.getCustomFieldSerializer() != null) {
+                deserializeMethodBuilder.addParameter(model.getDeserializeMethodParamType(), "instance");
                 deserializeMethodBuilder.addStatement("$L.deserialize(reader, instance)", model.getCustomFieldSerializer());
             } else {
+                deserializeMethodBuilder.addParameter(ClassName.get(typeElement), "instance");
                 for (Property property : model.getProperties()) {
                     deserializeMethodBuilder.addStatement("instance.$L(($T) reader.read$L())", property.getSetter().getSimpleName(), property.getTypeName(), property.getStreamMethodName());
                 }
@@ -478,13 +486,15 @@ public class Processor extends AbstractProcessor {
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .returns(TypeName.VOID)
                     .addParameter(SerializationStreamWriter.class, "writer")
-                    .addParameter(ClassName.get(typeElement), "instance")
+//                    .addParameter(ClassName.get(typeElement), "instance")//this will be handled once we know what type we are dealing with below
                     .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                     .addException(SerializationException.class);
 
             if (model.getCustomFieldSerializer() != null) {
+                serializeMethodBuilder.addParameter(model.getSerializeMethodParamType(), "instance");
                 serializeMethodBuilder.addStatement("$L.serialize(writer, instance)", model.getCustomFieldSerializer());
             } else {
+                serializeMethodBuilder.addParameter(ClassName.get(typeElement), "instance");
                 for (Property property : model.getProperties()) {
                     serializeMethodBuilder.addStatement("writer.write$L(instance.$L())", property.getStreamMethodName(), property.getGetter().getSimpleName());
                 }
@@ -503,12 +513,12 @@ public class Processor extends AbstractProcessor {
         //maybe write instantiate (if not abstract, and has default ctor) OR is an enum
         MethodSpec.Builder instantiateMethodBuilder = MethodSpec.methodBuilder("instantiate")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(ClassName.get(typeElement))
+                .returns(Object.class)// could be ClassName.get(typeElement), if visible...
                 .addParameter(SerializationStreamReader.class, "reader")
                 .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                 .addException(SerializationException.class);
 
-        if (model.getCustomFieldSerializer() != null && CustomFieldSerializerValidator.hasInstantiationMethod(types, model.getCustomFieldSerializer(), typeElement)) {
+        if (model.getCustomFieldSerializer() != null && CustomFieldSerializerValidator.hasInstantiationMethod(types, model.getCustomFieldSerializer(), typeElement.asType())) {
             instantiateMethodBuilder.addStatement("return $L.instantiate(reader)", model.getCustomFieldSerializer());
         } else {
             if (typeElement.getKind() == ElementKind.ENUM || (!typeElement.getModifiers().contains(Modifier.ABSTRACT) && JTypeUtils.isDefaultInstantiable(typeElement))) {
@@ -527,7 +537,7 @@ public class Processor extends AbstractProcessor {
         }
         fieldSerializerType.addMethod(instantiateMethodBuilder.build());
 
-        writeInstanceMethods(fieldSerializerType, ClassName.get(typeElement), writeSerialize, writeDeserialize, writeInstantiate);
+        writeInstanceMethods(fieldSerializerType, model, writeSerialize, writeDeserialize, writeInstantiate);
 
         String packageName = elements.getPackageOf(typeElement).getQualifiedName().toString();
         JavaFile file = JavaFile.builder(packageName, fieldSerializerType.build()).build();
@@ -548,14 +558,13 @@ public class Processor extends AbstractProcessor {
      * js/jsni map of method references, but that is not going to fly for J2CL, so instead the goal here is to
      * produce multiple field serializer types which each only contain the methods required for a particular use
      * case.
-     *
-     * @param fieldSerializerType the being built
+     *  @param fieldSerializerType the being built
      * @param dataType the type being de/serialized
      * @param writeSerialize whether or not it is necessary to serialize fields
      * @param writeDeserialize whether or not it is necessary to deserialize fields
      * @param writeInstantiate whether or not instantiation is supported
      */
-    private void writeInstanceMethods(TypeSpec.Builder fieldSerializerType, TypeName dataType, boolean writeSerialize, boolean writeDeserialize, boolean writeInstantiate) {
+    private void writeInstanceMethods(Builder fieldSerializerType, SerializableTypeModel dataType, boolean writeSerialize, boolean writeDeserialize, boolean writeInstantiate) {
 
         // cases that can be supported:
         //  * write object only
@@ -581,7 +590,7 @@ public class Processor extends AbstractProcessor {
 
     }
 
-    private void writeInnerFieldSerializer(Builder fieldSerializerType, TypeName dataType, boolean write, boolean ignore, boolean read, boolean instantiate, String nestedTypeName) {
+    private void writeInnerFieldSerializer(Builder fieldSerializerType, SerializableTypeModel dataType, boolean write, boolean ignore, boolean read, boolean instantiate, String nestedTypeName) {
         TypeSpec.Builder inner = TypeSpec.classBuilder(nestedTypeName).addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
         inner.superclass(ClassName.get("", fieldSerializerType.build().name));
         if (write) {
@@ -593,7 +602,7 @@ public class Processor extends AbstractProcessor {
                     .returns(TypeName.VOID)
                     .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                     .addException(SerializationException.class)
-                    .addStatement("serialize(writer, ($T) instance)", dataType)
+                    .addStatement("serialize(writer, ($T) instance)", dataType.getSerializeMethodParamType())
                     .build());
         }
         if (read) {
@@ -605,7 +614,7 @@ public class Processor extends AbstractProcessor {
                     .returns(TypeName.VOID)
                     .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                     .addException(SerializationException.class)
-                    .addStatement("deserialize(reader, ($T)instance)", dataType)
+                    .addStatement("deserialize(reader, ($T)instance)", dataType.getDeserializeMethodParamType())
                     .build());
         }
         if (instantiate) {
@@ -645,9 +654,13 @@ public class Processor extends AbstractProcessor {
         Set<TypeElement> existingTypes = allTypes.stream()
                 .map(typeName -> {
                     try {
-                        return elements.getTypeElement(typeName);
+                        TypeElement typeElement = elements.getTypeElement(typeName);
+                        if (typeElement == null && typeName.contains("$")) {
+                            typeElement = elements.getTypeElement(typeName.replaceAll("\\$", "."));
+                        }
+                        return typeElement;
                     } catch (Exception e) {
-                        //ignore this type, we can't see the type, possibly something emulated?
+                        //ignore this type, we can't see or load the type, possibly something emulated?
                         return null;
                     }
                 })
