@@ -79,7 +79,7 @@ public class Processor extends AbstractProcessor {
         try {
             String knownSubtypes = processingEnv.getOptions().get("serial.knownSubtypes");
             if (knownSubtypes != null) {
-                allTypes.addAll(readTypes(knownSubtypes));
+                allTypes.addAll(readTypes(Arrays.asList(knownSubtypes.split(File.pathSeparator))));
             }
         } catch (IOException e) {
             messager.printMessage(Kind.ERROR, "Failed to read from " + knownTypesFilename);
