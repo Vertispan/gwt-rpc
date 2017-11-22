@@ -223,7 +223,7 @@ class TypeParameterExposureComputer {
         private void computeIndirectExposureCauses() {
             // TODO(spoon): this only needs to consider immediate subtypes, not all
             // subtypes
-            List<TypeMirror> subtypes = types.getSubtypes(baseType).stream().map(Element::asType).collect(Collectors.toList());//TODO stick bit. where to get all possible types that we might need to reach...
+            List<TypeMirror> subtypes = types.getSubtypes(baseType).stream().map(Element::asType).collect(Collectors.toList());//TODO sticky bit. where to get all possible types that we might need to reach...
             for (TypeMirror subtype : subtypes) {
                 if (!(subtype instanceof DeclaredType)) {
                     // Only generic types can cause a type parameter to be exposed

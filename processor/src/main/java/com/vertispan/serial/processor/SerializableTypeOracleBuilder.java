@@ -701,7 +701,7 @@ public class SerializableTypeOracleBuilder {
     /**
      * Map of {@link TypeMirror} to {@link TypeInfoComputed}.
      */
-    private final Map<TypeMirror, TypeInfoComputed> typeToTypeInfoComputed =
+    private final Map<String, TypeInfoComputed> typeToTypeInfoComputed =
             new HashMap<>();
 
     private final SerializingTypes types;
@@ -893,7 +893,7 @@ public class SerializableTypeOracleBuilder {
 
 //        JClassType classType = (JClassType) type;
 
-        TypeInfoComputed tic = typeToTypeInfoComputed.get(type);
+        TypeInfoComputed tic = typeToTypeInfoComputed.get(ClassName.get(type).toString());
         if (tic != null && tic.isDone()) {
             // we have an answer already; use it.
             return tic;
@@ -932,7 +932,7 @@ public class SerializableTypeOracleBuilder {
 
         if (type.getKind() == TypeKind.ARRAY) {
             TypeInfoComputed arrayTic = checkArrayInstantiable((ArrayType) type, path, problems);
-            assert typeToTypeInfoComputed.get(type) != null;
+            assert typeToTypeInfoComputed.get(ClassName.get(type).toString()) != null;
             return arrayTic;
         }
 
@@ -1417,10 +1417,10 @@ public class SerializableTypeOracleBuilder {
     }
 
     private TypeInfoComputed ensureTypeInfoComputed(TypeMirror type, TypePath path) {
-        TypeInfoComputed tic = typeToTypeInfoComputed.get(type);
+        TypeInfoComputed tic = typeToTypeInfoComputed.get(ClassName.get(type).toString());
         if (tic == null) {
             tic = new TypeInfoComputed(type, path, types);
-            typeToTypeInfoComputed.put(type, tic);
+            typeToTypeInfoComputed.put(ClassName.get(type).toString(), tic);
         }
         return tic;
     }
@@ -1477,7 +1477,7 @@ public class SerializableTypeOracleBuilder {
 //        Arrays.sort(types, JTYPE_COMPARATOR);
 //
 //        for (JType type : types) {
-//            TypeInfoComputed tic = typeToTypeInfoComputed.get(type);
+//            TypeInfoComputed tic = typeToTypeInfoComputed.get(ClassName.get(type).toString());
 //            assert (tic != null);
 //
 //            TreeLogger typeLogger =
@@ -1544,7 +1544,7 @@ public class SerializableTypeOracleBuilder {
             }
         }
 
-        TypeInfoComputed leafTic = typeToTypeInfoComputed.get(leafType);
+        TypeInfoComputed leafTic = typeToTypeInfoComputed.get(ClassName.get(leafType).toString());
         if (leafTic == null) {
             problems.add(array, "internal error: leaf type not computed: " +
                     ClassName.get(leafType), Priority.FATAL);
@@ -1568,7 +1568,7 @@ public class SerializableTypeOracleBuilder {
             List<TypeMirror> candidates =
                     getPossiblyInstantiableSubtypes(baseClass, problems);
             for (TypeMirror candidate : candidates) {
-                TypeInfoComputed tic = typeToTypeInfoComputed.get(candidate);
+                TypeInfoComputed tic = typeToTypeInfoComputed.get(ClassName.get(candidate).toString());
                 if (tic != null && tic.instantiable) {
                     instantiableTypes.add(candidate);
                 }

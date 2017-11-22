@@ -7,13 +7,13 @@ import com.vertispan.serial.processor.SerializableTypeOracleBuilder;
 import com.vertispan.serial.processor.SerializingTypes;
 
 import javax.lang.model.element.*;
-import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class SerializableTypeModel {
 
@@ -188,22 +188,47 @@ public class SerializableTypeModel {
             name.insert(0, element.getSimpleName() + "_");
             element = element.getEnclosingElement();
         } while (element.getKind() != ElementKind.PACKAGE);
+
         return name.toString();
     }
+    public String getFieldSerializerPackage() {
+        assert type.getKind() == TypeKind.DECLARED : "Can't create field serializer name for " + type.getKind();
+        Element element = types.getTypes().asElement(type);
+        String packageName = types.getElements().getPackageOf(element).getQualifiedName().toString();
+        if (packageName.startsWith("java")) {
+            return "com.vertispan.serial." + packageName;
+        }
+        return packageName;
+    }
 
-    public TypeName getDeserializeMethodParamType() {
+
+    //custom field serializer may specify a looser type
+    public Optional<TypeName> getDeserializeMethodParamType() {
         if (customFieldSerializer == null) {
-            return getTypeName();
+            return Optional.of(getTypeName());
         }
         ExecutableElement method = CustomFieldSerializerValidator.getDeserializationMethod(types.getTypes(), customFieldSerializer, type);
-        return ClassName.get(types.getTypes().erasure(method.getParameters().get(1).asType()));
+        if (method == null) {
+            return Optional.empty();//...hmm. GWT handles this by just emitting empty classes, which seems silly. But in this case,
+            //            we know that there is a custom field serializer, which doesn't have the methods we need, so
+            //            validation already failed and we aren't going to even try to consider this type as
+            //            instantiable. I think.
+        }
+        return Optional.of(ClassName.get(types.getTypes().erasure(method.getParameters().get(1).asType())));
     }
-    public TypeName getSerializeMethodParamType() {
+    //custom field serializer may specify a looser type
+    public Optional<TypeName> getSerializeMethodParamType() {
         if (customFieldSerializer == null) {
-            return getTypeName();
+            return Optional.of(getTypeName());
         }
         ExecutableElement method = CustomFieldSerializerValidator.getSerializationMethod(types.getTypes(), customFieldSerializer, type);
-        return ClassName.get(types.getTypes().erasure(method.getParameters().get(1).asType()));
+        if (method == null) {
+            return Optional.empty();//...hmm. GWT handles this by just emitting empty classes, which seems silly. But in this case,
+            //            we know that there is a custom field serializer, which doesn't have the methods we need, so
+            //            validation already failed and we aren't going to even try to consider this type as
+            //            instantiable. I think.
+        }
+        return Optional.of(ClassName.get(types.getTypes().erasure(method.getParameters().get(1).asType())));
     }
 
 

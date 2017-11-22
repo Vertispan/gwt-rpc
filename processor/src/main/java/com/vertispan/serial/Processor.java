@@ -290,7 +290,9 @@ public class Processor extends AbstractProcessor {
 
         CodeBlock.Builder clinit = CodeBlock.builder();
         for (TypeMirror serializableType : bidiOracle.getSerializableTypes()) {
-            clinit.addStatement("fieldSerializer.put($S, new $T())", ClassName.get(serializableType).toString(), getFieldSerializer(serializableType, bidiOracle));
+            if (bidiOracle.maybeInstantiated(serializableType)) {
+                clinit.addStatement("fieldSerializer.put($S, new $T())", ClassName.get(serializableType).toString(), getFieldSerializer(serializableType, bidiOracle));
+            }
         }
         typeSerializer.addStaticBlock(clinit.build());
 
@@ -411,6 +413,9 @@ public class Processor extends AbstractProcessor {
         //TODO push this into STM, share the impl
 
         String packageName = elements.getPackageOf(type).getQualifiedName().toString();
+        if (packageName.startsWith("java")) {
+            packageName = "com.vertispan.serial." + packageName;
+        }
         String outerClassName = "FieldSerializer";
         Element elt = type;
         do {
@@ -462,8 +467,13 @@ public class Processor extends AbstractProcessor {
                     .addException(SerializationException.class);
 
             if (model.getCustomFieldSerializer() != null) {
-                deserializeMethodBuilder.addParameter(model.getDeserializeMethodParamType(), "instance");
-                deserializeMethodBuilder.addStatement("$L.deserialize(reader, instance)", model.getCustomFieldSerializer());
+                TypeName paramType = model.getDeserializeMethodParamType().orElse(null);
+                if (paramType == null) {
+                    deserializeMethodBuilder.addParameter(Object.class, "unused");
+                } else {
+                    deserializeMethodBuilder.addParameter(paramType, "instance");
+                    deserializeMethodBuilder.addStatement("$L.deserialize(reader, instance)", model.getCustomFieldSerializer());
+                }
             } else {
                 deserializeMethodBuilder.addParameter(ClassName.get(typeElement), "instance");
                 for (Property property : model.getProperties()) {
@@ -491,8 +501,13 @@ public class Processor extends AbstractProcessor {
                     .addException(SerializationException.class);
 
             if (model.getCustomFieldSerializer() != null) {
-                serializeMethodBuilder.addParameter(model.getSerializeMethodParamType(), "instance");
-                serializeMethodBuilder.addStatement("$L.serialize(writer, instance)", model.getCustomFieldSerializer());
+                TypeName paramType = model.getSerializeMethodParamType().orElse(null);
+                if (paramType == null) {
+                    serializeMethodBuilder.addParameter(Object.class, "unused");
+                } else {
+                    serializeMethodBuilder.addParameter(paramType, "instance");
+                    serializeMethodBuilder.addStatement("$L.serialize(writer, instance)", model.getCustomFieldSerializer());
+                }
             } else {
                 serializeMethodBuilder.addParameter(ClassName.get(typeElement), "instance");
                 for (Property property : model.getProperties()) {
@@ -539,7 +554,7 @@ public class Processor extends AbstractProcessor {
 
         writeInstanceMethods(fieldSerializerType, model, writeSerialize, writeDeserialize, writeInstantiate);
 
-        String packageName = elements.getPackageOf(typeElement).getQualifiedName().toString();
+        String packageName = model.getFieldSerializerPackage();
         JavaFile file = JavaFile.builder(packageName, fieldSerializerType.build()).build();
 
         try {
@@ -602,7 +617,7 @@ public class Processor extends AbstractProcessor {
                     .returns(TypeName.VOID)
                     .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                     .addException(SerializationException.class)
-                    .addStatement("serialize(writer, ($T) instance)", dataType.getSerializeMethodParamType())
+                    .addStatement("serialize(writer, ($T) instance)", dataType.getSerializeMethodParamType().orElse(ClassName.get(Object.class)))
                     .build());
         }
         if (read) {
@@ -614,7 +629,7 @@ public class Processor extends AbstractProcessor {
                     .returns(TypeName.VOID)
                     .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                     .addException(SerializationException.class)
-                    .addStatement("deserialize(reader, ($T)instance)", dataType.getDeserializeMethodParamType())
+                    .addStatement("deserialize(reader, ($T)instance)", dataType.getDeserializeMethodParamType().orElse(ClassName.get(Object.class)))
                     .build());
         }
         if (instantiate) {
@@ -729,18 +744,20 @@ public class Processor extends AbstractProcessor {
             return lines;
         }
     }
-    private Collection<? extends String> readTypes(String knownSubtypes) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(knownSubtypes), Charsets.UTF_8))) {
-            Set<String> lines = new HashSet<>();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith("#")) {
-                    continue;
+    private Collection<? extends String> readTypes(List<String> knownSubtypePaths) throws IOException {
+        Set<String> lines = new HashSet<>();
+        for (String path : knownSubtypePaths) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path), Charsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.startsWith("#")) {
+                        continue;
+                    }
+                    lines.add(line);
                 }
-                lines.add(line);
             }
-            return lines;
         }
+        return lines;
     }
 
 
