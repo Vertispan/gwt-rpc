@@ -331,7 +331,7 @@ public class Processor extends AbstractProcessor {
         //TODO for readObject, share the Object_Array_CustomFieldSerializer
         deserializeMethodBuilder
                 .beginControlFlow("for (int i = 0, n = instance.length; i < n; ++i)")
-                .addStatement("instance[i] = reader.read$L()", SerializableTypeModel.getStreamMethodSuffix(componentType))
+                .addStatement("instance[i] = ($T) reader.read$L()", componentType, SerializableTypeModel.getStreamMethodSuffix(componentType))
                 .endControlFlow();
 
         fieldSerializerType.addMethod(deserializeMethodBuilder.build());
@@ -448,7 +448,26 @@ public class Processor extends AbstractProcessor {
                 .addModifiers(Modifier.PUBLIC)
                 .addOriginatingElement(typeElement);
         boolean writeSerialize = false, writeDeserialize = false, writeInstantiate = false;
-        if (typeElement.getKind() != ElementKind.ENUM) {
+        if (typeElement.getKind() == ElementKind.ENUM) {
+            //write deserialize method
+            MethodSpec.Builder deserializeMethodBuilder = MethodSpec.methodBuilder("deserialize")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .returns(TypeName.VOID)
+                    .addParameter(SerializationStreamReader.class, "reader")
+                    .addParameter(Object.class, "instance")
+                    .addException(com.google.gwt.user.client.rpc.SerializationException.class)
+                    .addException(SerializationException.class);
+            fieldSerializerType.addMethod(deserializeMethodBuilder.build());
+
+            MethodSpec.Builder serializeMethodBuilder = MethodSpec.methodBuilder("serialize")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .returns(TypeName.VOID)
+                    .addParameter(SerializationStreamWriter.class, "writer")
+                    .addParameter(Object.class, "instance")
+                    .addException(com.google.gwt.user.client.rpc.SerializationException.class)
+                    .addException(SerializationException.class);
+            fieldSerializerType.addMethod(serializeMethodBuilder.build());
+        } else{
             assert typeElement.getKind() == ElementKind.CLASS;
 
             writeSerialize = true;

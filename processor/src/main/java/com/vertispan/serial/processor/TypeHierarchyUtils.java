@@ -27,7 +27,7 @@ class TypeHierarchyUtils {
         List<TypeMirror> interfaces = new ArrayList<>(type.getInterfaces());
 
         while (!interfaces.isEmpty()) {
-            TypeMirror possibleMatch = types.erasure(interfaces.get(0));
+            TypeMirror possibleMatch = types.erasure(interfaces.remove(0));
             if (!seen.add(possibleMatch)) {
                 continue;
             }

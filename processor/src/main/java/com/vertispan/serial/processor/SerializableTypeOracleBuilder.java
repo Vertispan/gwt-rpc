@@ -470,8 +470,10 @@ public class SerializableTypeOracleBuilder {
         }
 
         if (type.getKind() == TypeKind.WILDCARD) {
-            //TODO or might be superBounds, i cant think rt now
-            recordTypeParametersIn(((WildcardType) type).getExtendsBound(), params);
+            TypeMirror extendsBound = ((WildcardType) type).getExtendsBound();
+            if (extendsBound != null) {
+                recordTypeParametersIn(extendsBound, params);
+            }
         }
 
         //TODO I'm about 70% sure this is a bad idea in general, to use type params as if they were fields...
