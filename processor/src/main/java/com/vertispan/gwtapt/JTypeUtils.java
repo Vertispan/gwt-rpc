@@ -50,7 +50,10 @@ public class JTypeUtils {
         for (TypeMirror supertype : getFlattenedSupertypeHierarchy(types, subType)) {
             if (supertype instanceof DeclaredType) {
                 DeclaredType parameterized = (DeclaredType) supertype;
-                if (ClassName.get(intfType).equals(ClassName.get(parameterized))) {//dodgy bit here, forcing them raw to compare their base types, is this safe?
+                //dodgy bit here, forcing them raw to compare their base types, is this safe?
+                //answer: probably. We want to check if it is that particular interface, so we pick and return
+                //        the same interface. That seems to match gwt's semantics.
+                if (ClassName.get(types.erasure(intfType)).equals(ClassName.get(types.erasure(parameterized)))) {
                     // Found the desired supertype
                     return parameterized;
                 }
