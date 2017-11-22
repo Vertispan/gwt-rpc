@@ -63,7 +63,7 @@ public interface SerializationStreamWriter extends com.google.gwt.user.client.rp
      * @param value
      * @throws SerializationException
      */
-    void writeObject(Object value) throws SerializationException;
+    void writeObject(Object value) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException;
 
     /**
      *

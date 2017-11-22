@@ -19,6 +19,7 @@
 
   <modules>
     <module>api</module>
+    <module>string-serializer-streams</module>
     <module>processor</module>
     <module>gwt-jre-serializers</module>
     <module>sample</module>

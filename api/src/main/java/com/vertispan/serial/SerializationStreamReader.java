@@ -77,7 +77,7 @@ public interface SerializationStreamReader extends com.google.gwt.user.client.rp
      * @return the next Object in the stream, with all of its fields
      * @throws SerializationException if not enough data remains, or the data is not formatted correctly
      */
-    Object readObject() throws SerializationException;
+    Object readObject() throws com.google.gwt.user.client.rpc.SerializationException;
 
     /**
      * Reads the next piece of data in the stream as if it were a short.

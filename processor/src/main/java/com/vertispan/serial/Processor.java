@@ -250,7 +250,7 @@ public class Processor extends AbstractProcessor {
                             .addParameter(SerializationStreamWriter.class, "writer")
                             .beginControlFlow("try")
                             .addStatement("writer.write$L(instance)", SerializableTypeModel.getStreamMethodSuffix(writtenType))
-                            .nextControlFlow("catch ($T ex)", SerializationException.class)
+                            .nextControlFlow("catch ($T ex)", com.google.gwt.user.client.rpc.SerializationException.class)
                             .addStatement("throw new IllegalStateException(ex)")
                             .endControlFlow()
                             .build());
@@ -263,7 +263,7 @@ public class Processor extends AbstractProcessor {
                             .addParameter(SerializationStreamReader.class, "reader")
                             .beginControlFlow("try")
                             .addStatement("return ($T) reader.read$L()", ClassName.get(readType), SerializableTypeModel.getStreamMethodSuffix(readType))
-                            .nextControlFlow("catch ($T ex)", SerializationException.class)
+                            .nextControlFlow("catch ($T ex)", com.google.gwt.user.client.rpc.SerializationException.class)
                             .addStatement("throw new IllegalStateException(ex)")
                             .endControlFlow()
                             .build());

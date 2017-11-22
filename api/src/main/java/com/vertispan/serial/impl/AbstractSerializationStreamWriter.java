@@ -83,7 +83,7 @@ public abstract class AbstractSerializationStreamWriter extends
 
     public abstract void writeLong(long value);
 
-    public void writeObject(Object instance) throws SerializationException {
+    public void writeObject(Object instance) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException {
         if (instance == null) {
             // write a null string
             writeString(null);
@@ -192,5 +192,5 @@ public abstract class AbstractSerializationStreamWriter extends
      * @throws SerializationException
      */
     protected abstract void serialize(Object instance, String typeSignature)
-            throws SerializationException;
+            throws com.google.gwt.user.client.rpc.SerializationException;
 }

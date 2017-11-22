@@ -87,7 +87,7 @@ public abstract class AbstractSerializationStreamReader extends
 //        setFlags(readInt());
 //    }
 
-    public final Object readObject() throws SerializationException {
+    public final Object readObject() throws com.google.gwt.user.client.rpc.SerializationException {
         int token = readInt();
 
         if (token < 0) {
@@ -114,7 +114,7 @@ public abstract class AbstractSerializationStreamReader extends
      * @throws SerializationException
      */
     protected abstract Object deserialize(String typeSignature)
-            throws SerializationException;
+            throws com.google.gwt.user.client.rpc.SerializationException;
 
     /**
      * Get the previously seen object at the given index which must be 1-based.

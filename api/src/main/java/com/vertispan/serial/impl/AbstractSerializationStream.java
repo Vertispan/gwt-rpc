@@ -101,7 +101,7 @@ public abstract class AbstractSerializationStream {
      *
      * Keep this synchronized with the version in Base64Utils.
      */
-    static long longFromBase64(String value) {
+    protected static long longFromBase64(String value) {
         int pos = 0;
         long longVal = base64Value(value.charAt(pos++));
         int len = value.length();
@@ -118,7 +118,7 @@ public abstract class AbstractSerializationStream {
      *
      * Keep this synchronized with the version in Base64Utils.
      */
-    static String longToBase64(long value) {
+    protected static String longToBase64(long value) {
         // Convert to ints early to avoid need for long ops
         int low = (int) (value & 0xffffffff);
         int high = (int) (value >> 32);
