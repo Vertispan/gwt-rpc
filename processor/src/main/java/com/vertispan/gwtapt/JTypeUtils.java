@@ -10,10 +10,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.*;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Types;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Some JClassType/JType bits that we take for granted in GWT Generators, expressed
@@ -90,20 +87,20 @@ public class JTypeUtils {
      * breadth-first ordering of the type, followed by its interfaces (and their
      * super-interfaces), then the supertype and its interfaces, and so on.
      */
-    public static Set<TypeMirror> getFlattenedSupertypeHierarchy(Types types, TypeMirror t) {
+    public static Collection<TypeMirror> getFlattenedSupertypeHierarchy(Types types, TypeMirror t) {
         List<TypeMirror> toAdd = new ArrayList<>();
-        LinkedHashSet<TypeMirror> result = new LinkedHashSet<>();
+        LinkedHashMap<String, TypeMirror> result = new LinkedHashMap<>();
 
         toAdd.add(t);
 
         for (int i = 0; i < toAdd.size(); i++) {
             TypeMirror type = toAdd.get(i);
-            if (result.add(type)) {
+            if (result.put(ClassName.get(types.erasure(type)).toString(), type) == null) {
                 toAdd.addAll(types.directSupertypes(type));
             }
         }
 
-        return result;
+        return result.values();
     }
 
     public static boolean isRawType(TypeMirror originalType) {
