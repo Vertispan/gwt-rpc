@@ -50,7 +50,7 @@
         <version>3.7.0</version>
         <configuration>
           <compilerArgs>
-            <arg>-Aserial.knownSubtypes=types.txt</arg>
+            <arg>-Aserial.knownSubtypes=jre.txt:guava.txt</arg>
           </compilerArgs>
         </configuration>
       </plugin>
