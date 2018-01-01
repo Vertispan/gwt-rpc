@@ -687,7 +687,7 @@ public class SerializableTypeOracleBuilder {
 
     private final Set<TypeMirror> rootTypes = new LinkedHashSet<TypeMirror>();
 
-//    private final TypeConstrainer typeConstrainer;
+    private final TypeConstrainer typeConstrainer;
     private TypeFilter typeFilter = DEFAULT_TYPE_FILTER;
 
     private final TypeParameterExposureComputer typeParameterExposureComputer;
@@ -722,7 +722,7 @@ public class SerializableTypeOracleBuilder {
         this.messager = messager;
         this.types = serializingTypes;
         this.typeParameterExposureComputer = new TypeParameterExposureComputer(this.types, typeFilter, messager);
-//        typeConstrainer = new TypeConstrainer(this.types);
+        typeConstrainer = new TypeConstrainer(this.types);
 
         collectionClass = (DeclaredType) elements.getTypeElement(Collection.class.getName()).asType();
         mapClass = (DeclaredType) elements.getTypeElement(Map.class.getName()).asType();
@@ -1356,7 +1356,7 @@ public class SerializableTypeOracleBuilder {
      */
     private TypeMirror constrainTypeBy(TypeMirror type, TypeMirror superType) {
         //TODO actually make this class work
-        return type;//typeConstrainer.constrainTypeBy(type, superType);
+        return typeConstrainer.constrainTypeBy((DeclaredType) type, (DeclaredType) superType);
     }
 
     private TypeParameterFlowInfo getFlowInfo(DeclaredType type, int index) {
