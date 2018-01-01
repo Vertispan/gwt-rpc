@@ -387,7 +387,11 @@ public class Processor extends AbstractProcessor {
             return elements.getPackageOf(typeSerializer).getQualifiedName().toString();
         }
         assert componentType.getKind() == TypeKind.DECLARED;
-        return elements.getPackageOf(types.asElement(componentType)).getQualifiedName().toString();
+        String packageName = elements.getPackageOf(types.asElement(componentType)).getQualifiedName().toString();
+        if (packageName.startsWith("java")) {
+            return "com.vertispan.serial." + packageName;
+        }
+        return packageName;
     }
 
     private ClassName getFieldSerializer(TypeMirror type, SerializableTypeOracleUnion bidiOracle) {
