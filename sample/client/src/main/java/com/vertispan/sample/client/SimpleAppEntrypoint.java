@@ -3,7 +3,7 @@ package com.vertispan.sample.client;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.vertispan.sample.shared.*;
-import com.vertispan.serial.streams.StringSerializationStreamWriter;
+import com.vertispan.serial.streams.string.StringSerializationStreamWriter;
 import elemental2.dom.DomGlobal;
 
 public class SimpleAppEntrypoint implements EntryPoint {

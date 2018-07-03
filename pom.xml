@@ -20,6 +20,7 @@
   <modules>
     <module>api</module>
     <module>string-serializer-streams</module>
+    <module>bytebuffer-serializer-streams</module>
     <module>processor</module>
     <module>gwt-jre-serializers</module>
     <module>sample</module>
@@ -55,4 +56,14 @@
     </pluginManagement>
 
   </build>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 </project>

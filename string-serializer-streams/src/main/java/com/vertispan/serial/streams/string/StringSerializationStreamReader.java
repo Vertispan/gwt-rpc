@@ -1,4 +1,4 @@
-package com.vertispan.serial.streams;
+package com.vertispan.serial.streams.string;
 
 import com.vertispan.serial.SerializationException;
 import com.vertispan.serial.TypeSerializer;

@@ -1,4 +1,4 @@
-package com.vertispan.serial.streams;
+package com.vertispan.serial.streams.string;
 
 import com.vertispan.serial.TypeSerializer;
 import com.vertispan.serial.impl.AbstractSerializationStreamWriter;
