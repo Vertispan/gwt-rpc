@@ -18,5 +18,5 @@ public interface OrderSerializer {
 
     Project readProject(SerializationStreamReader reader);
 
-    void writeLocation(HasAddress hasAddress, SerializationStreamWriter writer);
+//    void writeLocation(HasAddress hasAddress, SerializationStreamWriter writer);
 }

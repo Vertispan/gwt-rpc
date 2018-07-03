@@ -10,6 +10,6 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
 public @interface SerializationWiring {
-    Class<?>[] readBlacklist() default {};
-    Class<?>[] writeBlacklist() default {};
+//    Class<?>[] readBlacklist() default {};
+//    Class<?>[] writeBlacklist() default {};
 }

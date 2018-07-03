@@ -1,0 +1,5 @@
+<module>
+  <inherits name="elemental2.dom.Dom" />
+  <source path="" />
+  <entry-point class="com.vertispan.sample.client.SimpleAppEntrypoint" />
+</module>

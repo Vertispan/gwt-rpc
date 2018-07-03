@@ -55,7 +55,6 @@ public class Discovery2 {
 
 
         FastClasspathScanner scanner = new FastClasspathScanner("!");
-//        scanner.
         scanner.overrideClassLoaders(new URLClassLoader(discovery.getUrls().toArray(new URL[0]), null));
 
         ScanResult result = scanner.scan();

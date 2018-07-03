@@ -10,20 +10,34 @@
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>sample</artifactId>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>shared</module>
+    <module>client</module>
+    <module>server</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.gwt</groupId>
+        <artifactId>gwt</artifactId>
+        <version>2.8.2</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>3.1.0</version>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
-    <dependency>
-      <groupId>com.vertispan.serial</groupId>
-      <artifactId>processor</artifactId>
-      <version>${project.version}</version>
-      <optional>true</optional>
-    </dependency>
 
-    <dependency>
-      <groupId>com.vertispan.serial</groupId>
-      <artifactId>gwt-jre-serializers</artifactId>
-      <version>${project.version}</version>
-    </dependency>
 
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -35,28 +49,54 @@
       <artifactId>guava-gwt</artifactId>
       <version>21.0</version>
     </dependency>
-
-    <dependency>
-      <groupId>org.dmfs</groupId>
-      <artifactId>rfc5545-datetime</artifactId>
-      <version>0.2.4</version>
-    </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
+        <groupId>net.ltgt.gwt.maven</groupId>
+        <artifactId>gwt-maven-plugin</artifactId>
+        <inherited>false</inherited>
         <configuration>
-          <compilerArgs>
-            <arg>-Aserial.knownSubtypes=jre.txt:guava.txt</arg>
-          </compilerArgs>
+          <launcherDir>${project.build.directory}/gwt/launcherDir</launcherDir>
         </configuration>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
+        </plugin>
+        <plugin>
+          <groupId>org.eclipse.jetty</groupId>
+          <artifactId>jetty-maven-plugin</artifactId>
+          <version>9.4.7.v20170914</version>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.tomcat.maven</groupId>
+          <artifactId>tomcat7-maven-plugin</artifactId>
+          <version>2.2</version>
+        </plugin>
+        <plugin>
+          <groupId>net.ltgt.gwt.maven</groupId>
+          <artifactId>gwt-maven-plugin</artifactId>
+          <version>1.0-rc-8</version>
+          <extensions>true</extensions>
+          <configuration>
+            <sourceLevel>1.8</sourceLevel>
+            <failOnError>true</failOnError>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-source-plugin</artifactId>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
+
 </project>

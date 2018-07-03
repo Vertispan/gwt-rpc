@@ -2,6 +2,9 @@ package com.vertispan.serial.impl;
 
 import com.vertispan.serial.*;
 
+/**
+ * Trivial implementation, assuming that the actual serializers are mapped by Class.getName.
+ */
 public abstract class TypeSerializerImpl implements TypeSerializer {
     protected abstract FieldSerializer serializer(String name);
 

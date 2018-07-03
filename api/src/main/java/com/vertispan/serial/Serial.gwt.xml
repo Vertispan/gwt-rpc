@@ -1,3 +1,4 @@
 <module>
+  <inherits name="com.google.gwt.user.client.rpc.LegacyRpcClasses" />
   <source path="" />
 </module>

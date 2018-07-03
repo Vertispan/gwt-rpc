@@ -1,6 +1,5 @@
 package com.vertispan.sample.shared;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class Project extends LineItem {

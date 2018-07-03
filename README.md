@@ -18,7 +18,7 @@ Aspects of this project, and their progress:
  * SerializableTypeOracleBuilder - the meat of RPC, the part that identifies which classes are
    eligible to be instantiated, serialized, and deserialized on either side of the wire. About
    70% complete:
-   * Missing TypeConstrainer, allows us to remove some potential serializers
+   * Partially implemented TypeConstrainer, allows us to remove some potential serializers
    * Missing some handling of generic arrays
    * Missing some logging
    * Future improvements should include optional "asserts" that assist in knowing exactly
@@ -33,7 +33,8 @@ Aspects of this project, and their progress:
    let developers keep the "type explosion" firmly under their control. They will allow
    specifying packages to scan directly, or pre-build lists of classes in external/upstream
    jars that are compatible with the platforms that the generated serializer can be used on.
-   Not officially started but there is lots of prior art in this area.
+   * One implementation is complete, scanning a jar for all classes, and allowing that list to 
+     be passed directly to a the main processor.
  * Serialization formats - These can be specified by downstream projects, but we'll probably try
    to collect them here too. Three complete and working examples (designed for classic GWT-RPC,
    but should be compatible with the new variety) that will be available in examples:
@@ -48,4 +49,8 @@ Aspects of this project, and their progress:
  * More options on automatic serialization than getters/setters, such as "violator-pattern"
    `private`/`final` field access, reflection on platforms that support it, builders and
    factories and `@ConstructorProperties` and more...
+ * Option to disable polymorphism on the stream, and always assume that the declared type is the
+   only possible type that can be provided there, or that a custom serializer is available to
+   handle any possible polymorphism. This will reduce the size of the stream in specific cases,
+   and can allow for non-object oriented data to read and write data (JSON, C, etc).
  * JPA or other bytecode enhancement support (opaque to most clients), if requested.

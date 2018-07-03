@@ -1,0 +1,10 @@
+<module>
+  <source path="">
+    <include name="CustomFieldSerializer.java" />
+    <include name="SerializationException.java" />
+    <include name="SerializationStreamReader.java" />
+    <include name="SerializationStreamWriter.java" />
+    <include name="core/**" />
+  </source>
+  <super-source path="super" />
+</module>
