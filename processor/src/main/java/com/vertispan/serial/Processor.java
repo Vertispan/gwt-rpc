@@ -1,5 +1,6 @@
 package com.vertispan.serial;
 
+import com.google.auto.common.MoreElements;
 import com.google.auto.service.AutoService;
 import com.google.common.base.Charsets;
 import com.squareup.javapoet.*;
@@ -86,6 +87,9 @@ public class Processor extends AbstractProcessor {
             e.printStackTrace();
         }
 
+    }
+
+    private void cacheHandyTypes() {
         serializationStreamReader = elements.getTypeElement(SerializationStreamReader.class.getName());
         serializationStreamWriter = elements.getTypeElement(SerializationStreamWriter.class.getName());
         typeSerializer = elements.getTypeElement(TypeSerializer.class.getName());
@@ -95,6 +99,7 @@ public class Processor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        cacheHandyTypes();
         // for each type we notice (not created by this processor?), note it in a file so we can work from it
         // later, during incremental updates to individual files (which could include creation of new files)
 
