@@ -295,7 +295,18 @@ public class SerializableTypeOracleBuilder {
                 return false;
             }
 
-            boolean isDefaultInstantiable = ElementFilter.constructorsIn(typeElt.getEnclosedElements()).stream().anyMatch(ctor -> ctor.getParameters().isEmpty());
+            boolean isJreType = isInStandardJavaPackage(ClassName.get(typeElt).toString());
+
+            boolean isDefaultInstantiable = ElementFilter.constructorsIn(typeElt.getEnclosedElements())
+                    .stream().anyMatch(ctor -> {
+                        if (isJreType && !ctor.getModifiers().contains(Modifier.PUBLIC)) {
+                            return false;
+                        }
+                        if (ctor.getModifiers().contains(Modifier.PRIVATE)) {
+                            return false;
+                        }
+                        return ctor.getParameters().isEmpty();
+                    });
             if (!isDefaultInstantiable && !isManuallySerializable(types, type)) {
                 // Warn and return false.
                 problems.add(type, ClassName.get(type)
