@@ -12,8 +12,8 @@
   <artifactId>processor</artifactId>
 
   <properties>
-    <javapoet.version>1.9.0</javapoet.version>
-    <auto.common.version>0.8</auto.common.version>
+    <javapoet.version>1.11.1</javapoet.version>
+    <auto.common.version>0.10</auto.common.version>
     <auto.service.version>1.0-rc3</auto.service.version>
   </properties>
 
