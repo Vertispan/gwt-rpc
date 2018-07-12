@@ -299,13 +299,20 @@ public class SerializableTypeOracleBuilder {
 
             boolean isDefaultInstantiable = ElementFilter.constructorsIn(typeElt.getEnclosedElements())
                     .stream().anyMatch(ctor -> {
+                        if (!ctor.getParameters().isEmpty()) {
+                            return false;
+                        }
+                        // JRE classes don't get their serializer built into their own package,
+                        // so the default constructor must be public
                         if (isJreType && !ctor.getModifiers().contains(Modifier.PUBLIC)) {
                             return false;
                         }
+                        // For non-JRE classes we can generate serializers in their package,
+                        // and can allow constructors to be non-private
                         if (ctor.getModifiers().contains(Modifier.PRIVATE)) {
                             return false;
                         }
-                        return ctor.getParameters().isEmpty();
+                        return true;
                     });
             if (!isDefaultInstantiable && !isManuallySerializable(types, type)) {
                 // Warn and return false.
