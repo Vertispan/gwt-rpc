@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+				 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>org.gwtproject.rpc</groupId>
+		<artifactId>gwt-rpc-parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>gwt-websockets-api</artifactId>
+	<description>
+		Common API details to support serialization on a variety of platforms. Facilitates code generation,
+		but each platform will need concrete wiring to go the rest of the distance.
+	</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/client/**/*.java</include>
+					<include>**/shared/**/*.java</include>
+					<include>**/*.gwt.xml</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
+
+</project>

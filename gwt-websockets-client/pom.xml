@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+				 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>org.gwtproject.rpc</groupId>
+		<artifactId>gwt-rpc-parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>gwt-websockets-client</artifactId>
+
+	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>gwt-websockets-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.gwtproject.event</groupId>
+			<artifactId>gwt-event</artifactId>
+			<version>HEAD-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.jsinterop</groupId>
+			<artifactId>jsinterop-annotations</artifactId>
+			<version>1.0.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.elemental2</groupId>
+			<artifactId>elemental2-dom</artifactId>
+			<version>1.0.0-RC1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>api</artifactId>
+			<version>${project.version}</version>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>string-serializer-streams</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/client/**/*.java</include>
+					<include>**/shared/**/*.java</include>
+					<include>**/*.gwt.xml</include>
+				</includes>
+			</resource>
+		</resources>
+	</build>
+</project>

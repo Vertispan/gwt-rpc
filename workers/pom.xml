@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+				 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>org.gwtproject.rpc</groupId>
+		<artifactId>gwt-rpc-parent</artifactId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>workers</artifactId>
+	<description>Easy worker communication of RPC-able objects</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-dev</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.playn</groupId>
+			<artifactId>playn-html</artifactId>
+			<version>2.0-rc4</version>
+		</dependency>
+		<dependency>
+			<groupId>io.playn</groupId>
+			<artifactId>playn-html</artifactId>
+			<version>2.0-rc4</version>
+			<classifier>sources</classifier>
+		</dependency>
+
+		<dependency>
+			<groupId>com.vertispan.serial</groupId>
+			<artifactId>bytebuffer-serializer-streams</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.jsinterop</groupId>
+			<artifactId>base</artifactId>
+			<version>1.0.0-RC1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.elemental2</groupId>
+			<artifactId>elemental2-core</artifactId>
+			<version>1.0.0-RC1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>gwt-websockets-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>gwt-websockets-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<!-- not needed yet, but could make websockets a little lighter and faster -->
+		<dependency>
+			<groupId>org.webjars.bower</groupId>
+			<artifactId>pako</artifactId>
+			<version>0.2.8</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/client/**/*.java</include>
+					<include>**/shared/**/*.java</include>
+					<include>**/*.gwt.xml</include>
+				</includes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<productionMode>true</productionMode>
+					<!--<mode>manual</mode>-->
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

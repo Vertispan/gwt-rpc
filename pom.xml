@@ -2,68 +2,207 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.vertispan.serial</groupId>
-  <artifactId>gwt-serializable-objects</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>pom</packaging>
+    <groupId>org.gwtproject.rpc</groupId>
+    <artifactId>gwt-rpc-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
+    <name></name>
+    <description></description>
+    <inceptionYear>2018</inceptionYear>
 
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
-  </properties>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
-  <modules>
-    <module>api</module>
-    <module>string-serializer-streams</module>
-    <module>bytebuffer-serializer-streams</module>
-    <module>processor</module>
-    <module>gwt-jre-serializers</module>
-    <module>sample</module>
-    <module>discovery</module>
-  </modules>
+    <scm>
+        <connection>scm:git:git://github.com/vertispan/gwt-rpc.git</connection>
+        <developerConnection>scm:git:ssh://github.com:vertispan/gwt-rpc.git</developerConnection>
+        <url>https://github.com/vertispan/gwt-rpc/tree/master</url>
+    </scm>
 
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.5.1</version>
-          <configuration>
-            <source>${maven.compiler.source}</source>
-            <target>${maven.compiler.target}</target>
-          </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-source-plugin</artifactId>
-          <version>2.2.1</version>
-          <executions>
-            <execution>
-              <id>attach-sources</id>
-              <goals>
-                <goal>jar-no-fork</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
 
-  </build>
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.12</version>
-        <scope>test</scope>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
+        <gwt.version>2.8.2</gwt.version>
+        <gwt.plugin.version>2.8.2</gwt.plugin.version>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.7.0</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                        <excludes>
+                            <exclude>**/super/**</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.2.1</version>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>gwt-maven-plugin</artifactId>
+                    <version>${gwt.plugin.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.google.gwt</groupId>
+                            <artifactId>gwt-user</artifactId>
+                            <version>${gwt.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.google.gwt</groupId>
+                            <artifactId>gwt-dev</artifactId>
+                            <version>${gwt.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-servlet</artifactId>
+                <version>${gwt.version}</version>
+            </dependency>
+
+            <!-- This dep causes gwt-m-p to warn about complex dependencies, ignore
+              it -->
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-dev</artifactId>
+                <version>${gwt.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Depend on gwt-user, -dev for compilation only -->
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-user</artifactId>
+                <version>${gwt.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.12</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <modules>
+        <!-- serialization api -->
+        <module>api</module>
+        <!-- string serializer impl -->
+        <module>string-serializer-streams</module>
+        <!-- bytebuffer serializer impl -->
+        <module>bytebuffer-serializer-streams</module>
+        <!-- serializer generating processor -->
+        <module>processor</module>
+        <!-- field serializer impls for the subset of the JRE supported by GWT -->
+        <module>gwt-jre-serializers</module>
+        <!-- a simple example of the serializer wiring, without any endpoints -->
+        <module>sample</module>
+        <!-- utility to find all types in a jar so that they can be referenced by a project expecting to rely on those types -->
+        <module>discovery</module>
+
+        <!-- gwt rpc endpoints api, base impls -->
+        <module>gwt-websockets-api</module>
+        <!-- endpoint generating processor -->
+        <module>gwt-websockets-processor</module>
+        <!-- gwt-client wiring to create websocket, xhr endpoints -->
+        <module>gwt-websockets-client</module>
+        <!-- java server wiring to create websocket, xhr endpoints -->
+        <module>gwt-websockets-jsr356</module>
+
+        <!-- servlet/gwt sample using these endpoints -->
+        <module>javaee-websocket-gwt-rpc-sample</module>
+
+        <!-- experimental workers, should fit the endpoint mold above -->
+        <module>workers</module>
+        <!-- sample showing workers -->
+        <module>workers-sample</module>
+    </modules>
+
+
+    <!-- Specify that we will push snapshots and releases to sonatype's repos -->
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <profiles>
+        <!-- release profile to create sources, javadoc, and sign all artifacts before uploading -->
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- see http://central.sonatype.org/pages/working-with-pgp-signatures.html for more detail -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
