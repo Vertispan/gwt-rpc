@@ -36,7 +36,7 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.vertispan.serial</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>bytebuffer-serializer-streams</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
@@ -67,6 +67,13 @@
 			<groupId>org.webjars.bower</groupId>
 			<artifactId>pako</artifactId>
 			<version>0.2.8</version>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>gwt-websockets-processor</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

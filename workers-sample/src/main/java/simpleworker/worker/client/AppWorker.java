@@ -19,9 +19,9 @@
  */
 package simpleworker.worker.client;
 
-import com.colinalworth.gwt.websockets.shared.Callback;
-import com.colinalworth.gwt.worker.client.WorkerFactory;
-import com.colinalworth.gwt.worker.client.worker.MessagePort;
+import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.worker.client.WorkerFactory;
+import org.gwtproject.rpc.worker.client.worker.MessagePort;
 import com.google.gwt.core.client.EntryPoint;
 import simpleworker.common.client.MyHost;
 import simpleworker.common.client.MyHost_Impl;

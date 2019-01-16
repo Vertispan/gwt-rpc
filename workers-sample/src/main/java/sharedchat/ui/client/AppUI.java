@@ -19,7 +19,7 @@
  */
 package sharedchat.ui.client;
 
-import com.colinalworth.gwt.worker.client.WorkerFactory;
+import org.gwtproject.rpc.worker.client.WorkerFactory;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.Style.Position;
 import com.google.gwt.dom.client.Style.Unit;

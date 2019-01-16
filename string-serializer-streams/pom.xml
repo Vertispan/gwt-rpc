@@ -13,7 +13,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.vertispan.serial</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>api</artifactId>
       <version>${project.version}</version>
     </dependency>

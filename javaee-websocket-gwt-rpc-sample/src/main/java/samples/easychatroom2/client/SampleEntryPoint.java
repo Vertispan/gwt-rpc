@@ -19,11 +19,11 @@
  */
 package samples.easychatroom2.client;
 
-import com.colinalworth.gwt.websockets.client.ConnectionClosedEvent;
-import com.colinalworth.gwt.websockets.client.ConnectionOpenedEvent;
-import com.colinalworth.gwt.websockets.client.ConnectionOpenedEvent.ConnectionOpenedHandler;
-import com.colinalworth.gwt.websockets.client.ServerBuilder;
-import com.colinalworth.gwt.websockets.shared.Callback;
+import org.gwtproject.rpc.websockets.client.ConnectionClosedEvent;
+import org.gwtproject.rpc.websockets.client.ConnectionOpenedEvent;
+import org.gwtproject.rpc.websockets.client.ConnectionOpenedEvent.ConnectionOpenedHandler;
+import org.gwtproject.rpc.websockets.client.ServerBuilder;
+import org.gwtproject.rpc.websockets.shared.Callback;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

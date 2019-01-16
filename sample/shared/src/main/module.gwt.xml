@@ -1,5 +1,5 @@
-<module>
+<module rename-to="app">
   <!--<inherits name="com.google.common.collect.Collect" />-->
-  <inherits name="com.vertispan.serial.Serial" />
-  <source path="" />
+  <inherits name="org.gwtproject.rpc.serialization.api.Serial" />
+  <source path="shared" />
 </module>

@@ -19,9 +19,9 @@
  */
 package samples.easychatroom2.client;
 
-import com.colinalworth.gwt.websockets.client.RemoteServiceFactory;
-import com.colinalworth.gwt.websockets.shared.Callback;
-import com.colinalworth.gwt.websockets.shared.impl.ServiceDefTarget;
+import org.gwtproject.rpc.websockets.client.RemoteServiceFactory;
+import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.websockets.shared.impl.ServiceDefTarget;
 import elemental2.dom.DomGlobal;
 import samples.easychatroom2.shared.ChatRemoteServiceAsync;
 import samples.easychatroom2.shared.ChatRemoteServiceAsync_Impl;

@@ -19,9 +19,9 @@
  */
 package samples.easychatroom2.shared;
 
-import com.colinalworth.gwt.websockets.shared.Callback;
-import com.colinalworth.gwt.websockets.shared.Endpoint;
-import com.colinalworth.gwt.websockets.shared.Server;
+import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.websockets.shared.Endpoint;
+import org.gwtproject.rpc.websockets.shared.Server;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**

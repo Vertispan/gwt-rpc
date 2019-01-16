@@ -19,7 +19,7 @@
   -->
 <module rename-to="simpleworker_worker">
 	<inherits name="com.google.gwt.core.Core" />
-	<inherits name="com.colinalworth.gwt.worker.RpcToWorkers" />
+	<inherits name="org.gwtproject.rpc.worker.RpcToWorkers" />
 	<inherits name="prj.gwtwwlinker.workerlinker.WorkerLinker" />
 
 	<inherits name="simpleworker.common.Common" />

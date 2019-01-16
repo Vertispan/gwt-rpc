@@ -19,9 +19,9 @@
  */
 package sharedchat.worker.client;
 
-import com.colinalworth.gwt.websockets.client.ServerBuilder;
-import com.colinalworth.gwt.worker.client.WorkerFactory;
-import com.colinalworth.gwt.worker.client.worker.MessagePort;
+import org.gwtproject.rpc.websockets.client.ServerBuilder;
+import org.gwtproject.rpc.worker.client.WorkerFactory;
+import org.gwtproject.rpc.worker.client.worker.MessagePort;
 import com.google.gwt.core.client.EntryPoint;
 import jsinterop.annotations.JsFunction;
 import jsinterop.annotations.JsPackage;

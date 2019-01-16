@@ -21,7 +21,7 @@
 
 <module>
 	<inherits name="com.google.gwt.user.User" />
-	<inherits name="com.colinalworth.gwt.websockets.RpcOverWebSockets"/>
+	<inherits name="org.gwtproject.rpc.websockets.RpcOverWebSockets"/>
 
 	<source path="client" />
 	<source path="shared" />

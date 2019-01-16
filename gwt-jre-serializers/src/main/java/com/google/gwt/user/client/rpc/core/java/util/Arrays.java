@@ -15,10 +15,9 @@
  */
 package com.google.gwt.user.client.rpc.core.java.util;
 
-import com.google.gwt.user.client.rpc.CustomFieldSerializer;
-import com.vertispan.serial.SerializationException;
-import com.vertispan.serial.SerializationStreamReader;
-import com.vertispan.serial.SerializationStreamWriter;
+import org.gwtproject.rpc.serialization.api.SerializationException;
+import org.gwtproject.rpc.serialization.api.SerializationStreamReader;
+import org.gwtproject.rpc.serialization.api.SerializationStreamWriter;
 
 import java.util.List;
 

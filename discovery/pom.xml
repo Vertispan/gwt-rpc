@@ -11,7 +11,7 @@
 
   <artifactId>discovery</artifactId>
   <description>
-    Tool to discover classes in code we don't control, while still allowing us to limit what classes might be serializable
+    Experimental tool to discover classes in code we don't control, while still allowing us to limit what classes might be serializable
   </description>
 
   <dependencies>

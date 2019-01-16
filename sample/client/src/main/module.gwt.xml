@@ -1,5 +1,7 @@
 <module>
   <inherits name="elemental2.dom.Dom" />
-  <source path="" />
-  <entry-point class="com.vertispan.sample.client.SimpleAppEntrypoint" />
+  <inherits name="com.example.rpcsample.Shared" />
+  <inherits name="org.gwtproject.rpc.serialization.stream.string.StringSerializerStream" />
+  <source path="client" />
+  <entry-point class="com.example.rpcsample.client.SimpleAppEntrypoint" />
 </module>

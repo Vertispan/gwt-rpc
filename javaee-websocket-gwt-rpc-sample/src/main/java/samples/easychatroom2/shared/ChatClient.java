@@ -19,9 +19,9 @@
  */
 package samples.easychatroom2.shared;
 
-import com.colinalworth.gwt.websockets.shared.Callback;
-import com.colinalworth.gwt.websockets.shared.Client;
-import com.colinalworth.gwt.websockets.shared.Endpoint;
+import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.websockets.shared.Client;
+import org.gwtproject.rpc.websockets.shared.Endpoint;
 
 /**
  * Simple example of methods implemented by a GWT client that can be called from the server

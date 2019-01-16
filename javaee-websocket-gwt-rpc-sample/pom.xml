@@ -56,9 +56,9 @@
 
 
 		<dependency>
-			<groupId>com.vertispan.serial</groupId>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>processor</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

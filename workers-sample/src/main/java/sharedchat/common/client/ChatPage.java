@@ -19,8 +19,8 @@
  */
 package sharedchat.common.client;
 
-import com.colinalworth.gwt.websockets.shared.Endpoint;
-import com.colinalworth.gwt.worker.client.MessagePortEndpoint;
+import org.gwtproject.rpc.websockets.shared.Endpoint;
+import org.gwtproject.rpc.worker.client.MessagePortEndpoint;
 import sharedchat.common.shared.ChatEvent;
 
 import java.util.List;

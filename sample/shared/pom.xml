@@ -71,7 +71,7 @@
         <groupId>net.ltgt.gwt.maven</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
         <configuration>
-          <moduleName>com.vertispan.sample.shared.Shared</moduleName>
+          <moduleName>com.example.rpcsample.Shared</moduleName>
         </configuration>
       </plugin>
     </plugins>

@@ -1,0 +1,4 @@
+<module>
+    <inherits name="org.gwtproject.rpc.serialization.api.Serial" />
+    <source path="" />
+</module>

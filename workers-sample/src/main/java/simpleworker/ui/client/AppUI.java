@@ -19,8 +19,8 @@
  */
 package simpleworker.ui.client;
 
-import com.colinalworth.gwt.websockets.shared.Callback;
-import com.colinalworth.gwt.worker.client.WorkerFactory;
+import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.worker.client.WorkerFactory;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

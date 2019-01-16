@@ -19,10 +19,10 @@
  */
 package samples.easychatroom2.shared;
 
-import com.colinalworth.gwt.websockets.shared.Callback;
-import com.colinalworth.gwt.websockets.shared.Endpoint;
-import com.colinalworth.gwt.websockets.shared.Endpoint.NoRemoteEndpoint;
-import com.colinalworth.gwt.websockets.shared.RemoteService.RemoteServiceAsync;
+import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.websockets.shared.Endpoint;
+import org.gwtproject.rpc.websockets.shared.Endpoint.NoRemoteEndpoint;
+import org.gwtproject.rpc.websockets.shared.RemoteService.RemoteServiceAsync;
 
 @Endpoint(value = NoRemoteEndpoint.class)
 public interface ChatRemoteServiceAsync extends RemoteServiceAsync {

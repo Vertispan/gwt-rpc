@@ -19,7 +19,7 @@
   -->
 <module rename-to="sharedchat_ui">
 	<inherits name="com.google.gwt.user.User" />
-	<inherits name="com.colinalworth.gwt.worker.RpcToWorkers" />
+	<inherits name="org.gwtproject.rpc.worker.RpcToWorkers" />
 
 	<inherits name="sharedchat.common.Common" />
 

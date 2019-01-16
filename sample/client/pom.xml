@@ -53,7 +53,7 @@
         <groupId>net.ltgt.gwt.maven</groupId>
         <artifactId>gwt-maven-plugin</artifactId>
         <configuration>
-          <moduleName>com.vertispan.sample.client.App</moduleName>
+          <moduleName>com.example.rpcsample.App</moduleName>
           <style>PRETTY</style>
         </configuration>
       </plugin>
