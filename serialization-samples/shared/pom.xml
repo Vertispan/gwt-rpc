@@ -37,20 +37,9 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>endpoint-processor</artifactId>
+      <artifactId>serialization-processor</artifactId>
       <version>${project.version}</version>
       <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>string-serializer-streams</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>string-serializer-streams</artifactId>
-      <version>${project.version}</version>
-      <classifier>sources</classifier>
     </dependency>
   </dependencies>
   <build>
