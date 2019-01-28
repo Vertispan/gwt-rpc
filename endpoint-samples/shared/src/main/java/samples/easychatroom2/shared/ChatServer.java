@@ -22,13 +22,11 @@ package samples.easychatroom2.shared;
 import org.gwtproject.rpc.websockets.shared.Callback;
 import org.gwtproject.rpc.websockets.shared.Endpoint;
 import org.gwtproject.rpc.websockets.shared.Server;
-import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
 /**
  * Simple example of methods a server can have that can be invoked by a client.
  *
  */
-@RemoteServiceRelativePath("/chat")
 @Endpoint
 public interface ChatServer extends Server<ChatServer, ChatClient> {
 	/**
