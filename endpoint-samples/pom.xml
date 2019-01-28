@@ -10,12 +10,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>war</packaging>
 
-	<artifactId>javaee-websocket-gwt-rpc-sample</artifactId>
+	<artifactId>endpoint-samples</artifactId>
 
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>gwt-websockets-jsr356</artifactId>
+			<artifactId>endpoint-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -37,29 +37,21 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>gwt-websockets-client</artifactId>
+			<artifactId>endpoint-client-gwt</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>gwt-websockets-processor</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Depend on gwt-user for compilation only -->
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-user</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>processor</artifactId>
+			<artifactId>endpoint-processor</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>endpoint-server-jsr356</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 

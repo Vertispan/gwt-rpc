@@ -9,12 +9,12 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>gwt-websockets-jsr356</artifactId>
+	<artifactId>endpoint-server-jsr356</artifactId>
 
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>gwt-websockets-api</artifactId>
+			<artifactId>endpoint-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

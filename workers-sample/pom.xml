@@ -22,7 +22,7 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>gwt-websockets-processor</artifactId>
+			<artifactId>endpoint-processor</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
@@ -43,7 +43,7 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>gwt-websockets-jsr356</artifactId>
+			<artifactId>endpoint-server-jsr356</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 

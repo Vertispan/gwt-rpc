@@ -1,4 +1,4 @@
-#GWT-RPC
+# GWT-RPC
 
 (Now with more annotation processors!)
 
@@ -36,7 +36,7 @@ java-servlet vs vertx server, gwt or jvm for the client. Each module has its own
 
 
 # Old Readme from serialization emul
-#GWT Serializable Objects
+## GWT Serializable Objects
 
 This project takes the base wiring of GWT-RPC and rebuilds it using annotation processors. This
 has several benefits:
@@ -93,7 +93,7 @@ Aspects of this project, and their progress:
    and can allow for non-object oriented data to read and write data (JSON, C, etc).
  * JPA or other bytecode enhancement support (opaque to most clients), if requested.
 
-#Old readme from gwt-webbit
+# Old readme from gwt-webbit
 
 (Name in flux, probably will be renamed to gwt-websockets)
 

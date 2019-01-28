@@ -9,12 +9,12 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>gwt-websockets-client</artifactId>
+	<artifactId>endpoint-client-gwt</artifactId>
 
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>gwt-websockets-api</artifactId>
+			<artifactId>endpoint-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 
@@ -38,12 +38,12 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>api</artifactId>
+			<artifactId>serialization-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>api</artifactId>
+			<artifactId>serialization-api</artifactId>
 			<version>${project.version}</version>
 			<classifier>sources</classifier>
 		</dependency>

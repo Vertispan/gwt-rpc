@@ -9,7 +9,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>processor</artifactId>
+  <artifactId>serialization-processor</artifactId>
 
   <properties>
     <javapoet.version>1.11.1</javapoet.version>
@@ -20,7 +20,7 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>api</artifactId>
+      <artifactId>serialization-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     

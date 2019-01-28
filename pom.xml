@@ -9,8 +9,8 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name></name>
-    <description></description>
+    <name>gwt-rpc</name>
+    <description>JVM and GWT compatible object serialization and RPC invocation</description>
     <inceptionYear>2018</inceptionYear>
 
     <licenses>
@@ -119,33 +119,37 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <!--
+    We're deliberately breaking with the conventions of other org.gwtproject artifactIds here, so that it can be clear
+    when modules are actually gwt-only (or servlet-only, etc), and when they are sharable.
+    -->
     <modules>
         <!-- serialization api -->
-        <module>api</module>
+        <module>serialization-api</module>
         <!-- string serializer impl -->
         <module>string-serializer-streams</module>
         <!-- bytebuffer serializer impl -->
         <module>bytebuffer-serializer-streams</module>
         <!-- serializer generating processor -->
-        <module>processor</module>
+        <module>serialization-processor</module>
         <!-- field serializer impls for the subset of the JRE supported by GWT -->
         <module>gwt-jre-serializers</module>
         <!-- a simple example of the serializer wiring, without any endpoints -->
-        <module>sample</module>
-        <!-- utility to find all types in a jar so that they can be referenced by a project expecting to rely on those types -->
+        <module>serialization-samples</module>
+        <!-- experimental utility to find all types in a jar so that they can be referenced by a project expecting to rely on those types -->
         <module>discovery</module>
 
         <!-- gwt rpc endpoints api, base impls -->
-        <module>gwt-websockets-api</module>
+        <module>endpoint-api</module>
         <!-- endpoint generating processor -->
-        <module>gwt-websockets-processor</module>
+        <module>endpoint-processor</module>
         <!-- gwt-client wiring to create websocket, xhr endpoints -->
-        <module>gwt-websockets-client</module>
+        <module>endpoint-client-gwt</module>
         <!-- java server wiring to create websocket, xhr endpoints -->
-        <module>gwt-websockets-jsr356</module>
+        <module>endpoint-server-jsr356</module>
 
         <!-- servlet/gwt sample using these endpoints -->
-        <module>javaee-websocket-gwt-rpc-sample</module>
+        <module>endpoint-samples</module>
 
         <!-- experimental workers, should fit the endpoint mold above -->
         <module>workers</module>

@@ -54,12 +54,12 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>gwt-websockets-api</artifactId>
+			<artifactId>endpoint-api</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>gwt-websockets-client</artifactId>
+			<artifactId>endpoint-client-gwt</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<!-- not needed yet, but could make websockets a little lighter and faster -->
@@ -71,7 +71,7 @@
 
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>gwt-websockets-processor</artifactId>
+			<artifactId>endpoint-processor</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
