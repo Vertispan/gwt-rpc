@@ -84,7 +84,6 @@ public class EndpointProcessingStep implements ProcessingStep {
 				.map(endpoint -> EndpointPair.fromOne(endpoint, processingEnv))
 				.distinct()
 				.forEach(pair -> {
-					processingEnv.getMessager().printMessage(Kind.MANDATORY_WARNING, pair.toString());
 					implement(pair.getLeft(), pair.getRight());
 					implement(pair.getRight(), pair.getLeft());
 				});
@@ -247,7 +246,6 @@ public class EndpointProcessingStep implements ProcessingStep {
 				invokeBody.add("// read callbackId first\n");
 				invokeBody.addStatement("callbackId = reader.readInt()");
 			}
-			processingEnv.getMessager().printMessage(Kind.MANDATORY_WARNING, remoteMethod.getElement().getSimpleName());
 			String remoteGetter = model.getRemoteEndpointGetterMethodName(processingEnv);
 			invokeBody.add("$L().$L(", remoteGetter, remoteMethod.getElement().getSimpleName().toString());
 			boolean first = true;
