@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>endpoint-samples-shared</artifactId>
+    <packaging>gwt-lib</packaging>
 
     <dependencies>
         <dependency>
@@ -25,8 +26,7 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- Optional, not required on this project -->
-<!--        <dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>gwt-jre-serializers</artifactId>
             <version>${project.version}</version>
@@ -36,7 +36,19 @@
             <artifactId>gwt-jre-serializers</artifactId>
             <version>${project.version}</version>
             <classifier>sources</classifier>
-        </dependency>-->
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.ltgt.gwt.maven</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <configuration>
+                    <moduleName>samples.easychatroom2.Shared</moduleName>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

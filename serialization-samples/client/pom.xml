@@ -24,8 +24,20 @@
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>sample-shared</artifactId>
+      <artifactId>serialization-samples-shared</artifactId>
       <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>string-serializer-streams</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>string-serializer-streams</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
     </dependency>
 
     <dependency>

@@ -1,4 +1,5 @@
 <module>
-  <inherits name="com.google.gwt.user.client.rpc.LegacyRpcClasses" />
+  <!--<inherits name="com.google.gwt.user.client.rpc.LegacyRpcClasses" />-->
+  <!--<inherits name="com.google.gwt.user.RemoteService" />-->
   <source path="" />
 </module>

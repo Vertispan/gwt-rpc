@@ -2,6 +2,14 @@
   <inherits name="elemental2.dom.Dom" />
   <inherits name="com.example.rpcsample.Shared" />
   <inherits name="org.gwtproject.rpc.serialization.stream.string.StringSerializerStream" />
+
+  <!--
+  As this project is not using GWT2's RemoteService module (or any
+  other part of User), for now we need this module to fill in the gaps
+  and correctly compile.
+  -->
+  <inherits name="com.google.gwt.user.client.rpc.LegacyRpcClasses" />
+
   <source path="client" />
   <entry-point class="com.example.rpcsample.client.SimpleAppEntrypoint" />
 </module>

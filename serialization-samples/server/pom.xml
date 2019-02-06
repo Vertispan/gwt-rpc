@@ -15,12 +15,12 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>sample-shared</artifactId>
+      <artifactId>serialization-samples-shared</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>sample-client</artifactId>
+      <artifactId>serialization-samples-client</artifactId>
       <version>${project.version}</version>
       <type>war</type>
       <scope>runtime</scope>

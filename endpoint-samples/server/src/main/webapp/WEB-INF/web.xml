@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!--
   #%L
   javaee-websocket-gwt-rpc-sample
@@ -18,20 +17,14 @@
   limitations under the License.
   #L%
   -->
+<web-app>
 
-<module>
-    <inherits name="com.google.gwt.user.User" />
-    <inherits name="org.gwtproject.rpc.websockets.RpcOverWebSockets"/>
-
-    <!--
-    Since we're including RemoteService (in User above, but reiterated here for clarity),
-    we must also use this fallback module.
-     -->
-    <inherits name="com.google.gwt.user.RemoteService" />
-    <inherits name="com.google.gwt.user.client.rpc.GwtUserFallback" />
-
-    <source path="client" />
-    <source path="shared" />
-
-    <entry-point class="samples.easychatroom2.client.SampleEntryPoint" />
-</module>
+       <servlet>
+               <servlet-name>hello</servlet-name>
+               <servlet-class>samples.easychatroom2.server.ChatRemoteServiceServlet</servlet-class>
+       </servlet>
+       <servlet-mapping>
+               <servlet-name>hello</servlet-name>
+               <url-pattern>/hello</url-pattern>
+       </servlet-mapping>
+</web-app>

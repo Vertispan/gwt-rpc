@@ -1,0 +1,7 @@
+<!--
+ This module includes a few pieces of the internal serialization wiring that has been modified in the new module,
+ but still aims to support running alongside GWT2's User module.
+ -->
+<module>
+    <super-source path="super" />
+</module>

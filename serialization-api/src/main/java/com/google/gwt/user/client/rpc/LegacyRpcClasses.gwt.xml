@@ -1,3 +1,8 @@
+<!--
+ With GWT 2's User simplified and removed from the classpath, this module file represents
+ the pieces of GWT we still need for backward compatibility. Classes should be moved out
+ of here as possible, especially super-source, to expedite compatibility with J2CL.
+ -->
 <module>
   <source path="">
     <include name="CustomFieldSerializer.java" />
