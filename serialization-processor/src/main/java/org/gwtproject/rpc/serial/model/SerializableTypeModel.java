@@ -40,11 +40,14 @@ public class SerializableTypeModel {
 
         //readFoo/writeFoo in stream reader and stream writer
         public String getStreamMethodName() {
-            return getStreamMethodSuffix(getter.getReturnType());
+            return getStreamMethodSuffix(getter.getReturnType(), 0);
         }
 
     }
-    public static String getStreamMethodSuffix(TypeMirror type) {
+    public static String getStreamMethodSuffix(TypeMirror type, int rank) {
+        if (rank > 0) {
+            return "Object";
+        }
         if (type.getKind().isPrimitive()) {
             return type.getKind().name().substring(0, 1) + type.getKind().name().substring(1).toLowerCase();
         } else if (ClassName.get(type).toString().equals("java.lang.String")) {
@@ -71,7 +74,7 @@ public class SerializableTypeModel {
 
         //readFoo/writeFoo in stream reader and stream writer
         public String getStreamMethodName() {
-            return getStreamMethodSuffix(field.asType());
+            return getStreamMethodSuffix(field.asType(), 0);
         }
     }
 

@@ -254,7 +254,7 @@ public class Processor extends AbstractProcessor {
                             .addParameter(ClassName.get(writtenType), "instance")
                             .addParameter(SerializationStreamWriter.class, "writer")
                             .beginControlFlow("try")
-                            .addStatement("writer.write$L(instance)", SerializableTypeModel.getStreamMethodSuffix(writtenType))
+                            .addStatement("writer.write$L(instance)", SerializableTypeModel.getStreamMethodSuffix(writtenType, 0))
                             .nextControlFlow("catch ($T ex)", com.google.gwt.user.client.rpc.SerializationException.class)
                             .addStatement("throw new IllegalStateException(ex)")
                             .endControlFlow()
@@ -267,7 +267,7 @@ public class Processor extends AbstractProcessor {
                             .addModifiers(Modifier.PUBLIC)
                             .addParameter(SerializationStreamReader.class, "reader")
                             .beginControlFlow("try")
-                            .addStatement("return ($T) reader.read$L()", ClassName.get(readType), SerializableTypeModel.getStreamMethodSuffix(readType))
+                            .addStatement("return ($T) reader.read$L()", ClassName.get(readType), SerializableTypeModel.getStreamMethodSuffix(readType, 0))
                             .nextControlFlow("catch ($T ex)", com.google.gwt.user.client.rpc.SerializationException.class)
                             .addStatement("throw new IllegalStateException(ex)")
                             .endControlFlow()
@@ -316,6 +316,11 @@ public class Processor extends AbstractProcessor {
         assert rank > 0;
         TypeMirror componentType = JTypeUtils.getLeafType(arrayType);
 
+        StringBuilder extraArrayRank = new StringBuilder();
+        for (int i = 0; i < rank - 1; ++i) {
+            extraArrayRank.append("[]");
+        }
+
         String packageName = arraySerializerPackage(componentType);
         ClassName fieldSerializerName = getFieldSerializer(arrayType, null);
 
@@ -336,7 +341,7 @@ public class Processor extends AbstractProcessor {
         //TODO for readObject, share the Object_Array_CustomFieldSerializer
         deserializeMethodBuilder
                 .beginControlFlow("for (int i = 0, n = instance.length; i < n; ++i)")
-                .addStatement("instance[i] = ($T) reader.read$L()", componentType, SerializableTypeModel.getStreamMethodSuffix(componentType))
+                .addStatement("instance[i] = ($T$L) reader.read$L()", componentType, extraArrayRank, SerializableTypeModel.getStreamMethodSuffix(componentType, rank - 1))
                 .endControlFlow();
 
         fieldSerializerType.addMethod(deserializeMethodBuilder.build());
@@ -354,16 +359,13 @@ public class Processor extends AbstractProcessor {
         serializeMethodBuilder
                 .addStatement("writer.writeInt(instance.length)")
                 .beginControlFlow("for (int i = 0, n = instance.length; i < n; ++i)")
-                .addStatement("writer.write$L(instance[i])", SerializableTypeModel.getStreamMethodSuffix(componentType))
+                .addStatement("writer.write$L(instance[i])", SerializableTypeModel.getStreamMethodSuffix(componentType, rank - 1))
                 .endControlFlow();
 
         fieldSerializerType.addMethod(serializeMethodBuilder.build());
 
         //write instantiate
-        StringBuilder extraArrayRank = new StringBuilder();
-        for (int i = 0; i < rank - 1; ++i) {
-            extraArrayRank.append("[]");
-        }
+
         MethodSpec.Builder instantiateMethodBuilder = MethodSpec.methodBuilder("instantiate")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(ClassName.get(arrayType))
