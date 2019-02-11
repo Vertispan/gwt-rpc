@@ -474,11 +474,11 @@ public class Processor extends AbstractProcessor {
                     .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .returns(TypeName.VOID)
                     .addParameter(SerializationStreamWriter.class, "writer")
-                    .addParameter(Object.class, "instance")
+                    .addParameter(Enum.class, "instance")
                     .addException(com.google.gwt.user.client.rpc.SerializationException.class)
-                    .addException(SerializationException.class);
+                    .addException(SerializationException.class).addStatement("writer.writeInt(instance.ordinal())");
             fieldSerializerType.addMethod(serializeMethodBuilder.build());
-        } else{
+        } else {
             assert typeElement.getKind() == ElementKind.CLASS;
 
             writeSerialize = true;
