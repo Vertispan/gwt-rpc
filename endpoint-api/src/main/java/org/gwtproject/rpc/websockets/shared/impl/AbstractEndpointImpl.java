@@ -52,8 +52,6 @@ public abstract class AbstractEndpointImpl {
 
 	private final TypeSerializer serializer;
 
-	protected SerializationStreamWriter activeWriter;
-
 	// count starts at 1, leaving zero for remote methods
 	private int nextCallbackId = 1;
 	private Map<Integer, ReadingCallback<?,?>> callbacks = new HashMap<>();
@@ -98,57 +96,48 @@ public abstract class AbstractEndpointImpl {
 		}
 	}
 
-	private void __startCall() {
-		assert activeWriter == null;
-		activeWriter = writerFactory.apply(serializer);
+	private SerializationStreamWriter __startCall() {
+		return writerFactory.apply(serializer);
 	}
-	private void __endCall() {
-		try {
-			send.accept(activeWriter);
-		} finally {
-			activeWriter = null;
-		}
+	private void __endCall(SerializationStreamWriter writer) {
+		send.accept(writer);
 	}
 
 	/**
 	 * Easy lambda to let generated classes run code which might throw within __send()
 	 */
 	protected interface Send {
-		void send() throws SerializationException;
+		void send(SerializationStreamWriter writer) throws SerializationException;
 	}
 
 	protected void __send(int recipient, Send s) {
-		__startCall();
+		SerializationStreamWriter writer = __startCall();
 		try {
-			activeWriter.writeInt(recipient);
-			s.send();
-			__endCall();
+			writer.writeInt(recipient);
+			s.send(writer);
+			__endCall(writer);
 		} catch (SerializationException e) {
 			__onError(e);
 			throw new RuntimeException(e);
-		} finally {
-			activeWriter = null;
 		}
 	}
 	protected void __send(int recipient, Send s, ReadingCallback<?, ?> callback) {
-		__startCall();
+		SerializationStreamWriter writer = __startCall();
 		try {
-			activeWriter.writeInt(recipient);
+			writer.writeInt(recipient);
 
 			// add the callbackId to the message to send so the remote end knows it will need a callback
 			// object when handling the rest of the body
 			int callbackId = nextCallbackId++;
-			activeWriter.writeInt(callbackId);
-			s.send();
+			writer.writeInt(callbackId);
+			s.send(writer);
 
-			__endCall();
+			__endCall(writer);
 			//only after we've successfully sent, register the callback
 			callbacks.put(callbackId, callback);
 		} catch (SerializationException e) {
 			//TODO report? can't actually pass to Callback.onFailure, since it might expect something else
 			throw new RuntimeException(e);
-		} finally {
-			activeWriter = null;
 		}
 	}
 

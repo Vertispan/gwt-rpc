@@ -196,7 +196,7 @@ public class EndpointProcessingStep implements ProcessingStep {
 			}
 			methodBuilder.addJavadoc(method.getElement().getEnclosingElement().getSimpleName().toString());
 
-			methodBuilder.beginControlFlow("__send($L, () ->", methodIndex);
+			methodBuilder.beginControlFlow("__send($L, activeWriter ->", methodIndex);
 
 			// instead of using the actual params, using this so we don't attempt to write the callback
 			List<? extends TypeName> parameterNames = method.getTypesToWrite(processingEnv);
@@ -271,7 +271,7 @@ public class EndpointProcessingStep implements ProcessingStep {
 										.addParameter(callbackSuccessType, "value")
 										.addModifiers(Modifier.PUBLIC)
 										.addComment("indicate that a callback in in use (negative reference)")
-										.beginControlFlow("__send(-callbackId, () ->")
+										.beginControlFlow("__send(-callbackId, activeWriter ->")
 										.addComment("indicate that the operation was a success")
 										.addStatement("activeWriter.writeBoolean(true)")
 										.addComment("write the value")
@@ -282,7 +282,7 @@ public class EndpointProcessingStep implements ProcessingStep {
 										.addParameter(callbackFailureType, "error")
 										.addModifiers(Modifier.PUBLIC)
 										.addComment("indicate that a callback in in use (negative reference)")
-										.beginControlFlow("__send(-callbackId, () ->")
+										.beginControlFlow("__send(-callbackId, activeWriter ->")
 										.addComment("indicate that the operation was a failure")
 										.addStatement("activeWriter.writeBoolean(false)")
 										.addComment("write the error")
