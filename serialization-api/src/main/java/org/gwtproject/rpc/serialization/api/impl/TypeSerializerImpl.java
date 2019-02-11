@@ -15,7 +15,7 @@ public abstract class TypeSerializerImpl implements TypeSerializer {
 
     @Override
     public String getSerializationSignature(Class<?> clazz) {
-        return clazz.getName();
+        return clazz.getCanonicalName();
     }
 
     @Override
