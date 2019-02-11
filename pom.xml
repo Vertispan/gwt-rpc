@@ -170,6 +170,13 @@
         </repository>
     </distributionManagement>
 
+    <repositories>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+
     <profiles>
         <!-- release profile to create sources, javadoc, and sign all artifacts before uploading -->
         <profile>
