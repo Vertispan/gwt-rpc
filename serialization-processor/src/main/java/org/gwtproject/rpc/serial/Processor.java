@@ -451,7 +451,7 @@ public class Processor extends AbstractProcessor {
 
     private void writeFieldSerializer(TypeElement typeElement, SerializingTypes serializingTypes, SerializableTypeOracle stob) throws IOException {
         //collect fields (err, properties for now) 
-        SerializableTypeModel model = SerializableTypeModel.create(serializingTypes, typeElement);
+        SerializableTypeModel model = SerializableTypeModel.create(serializingTypes, typeElement, messager);
 
         TypeSpec.Builder fieldSerializerType = TypeSpec.classBuilder(model.getFieldSerializerName())
                 .addSuperinterface(ClassName.get(fieldSerializer))

@@ -6,10 +6,12 @@ import org.gwtproject.rpc.serial.processor.CustomFieldSerializerValidator;
 import org.gwtproject.rpc.serial.processor.SerializableTypeOracleBuilder;
 import org.gwtproject.rpc.serial.processor.SerializingTypes;
 
+import javax.annotation.processing.Messager;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import javax.tools.Diagnostic;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -89,7 +91,7 @@ public class SerializableTypeModel {
         return new SerializableTypeModel(null, serializableType, null, Collections.emptyList(), Collections.emptyList());
     }
 
-    public static SerializableTypeModel create(SerializingTypes types, TypeElement serializableType) {
+    public static SerializableTypeModel create(SerializingTypes types, TypeElement serializableType, Messager messager) {
         TypeElement customFieldSerializer = SerializableTypeOracleBuilder.findCustomFieldSerializer(types, serializableType.asType());
         List<Property> properties = new ArrayList<>();
         List<Field> fields = new ArrayList<>();
@@ -123,6 +125,7 @@ public class SerializableTypeModel {
                 fields.add(new Field(field));
             } else {
                 //TODO violator pattern
+                messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, "Field " + field + " is private and is missing either getter or setter", field);
                 assert false : "field " + field + " is private";
             }
         }
