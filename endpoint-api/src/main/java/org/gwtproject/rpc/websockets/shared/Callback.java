@@ -27,7 +27,7 @@ import java.util.function.Consumer;
  * @param <F>
  */
 public interface Callback<T, F> {
-	static <T> Callback<T, ?> of(Consumer<T> success) {
+	static <T, F> Callback<T, F> of(Consumer<T> success) {
 		return of(success, ignore -> {/*TODO stop ignoring and report somehow*/});
 	}
 	static <T, F> Callback<T, F> of(Consumer<T> success, Consumer<F> failure) {
