@@ -7,6 +7,7 @@ import org.gwtproject.rpc.serialization.api.impl.AbstractSerializationStreamWrit
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,8 +50,8 @@ public class ByteBufferSerializationStreamWriter  extends AbstractSerializationS
         payload.position(0);
         payload = payload.slice();
 
-        payload.put(0, getFlags());
-        payload.put(1, getVersion());
+        payload.put(0, getVersion());
+        payload.put(1, getFlags());
         //mark the size of the payload
         payload.put(2, payload.limit() - 3);
 
@@ -68,6 +69,43 @@ public class ByteBufferSerializationStreamWriter  extends AbstractSerializationS
     public String[] getFinishedStringTable() {
         List<String> stringTable = getStringTable();
         return stringTable.toArray(new String[stringTable.size()]);
+    }
+
+    public ByteBuffer getFullPayload() {
+        ByteBuffer payloadBytes = getPayloadBytes();
+        List<String> stringTable = getStringTable();
+        int stringCount = stringTable.size();
+        if (stringCount == 0) {
+            return payloadBytes;
+        }
+
+        // make a buffer big enough to store all strings (and lengths)
+
+        // start with the size of the regular data, one int per string, and one int to count the strings
+        int size = payloadBytes.limit() + ((1 + stringCount) << 2);
+
+        // add the length of each string in bytes, and store the converted strings so we don't need to do it again
+        byte[][] stringBytes = new byte[stringCount][];
+        for (int i = 0; i < stringCount; i++) {
+            byte[] bytes = stringTable.get(i).getBytes(Charset.forName("UTF-8"));
+            stringBytes[i] = bytes;
+            size += bytes.length;
+        }
+        ByteBuffer bb = ByteBuffer.allocate(size);
+        bb.order(ByteOrder.nativeOrder());
+
+        // append the payload, the count of strings, and the strings themselves
+        bb.put(payloadBytes);
+        bb.putInt(stringCount);
+        for (int i = 0; i < stringCount; i++) {
+            byte[] bytes = stringBytes[i];
+            bb.putInt(bytes.length);
+            bb.put(bytes);
+        }
+
+        bb.position(0);
+
+        return bb;
     }
 
 

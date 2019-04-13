@@ -6,6 +6,7 @@ import org.gwtproject.rpc.serialization.api.TypeSerializer;
 import org.gwtproject.rpc.serialization.api.impl.AbstractSerializationStreamReader;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 
 public class ByteBufferSerializationStreamReader extends AbstractSerializationStreamReader {
@@ -17,6 +18,8 @@ public class ByteBufferSerializationStreamReader extends AbstractSerializationSt
     private int claimedTokens;
 
     public ByteBufferSerializationStreamReader(TypeSerializer serializer, ByteBuffer bb, String[] strings) {
+        bb.order(ByteOrder.nativeOrder());
+
         this.serializer = serializer;
         this.bb = bb;
         this.payload = bb.asIntBuffer();
@@ -24,9 +27,58 @@ public class ByteBufferSerializationStreamReader extends AbstractSerializationSt
         int version = payload.get();
         int flags = payload.get();
         int length = payload.get();
-//        assert length == payload.remaining();
+        assert length == payload.remaining();
         setVersion(version);
         setFlags(flags);
+    }
+
+    public ByteBufferSerializationStreamReader(TypeSerializer serializer, ByteBuffer bb) {
+        bb.order(ByteOrder.nativeOrder());
+
+        this.serializer = serializer;
+        this.bb = bb;
+        this.payload = bb.asIntBuffer();
+        int version = payload.get();
+        int flags = payload.get();
+        int length = payload.get();
+        setVersion(version);
+        setFlags(flags);
+
+        //strings are in the payload, read them out first and assign them
+        String[] strings = new String[0];
+        // see if there is a stringCount, and thus strings present
+        if (payload.limit() > 3 + length) {
+            int stringsCount = payload.get(3 + length);
+            if (stringsCount < 1) {
+                throw new IllegalArgumentException("Invalid string count in payload: " + stringsCount);
+            }
+            bb.position((4 + length) << 2);//3 headers + 1 count
+            // ensure there is enough space for at least that many string lengths left
+            if (bb.remaining() < stringsCount << 2) {
+                throw new IllegalArgumentException("Payload claims to have " + stringsCount + " strings, but only has space left for " + (bb.remaining() >> 2));
+            }
+            strings = new String[stringsCount];
+            for (int i = 0; i < stringsCount; i++) {
+                int stringLength = bb.getInt();
+                if (bb.remaining() < stringLength) {
+                    throw new IllegalArgumentException("Payload claims to have a string with length " + stringLength + " but only " + bb.remaining() + " bytes remain");
+                }
+                byte[] bytes = new byte[stringLength];
+                bb.get(bytes);
+                strings[i] = new String(bytes);
+            }
+        }
+
+
+
+        // move back to the starting point, right after the three headers
+//        payload.position(3);//unnecessary
+        bb.position(3 << 2);
+
+        // move the limit of the payload to just before strings start (if any)
+        payload.limit(length + 3);
+
+        this.strings = strings;
     }
 
     @Override
@@ -60,12 +112,12 @@ public class ByteBufferSerializationStreamReader extends AbstractSerializationSt
 
     @Override
     public double readDouble() throws SerializationException {
+        //TODO this could certainly be improved
         return Double.longBitsToDouble(readLong());
     }
 
     @Override
     public float readFloat() throws SerializationException {
-
         int position = payload.position();
         payload.position(position + 1);
         return bb.asFloatBuffer().get(position);
@@ -78,6 +130,8 @@ public class ByteBufferSerializationStreamReader extends AbstractSerializationSt
 
     @Override
     public long readLong() throws SerializationException {
+        // Using the exact same math as in GWT2-RPC, could probably be switched to read a double and use those bits?
+        // Or read two ints instead of three?
         int[] a = new int[3];
         a[0] = readInt();
         a[1] = readInt();
@@ -100,7 +154,7 @@ public class ByteBufferSerializationStreamReader extends AbstractSerializationSt
 
     @Override
     public void claimItems(int slots) throws SerializationException {
-        if (claimedTokens + slots > payload.remaining() + strings.length) {
+        if (claimedTokens + slots > payload.limit() + strings.length) {
             throw new SerializationException("Request claims to be larger than it is");
         }
         claimedTokens += slots;

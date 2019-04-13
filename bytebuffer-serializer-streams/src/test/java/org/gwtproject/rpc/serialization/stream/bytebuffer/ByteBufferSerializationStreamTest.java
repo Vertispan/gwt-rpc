@@ -3,8 +3,6 @@ package org.gwtproject.rpc.serialization.stream.bytebuffer;
 import org.gwtproject.rpc.serialization.api.FieldSerializer;
 import org.gwtproject.rpc.serialization.api.TypeSerializer;
 import org.gwtproject.rpc.serialization.api.impl.TypeSerializerImpl;
-import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
-import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -17,26 +15,36 @@ public class ByteBufferSerializationStreamTest {
         }
     };
 
-    private ByteBufferSerializationStreamWriter getUncompressedStreamWriter() {
+    private ByteBufferSerializationStreamWriter getStreamWriter() {
         ByteBufferSerializationStreamWriter writer = new ByteBufferSerializationStreamWriter(t);
         writer.setFlags(0);
         return writer;
     }
 
-    private ByteBufferSerializationStreamReader getStreamReader(ByteBufferSerializationStreamWriter writer) {
-        return new ByteBufferSerializationStreamReader(t, writer.getPayloadBytes(), writer.getFinishedStringTable());
+    private ByteBufferSerializationStreamReader getSplitPayloadStreamReader(ByteBufferSerializationStreamWriter writer) {
+        ByteBufferSerializationStreamReader reader = new ByteBufferSerializationStreamReader(t, writer.getPayloadBytes(), writer.getFinishedStringTable());
+        assertEquals(7, reader.getVersion());
+        assertEquals(0, reader.getFlags());
+        return reader;
+    }
+
+    private ByteBufferSerializationStreamReader getSinglePayloadStreamReader(ByteBufferSerializationStreamWriter writer) {
+        ByteBufferSerializationStreamReader reader = new ByteBufferSerializationStreamReader(t, writer.getFullPayload());
+        assertEquals(7, reader.getVersion());
+        assertEquals(0, reader.getFlags());
+        return reader;
     }
 
     @Test
     public void testInt() throws Exception {
-        ByteBufferSerializationStreamWriter writer = getUncompressedStreamWriter();
+        ByteBufferSerializationStreamWriter writer = getStreamWriter();
         writer.writeInt(4);
         writer.writeInt(1);
         writer.writeInt(Integer.MAX_VALUE);
         writer.writeInt(Integer.MIN_VALUE);
         writer.writeInt(1);
 
-        ByteBufferSerializationStreamReader reader = getStreamReader(writer);
+        ByteBufferSerializationStreamReader reader = getSplitPayloadStreamReader(writer);
 
         assertEquals(4, reader.readInt());
         assertEquals(1, reader.readInt());
@@ -45,10 +53,9 @@ public class ByteBufferSerializationStreamTest {
         assertEquals(1, reader.readInt());
     }
 
-
     @Test
     public void testLong() throws Exception {
-        ByteBufferSerializationStreamWriter writer = getUncompressedStreamWriter();
+        ByteBufferSerializationStreamWriter writer = getStreamWriter();
         writer.writeLong(4);
         writer.writeLong(1);
         writer.writeLong(Integer.MAX_VALUE);
@@ -57,7 +64,7 @@ public class ByteBufferSerializationStreamTest {
         writer.writeLong(Long.MAX_VALUE);
         writer.writeLong(Long.MIN_VALUE);
 
-        ByteBufferSerializationStreamReader reader = getStreamReader(writer);
+        ByteBufferSerializationStreamReader reader = getSplitPayloadStreamReader(writer);
 
         assertEquals(4L, reader.readLong());
         assertEquals(1L, reader.readLong());
@@ -71,14 +78,14 @@ public class ByteBufferSerializationStreamTest {
 
     @Test
     public void testString() throws Exception {
-        ByteBufferSerializationStreamWriter writer = getUncompressedStreamWriter();
+        ByteBufferSerializationStreamWriter writer = getStreamWriter();
 
         writer.writeString("foo");
         writer.writeString("foo1");
         writer.writeString("foo");
         writer.writeString("bar");
 
-        ByteBufferSerializationStreamReader reader = getStreamReader(writer);
+        ByteBufferSerializationStreamReader reader = getSplitPayloadStreamReader(writer);
 
         assertEquals("foo", reader.readString());
         assertEquals("foo1", reader.readString());
@@ -90,7 +97,7 @@ public class ByteBufferSerializationStreamTest {
 
     @Test
     public void testFloat() throws Exception {
-        ByteBufferSerializationStreamWriter writer = getUncompressedStreamWriter();
+        ByteBufferSerializationStreamWriter writer = getStreamWriter();
 
         writer.writeFloat(1.23f);
         writer.writeFloat(3);
@@ -103,7 +110,7 @@ public class ByteBufferSerializationStreamTest {
         writer.writeFloat(Float.NEGATIVE_INFINITY);
         writer.writeFloat(Float.POSITIVE_INFINITY);
 
-        ByteBufferSerializationStreamReader reader = getStreamReader(writer);
+        ByteBufferSerializationStreamReader reader = getSplitPayloadStreamReader(writer);
 
         assertEquals(1.23f, reader.readFloat(), 0);
         assertEquals(3.0f, reader.readFloat(), 0);
@@ -121,7 +128,7 @@ public class ByteBufferSerializationStreamTest {
 
     @Test
     public void testDouble() throws Exception {
-        ByteBufferSerializationStreamWriter writer = getUncompressedStreamWriter();
+        ByteBufferSerializationStreamWriter writer = getStreamWriter();
 
         writer.writeDouble(1.23);
         writer.writeDouble(3);
@@ -134,7 +141,7 @@ public class ByteBufferSerializationStreamTest {
         writer.writeDouble(Double.NEGATIVE_INFINITY);
         writer.writeDouble(Double.POSITIVE_INFINITY);
 
-        ByteBufferSerializationStreamReader reader = getStreamReader(writer);
+        ByteBufferSerializationStreamReader reader = getSplitPayloadStreamReader(writer);
 
         assertEquals(1.23, reader.readDouble(), 0);
         assertEquals(3.0, reader.readDouble(), 0);
@@ -148,5 +155,42 @@ public class ByteBufferSerializationStreamTest {
         assertEquals(Double.POSITIVE_INFINITY, reader.readDouble(), 0);
 
     }
+
+    //just the one test with split payloads for primitives, since no primitives use strings
+    @Test
+    public void testSinglePayloadInt() throws Exception {
+        ByteBufferSerializationStreamWriter writer = getStreamWriter();
+        writer.writeInt(4);
+        writer.writeInt(1);
+        writer.writeInt(Integer.MAX_VALUE);
+        writer.writeInt(Integer.MIN_VALUE);
+        writer.writeInt(1);
+
+        ByteBufferSerializationStreamReader reader = getSinglePayloadStreamReader(writer);
+
+        assertEquals(4, reader.readInt());
+        assertEquals(1, reader.readInt());
+        assertEquals(Integer.MAX_VALUE, reader.readInt());
+        assertEquals(Integer.MIN_VALUE, reader.readInt());
+        assertEquals(1, reader.readInt());
+    }
+
+    @Test
+    public void testSinglePayloadString() throws Exception {
+        ByteBufferSerializationStreamWriter writer = getStreamWriter();
+
+        writer.writeString("foo");
+        writer.writeString("foo1");
+        writer.writeString("foo");
+        writer.writeString("bar");
+
+        ByteBufferSerializationStreamReader reader = getSinglePayloadStreamReader(writer);
+
+        assertEquals("foo", reader.readString());
+        assertEquals("foo1", reader.readString());
+        assertEquals("foo", reader.readString());
+        assertEquals("bar", reader.readString());
+    }
+
 
 }
