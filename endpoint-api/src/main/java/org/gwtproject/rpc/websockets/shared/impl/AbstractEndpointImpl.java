@@ -80,10 +80,6 @@ public abstract class AbstractEndpointImpl {
 
 	public void __onMessage(SerializationStreamReader reader) {
 		try {
-			//thrown away, but they are still in the payoad for now
-			String moduleBaseURL = reader.readString();
-			String spsn = reader.readString();
-
 			int recipient = reader.readInt();
 			if (recipient >= 0) {
 				__invoke(recipient, reader);

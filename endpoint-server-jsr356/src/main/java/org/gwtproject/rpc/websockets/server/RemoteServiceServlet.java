@@ -314,7 +314,7 @@ public abstract class RemoteServiceServlet<S extends RemoteServiceAsync> extends
 		Runnable[] executeCall = new Runnable[1];
 		NoRemoteEndpoint<S> c = clientFactory.create(
 				ts -> {
-					StringSerializationStreamWriter writer = new StringSerializationStreamWriter(ts, "module base url", "policy strong name");
+					StringSerializationStreamWriter writer = new StringSerializationStreamWriter(ts);
 					writer.prepareToWrite();
 					return writer;
 				},

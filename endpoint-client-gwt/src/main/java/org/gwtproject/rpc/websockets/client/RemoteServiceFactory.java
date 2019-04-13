@@ -38,7 +38,7 @@ public final class RemoteServiceFactory {
 		T[] instance = (T[]) new RemoteServiceAsync[1];
 		instance[0] = constructor.create(
 				serializer -> {
-					StringSerializationStreamWriter writer = new StringSerializationStreamWriter(serializer, "", "");
+					StringSerializationStreamWriter writer = new StringSerializationStreamWriter(serializer);
 					writer.prepareToWrite();
 					return writer;
 				},

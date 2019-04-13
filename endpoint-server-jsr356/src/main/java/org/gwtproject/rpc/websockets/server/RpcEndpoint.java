@@ -55,7 +55,7 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 	public void onOpen(Session session) {
 		C instance = clientConstructor.create(
 				serializer -> {
-					StringSerializationStreamWriter writer = new StringSerializationStreamWriter(serializer, "", "");
+					StringSerializationStreamWriter writer = new StringSerializationStreamWriter(serializer);
 					writer.prepareToWrite();
 					return writer;
 				},

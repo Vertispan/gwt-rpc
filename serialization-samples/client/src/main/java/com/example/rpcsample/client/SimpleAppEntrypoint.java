@@ -11,11 +11,7 @@ public class SimpleAppEntrypoint implements EntryPoint {
     public void onModuleLoad() {
         OrderSerializer serializer = new OrderSerializer_Impl();
         StringSerializationStreamWriter serializationStreamWriter = new StringSerializationStreamWriter(
-                serializer.createSerializer(),
-                //moduleBaseURL - the url that this .nocache.js is found in. may not be required at all without the policy file
-                GWT.getModuleBaseURL(),
-                //serializationPolicyStringName - should be generated if it exists at all, since the server doesnt use reflection any more
-                "1234567890abcdef1234567890abcdef"
+                serializer.createSerializer()
         );
         serializationStreamWriter.prepareToWrite();
         Invoice invoice = new Invoice();

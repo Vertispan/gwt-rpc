@@ -14,8 +14,6 @@ import static org.junit.Assert.fail;
 
 public class ServerStreamTest {
 
-    public static final String MODULE_BASE_URL = "moduleBaseURL";
-    public static final String STRONGNAME = "strongname";
     protected final TypeSerializer s = new TypeSerializerImpl() {
         @Override
         protected FieldSerializer serializer(String s) {
@@ -24,7 +22,7 @@ public class ServerStreamTest {
     };
 
     protected StringSerializationStreamWriter getStringStreamWriter() {
-        StringSerializationStreamWriter writer = new StringSerializationStreamWriter(s, MODULE_BASE_URL, STRONGNAME);
+        StringSerializationStreamWriter writer = new StringSerializationStreamWriter(s);
         writer.prepareToWrite();
         writer.setFlags(0);
         return writer;
@@ -32,16 +30,7 @@ public class ServerStreamTest {
 
     protected StringSerializationStreamReader getStreamReader(StringSerializationStreamWriter writer) {
         String payload = writer.toString();
-        StringSerializationStreamReader reader = new StringSerializationStreamReader(s, payload);
-        try {
-            String moduleBaseURL = reader.readString();
-            String strongName = reader.readString();
-            assertEquals(MODULE_BASE_URL, moduleBaseURL);
-            assertEquals(STRONGNAME, strongName);
-        } catch (SerializationException e) {
-            fail(e.getMessage());
-        }
-        return reader;
+        return new StringSerializationStreamReader(s, payload);
     }
 
     @Test

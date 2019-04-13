@@ -116,7 +116,7 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 				WebSocket socket = new WebSocket(getUrl());
 				E instance = constructor.create(
 						serializer -> {
-							StringSerializationStreamWriter writer = new StringSerializationStreamWriter(serializer, "", "");
+							StringSerializationStreamWriter writer = new StringSerializationStreamWriter(serializer);
 							writer.prepareToWrite();
 							return writer;
 						},

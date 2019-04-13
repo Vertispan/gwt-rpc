@@ -87,10 +87,6 @@ public class StringSerializationStreamWriter extends AbstractSerializationStream
 
     private StringBuilder encodeBuffer;
 
-    private final String moduleBaseURL;
-
-    private final String serializationPolicyStrongName;
-
     private final TypeSerializer serializer;
 
     /**
@@ -98,15 +94,9 @@ public class StringSerializationStreamWriter extends AbstractSerializationStream
      * specified module base URL and the serialization policy.
      *
      * @param serializer the {@link TypeSerializer} to use
-     * @param moduleBaseURL the location of the module
-     * @param serializationPolicyStrongName the strong name of serialization
-     *          policy
      */
-    public StringSerializationStreamWriter(TypeSerializer serializer,
-                                           String moduleBaseURL, String serializationPolicyStrongName) {
+    public StringSerializationStreamWriter(TypeSerializer serializer) {
         this.serializer = serializer;
-        this.moduleBaseURL = moduleBaseURL;
-        this.serializationPolicyStrongName = serializationPolicyStrongName;
     }
 
     /**
@@ -117,10 +107,6 @@ public class StringSerializationStreamWriter extends AbstractSerializationStream
     public void prepareToWrite() {
         super.prepareToWrite();
         encodeBuffer = new StringBuilder();
-
-        // Write serialization policy info
-        writeString(moduleBaseURL);
-        writeString(serializationPolicyStrongName);
     }
 
     @Override
