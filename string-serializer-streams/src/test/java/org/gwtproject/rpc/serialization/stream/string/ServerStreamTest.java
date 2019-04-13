@@ -4,8 +4,6 @@ import org.gwtproject.rpc.serialization.api.FieldSerializer;
 import org.gwtproject.rpc.serialization.api.SerializationException;
 import org.gwtproject.rpc.serialization.api.TypeSerializer;
 import org.gwtproject.rpc.serialization.api.impl.TypeSerializerImpl;
-import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamReader;
-import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamWriter;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

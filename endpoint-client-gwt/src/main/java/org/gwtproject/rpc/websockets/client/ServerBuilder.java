@@ -19,16 +19,23 @@
  */
 package org.gwtproject.rpc.websockets.client;
 
+import com.google.gwt.typedarrays.shared.ArrayBuffer;
+import elemental2.core.Int8Array;
+import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
+import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 import org.gwtproject.rpc.websockets.client.impl.ServerBuilderImpl;
 import org.gwtproject.rpc.websockets.shared.Server;
 import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointImplConstructor;
-import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamReader;
-import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamWriter;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.WebSocket;
 import elemental2.dom.WebSocket.OnopenFn;
 import jsinterop.base.Js;
 import jsinterop.base.JsPropertyMap;
+import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketServerImpl;
+import playn.html.HasArrayBufferView;
+import playn.html.TypedArrayHelper;
+
+import java.nio.ByteBuffer;
 
 /**
  * Base interface to be extended and given a concrete Server interface in a client project,
@@ -114,16 +121,19 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 			@Override
 			public E start() {
 				WebSocket socket = new WebSocket(getUrl());
+				socket.binaryType = "arraybuffer";
 				E instance = constructor.create(
 						serializer -> {
-							StringSerializationStreamWriter writer = new StringSerializationStreamWriter(serializer);
+							ByteBufferSerializationStreamWriter writer = new ByteBufferSerializationStreamWriter(serializer);
 							writer.prepareToWrite();
 							return writer;
 						},
-						stream -> socket.send(stream.toString()),
+						stream -> socket.send(Js.<Int8Array>uncheckedCast(((HasArrayBufferView)stream.getFullPayload()).getTypedArray())),
 						(send, serializer) -> {
 							socket.onmessage = message -> {
-								send.accept(new StringSerializationStreamReader(serializer, message.data.toString()));
+								ArrayBuffer data = (ArrayBuffer) message.data;
+								ByteBuffer bb = TypedArrayHelper.wrap(data);
+								send.accept(new ByteBufferSerializationStreamReader(serializer, bb));
 								return null;
 							};
 						}

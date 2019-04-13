@@ -19,12 +19,12 @@
  */
 package org.gwtproject.rpc.websockets.server;
 
+import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
+import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 import org.gwtproject.rpc.websockets.shared.Client;
 import org.gwtproject.rpc.websockets.shared.Server;
 import org.gwtproject.rpc.websockets.shared.Server.Connection;
 import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointImplConstructor;
-import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamReader;
-import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamWriter;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -32,13 +32,14 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
 public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 	private final S server;
 	private final EndpointImplConstructor<C> clientConstructor;
 
-	private Consumer<String> handleMessage;
+	private Consumer<ByteBuffer> handleMessage;
 
 	public RpcEndpoint(S server, EndpointImplConstructor<C> clientConstructor) {
 		this.server = server;
@@ -55,14 +56,14 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 	public void onOpen(Session session) {
 		C instance = clientConstructor.create(
 				serializer -> {
-					StringSerializationStreamWriter writer = new StringSerializationStreamWriter(serializer);
+					ByteBufferSerializationStreamWriter writer = new ByteBufferSerializationStreamWriter(serializer);
 					writer.prepareToWrite();
 					return writer;
 				},
-				writer -> session.getAsyncRemote().sendText(writer.toString()),
+				writer -> session.getAsyncRemote().sendBinary(writer.getFullPayload()),
 				(onMessage, serializer) -> {
 					// using this to delegate to OnMessage, not working otherwise
-					handleMessage = message -> onMessage.accept(new StringSerializationStreamReader(serializer, message));
+					handleMessage = message -> onMessage.accept(new ByteBufferSerializationStreamReader(serializer, message));
 				}
 		);
 		server.setClient(instance);
@@ -72,11 +73,15 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 		server.onOpen(new Jsr356Connection(session), server.getClient());
 	}
 
+//	@OnMessage
+//	public void onMessage(String message) {
+//		handleMessage.accept(message);
+//	}
+
 	@OnMessage
-	public void onMessage(String message) {
+	public void onMessage(ByteBuffer message) {
 		handleMessage.accept(message);
 	}
-
 	@OnClose
 	public void onClose(Session session) {
 		assert server.getClient() != null;
