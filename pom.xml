@@ -155,6 +155,7 @@
         <module>workers</module>
         <!-- sample showing workers -->
         <module>workers-sample</module>
+        <module>endpoint-client-okhttp</module>
     </modules>
 
 
