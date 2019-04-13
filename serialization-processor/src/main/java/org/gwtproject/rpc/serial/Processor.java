@@ -306,7 +306,7 @@ public class Processor extends AbstractProcessor {
                 .addAnnotation(Override.class)
                 .addParameter(String.class, "name")
                 .returns(FieldSerializer.class)
-                .addStatement("return fieldSerializer.get(name)")
+                .addStatement("return fieldSerializer.computeIfAbsent(name, ignore -> {throw new IllegalArgumentException(name);})")
                 .build());
         JavaFile.builder(packageName, typeSerializer.build()).build().writeTo(filer);
     }

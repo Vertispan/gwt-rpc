@@ -145,6 +145,7 @@ public class SerializableTypeModel {
                 .filter(m ->
                         m.getSimpleName().contentEquals("get" + capitalize(field.getSimpleName().toString()))
                         || m.getSimpleName().contentEquals("is" + capitalize(field.getSimpleName().toString()))
+                        || m.getSimpleName().contentEquals(field.getSimpleName()) && field.getSimpleName().toString().startsWith("is")
 //                        || m.getSimpleName().contentEquals("has" + capitalize(field.getSimpleName().toString()))
                 )
                 .findAny()
