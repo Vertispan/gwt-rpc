@@ -33,6 +33,9 @@ public abstract class AbstractWebSocketServerImpl<S extends Server<S,C>, C exten
 		extends AbstractEndpointImpl implements Server<S, C> {
 
 	private C client;
+
+	public Runnable close;
+
 	protected <W extends SerializationStreamWriter> AbstractWebSocketServerImpl(
 			Function<TypeSerializer, W> writerFactory,
 			Consumer<W> send,
@@ -69,6 +72,9 @@ public abstract class AbstractWebSocketServerImpl<S extends Server<S,C>, C exten
 
 	@Override
 	public void close() {
-		//TODO
+		if (close == null) {
+			throw new IllegalStateException("Server factory failed to wire up close() behavior!");
+		}
+		close.run();
 	}
 }

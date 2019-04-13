@@ -144,6 +144,7 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 					}
 					return null;
 				});
+				((AbstractWebSocketServerImpl<?, ?>) instance).close = socket::close;
 				return instance;
 			}
 		};
