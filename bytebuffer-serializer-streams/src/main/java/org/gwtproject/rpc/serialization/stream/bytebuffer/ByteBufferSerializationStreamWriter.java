@@ -6,7 +6,6 @@ import org.gwtproject.rpc.serialization.api.impl.AbstractSerializationStreamWrit
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Objects;
@@ -18,25 +17,15 @@ import java.util.Objects;
  * the data separate to avoid an extra copy, such as communicating between browser workers.
  */
 public class ByteBufferSerializationStreamWriter  extends AbstractSerializationStreamWriter {
-    //constants from BigLongLibBase for long->int[] conversion
-    protected static final int BITS = 22;
-    protected static final int BITS01 = 2 * BITS;
-    protected static final int BITS2 = 64 - BITS01;
-    protected static final int MASK = (1 << BITS) - 1;
-    protected static final int MASK_2 = (1 << BITS2) - 1;
-
     private ByteBuffer bb;//initial size 1kb
-    private IntBuffer payload;//an int32 view on bb
 
     private final TypeSerializer serializer;
-
 
     public ByteBufferSerializationStreamWriter(TypeSerializer serializer) {
         this.serializer = serializer;
         bb = ByteBuffer.allocate(1024);
-        bb.order(ByteOrder.nativeOrder());
-        payload = bb.asIntBuffer();
-        payload.position(3);//leave room for flags, version, size
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+        bb.position(3 << 2);
     }
 
     /**
@@ -46,29 +35,25 @@ public class ByteBufferSerializationStreamWriter  extends AbstractSerializationS
     public ByteBuffer getPayloadBytes() {
         Objects.requireNonNull(bb);
 
-        payload.limit(payload.position());
-        payload.position(0);
-        payload = payload.slice();
-
-        payload.put(0, getVersion());
-        payload.put(1, getFlags());
-        //mark the size of the payload
-        payload.put(2, payload.limit() - 3);
-
-        bb.limit(payload.limit() << 2);
+        bb.limit(bb.position());
         bb.position(0);
         bb = bb.slice();//http://thecodelesscode.com/case/209
-        bb.order(ByteOrder.nativeOrder());
+
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+
+        bb.putInt(0 << 2, getVersion());
+        bb.putInt(1 << 2, getFlags());
+        //mark the size of the payload
+        bb.putInt(2 << 2, bb.limit() - (3 << 2));
 
         ByteBuffer retVal = bb;
         bb = null;
-        payload = null;
         return retVal;
     }
 
     public String[] getFinishedStringTable() {
         List<String> stringTable = getStringTable();
-        return stringTable.toArray(new String[stringTable.size()]);
+        return stringTable.toArray(new String[0]);
     }
 
     public ByteBuffer getFullPayload() {
@@ -92,7 +77,7 @@ public class ByteBufferSerializationStreamWriter  extends AbstractSerializationS
             size += bytes.length;
         }
         ByteBuffer bb = ByteBuffer.allocate(size);
-        bb.order(ByteOrder.nativeOrder());
+        bb.order(ByteOrder.LITTLE_ENDIAN);
 
         // append the payload, the count of strings, and the strings themselves
         bb.put(payloadBytes);
@@ -116,62 +101,58 @@ public class ByteBufferSerializationStreamWriter  extends AbstractSerializationS
 
     @Override
     public void writeLong(long l) {
-        //impl from BigLongLibBase
-        int[] a = new int[3];
-        a[0] = (int) (l & MASK);
-        a[1] = (int) ((l >> BITS) & MASK);
-        a[2] = (int) ((l >> BITS01) & MASK_2);
-        writeInt(a[0]);
-        writeInt(a[1]);
-        writeInt(a[2]);
+        maybeGrow();
+        bb.putLong(l);
     }
 
     public void writeBoolean(boolean fieldValue) {
-        writeInt(fieldValue ? 1 : 0);//wasteful, but no need to try to pack this way
+        maybeGrow();
+        bb.put((byte) (fieldValue ? 1 : 0));
     }
 
     @Override
     public void writeByte(byte fieldValue) {
-        writeInt(fieldValue);//wasteful, but no need to try to pack this way
+        maybeGrow();
+        bb.put(fieldValue);
     }
 
     @Override
     public void writeChar(char ch) {
-        writeInt(ch);
+        maybeGrow();
+        bb.putChar(ch);
     }
 
     @Override
     public void writeFloat(float fieldValue) {
         maybeGrow();
-        bb.asFloatBuffer().put(payload.position(), fieldValue);
-        payload.position(payload.position() + 1);
+        bb.putFloat(fieldValue);
     }
 
     @Override
     public void writeDouble(double fieldValue) {
-        writeLong(Double.doubleToLongBits(fieldValue));
+        maybeGrow();
+        bb.putDouble(fieldValue);
     }
 
     @Override
     public void writeInt(int fieldValue) {
         maybeGrow();
-        payload.put(fieldValue);
+        bb.putInt(fieldValue);
     }
 
     private void maybeGrow() {
-        if (!payload.hasRemaining()) {
+        if (!bb.hasRemaining()) {
             ByteBuffer old = bb;
             bb = ByteBuffer.allocate(old.capacity() * 2);
-            bb.order(ByteOrder.nativeOrder());
-            IntBuffer oldPayload = payload;
-            payload = bb.asIntBuffer();
-            payload.put((IntBuffer)oldPayload.flip());
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            bb.put((ByteBuffer) old.flip());
         }
     }
 
     @Override
     public void writeShort(short value) {
-        writeInt(value);
+        maybeGrow();
+        bb.putShort(value);
     }
 
     @Override

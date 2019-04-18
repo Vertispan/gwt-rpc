@@ -70,12 +70,11 @@ public interface WorkerFactory<R extends MessagePortEndpoint<L>, L extends Messa
 							worker.addMessageHandler(message -> {
 								JsArray<Any> data = message.getData();
 								ByteBuffer byteBuffer = TypedArrayHelper.wrap(data.getAt(0).cast());
-								byteBuffer.order(ByteOrder.nativeOrder());
+								byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 								String[] strings = data.getAt(1).cast();
 								send.accept(new ByteBufferSerializationStreamReader(serializer, byteBuffer, strings));
 							});
 						}
-
 
 				);
 			}
