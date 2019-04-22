@@ -135,7 +135,8 @@ public class ByteBufferSerializationStreamReader extends AbstractSerializationSt
 
     @Override
     public void claimItems(int slots) throws SerializationException {
-        if (claimedTokens + slots > (bb.limit() << 2) + strings.length) {
+        //shift to zero for now to avoid something like a byte[] appearing to be bigger than the entire payload
+        if (claimedTokens + slots > (bb.limit() << 0) + strings.length) {
             throw new SerializationException("Request claims to be larger than it is");
         }
         claimedTokens += slots;
