@@ -105,8 +105,7 @@ public class ByteBufferSerializationStreamReader extends AbstractSerializationSt
 
     @Override
     public double readDouble() throws SerializationException {
-        //TODO this could certainly be improved
-        return Double.longBitsToDouble(readLong());
+        return bb.getDouble();
     }
 
     @Override
