@@ -135,7 +135,10 @@ public class SerializableTypeModel {
     private static ExecutableElement setter(VariableElement field) {
         return ElementFilter.methodsIn(field.getEnclosingElement().getEnclosedElements()).stream()
                 .filter(m -> m.getParameters().size() == 1)
-                .filter(m -> m.getSimpleName().contentEquals("set" + capitalize(field.getSimpleName().toString())))
+                .filter(m ->
+                        m.getSimpleName().contentEquals("set" + capitalize(field.getSimpleName().toString()))
+                        || field.getSimpleName().toString().startsWith("is") && m.getSimpleName().contentEquals("set" + field.getSimpleName().toString().substring("is".length()))
+                )
                 .findAny()
                 .orElse(null);
     }
