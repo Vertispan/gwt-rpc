@@ -23,6 +23,7 @@ import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.auto.service.AutoService;
 
 import javax.annotation.processing.Processor;
+import javax.lang.model.SourceVersion;
 import java.util.Arrays;
 
 @AutoService(Processor.class)
@@ -32,5 +33,10 @@ public class EndpointProcessor extends BasicAnnotationProcessor {
 		return Arrays.asList(
 				new EndpointProcessingStep(processingEnv)
 		);
+	}
+
+	@Override
+	public SourceVersion getSupportedSourceVersion() {
+		return SourceVersion.RELEASE_8;
 	}
 }
