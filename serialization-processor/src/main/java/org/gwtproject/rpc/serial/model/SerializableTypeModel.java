@@ -96,8 +96,8 @@ public class SerializableTypeModel {
         List<Property> properties = new ArrayList<>();
         List<Field> fields = new ArrayList<>();
 
-        if (serializableType.getKind() == ElementKind.ENUM) {
-            //nothing to serialize
+        if (serializableType.getKind() == ElementKind.ENUM || customFieldSerializer != null) {
+            //nothing to serialize for enums, or custom field serializer will manage it
             return new SerializableTypeModel(types, serializableType.asType(), customFieldSerializer, Collections.emptyList(), Collections.emptyList());
         }
 
@@ -125,7 +125,7 @@ public class SerializableTypeModel {
                 fields.add(new Field(field));
             } else {
                 //TODO violator pattern
-                messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, "Field " + field + " is private and is missing either getter or setter", field);
+                messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, "Field " + field.getEnclosingElement() + "." + field + " is private and is missing either getter or setter", field);
                 assert false : "field " + field + " is private";
             }
         }
