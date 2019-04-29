@@ -140,7 +140,7 @@ public class ByteBufferSerializationStreamWriter  extends AbstractSerializationS
     }
 
     private void maybeGrow() {
-        if (!bb.hasRemaining()) {
+        if (bb.remaining() < 8) {//always want at least 8 bytes remaining for doubles or longs
             ByteBuffer old = bb;
             bb = ByteBuffer.allocate(old.capacity() * 2);
             bb.order(ByteOrder.LITTLE_ENDIAN);
