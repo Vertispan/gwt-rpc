@@ -16,9 +16,6 @@ public class Main {
         String url = args[0];
         String username = args[1];
 
-        //pause after startup until connected
-        Semaphore semaphore = new Semaphore(1);
-
         //build a client instance so we can print details for the user
         ChatClient client = new ChatClient() {
             private ChatServer server;
@@ -72,13 +69,7 @@ public class Main {
         };
 
         // create and connect to the server
-        ChatServer_Impl server = ServerBuilder.of(ChatServer_Impl::new).setUrl(url).start();
-        server.setClient(client);
-        client.setServer(server);
-
-
-        // wait for connection
-        semaphore.acquireUninterruptibly();
+        ChatServer server = ServerBuilder.of(ChatServer_Impl::new).setUrl(url).start(client);
 
         // log in
         server.login(username, Callback.of(ignore -> System.out.println("Login Successful")));

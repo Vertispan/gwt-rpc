@@ -5,6 +5,7 @@ import okio.ByteString;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 import org.gwtproject.rpc.websockets.okhttp.ServerBuilder;
+import org.gwtproject.rpc.websockets.shared.Client;
 import org.gwtproject.rpc.websockets.shared.Server;
 import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl;
 import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketServerImpl;
@@ -15,12 +16,12 @@ import java.util.function.Consumer;
 public class ServerBuilderImpl<S extends Server<? super S, ?>> implements ServerBuilder<S> {
     private final AbstractEndpointImpl.EndpointImplConstructor<S> constructor;
 
-    private static class ServerImpl<S extends Server<? super S, ?>> {
+    private static class ServerImpl<S extends Server<S, C>, C extends Client<C, S>> {
         private WebSocket websocket;
         private S endpoint;
         private Consumer<ByteBuffer> onMessage;
 
-        public ServerImpl(Request.Builder reqBuilder, AbstractEndpointImpl.EndpointImplConstructor<S> constructor) {
+        public ServerImpl(Request.Builder reqBuilder, AbstractEndpointImpl.EndpointImplConstructor<S> constructor, C client) {
 
             WebSocketListener listener = new WebSocketListener() {
                 @Override
@@ -48,9 +49,6 @@ public class ServerBuilderImpl<S extends Server<? super S, ?>> implements Server
                 }
             };
 
-            websocket = new OkHttpClient().newWebSocket(reqBuilder.build(), listener);
-
-
             endpoint = constructor.create(
                     serializer -> {
                         ByteBufferSerializationStreamWriter writer = new ByteBufferSerializationStreamWriter(serializer);
@@ -64,6 +62,10 @@ public class ServerBuilderImpl<S extends Server<? super S, ?>> implements Server
                         };
                     }
             );
+            endpoint.setClient(client);
+            client.setServer(endpoint);
+
+            websocket = new OkHttpClient().newWebSocket(reqBuilder.build(), listener);
 
             ((AbstractWebSocketServerImpl<?, ?>)endpoint).close = () -> websocket.close(1000, null);
         }
@@ -127,7 +129,8 @@ public class ServerBuilderImpl<S extends Server<? super S, ?>> implements Server
 
 
     @Override
-    public S start() {
-        return new ServerImpl<S>(reqBuilder, constructor).getEndpoint();
+    public <C extends Client<C, ? extends S>> S start(C client) {
+        return (S) new ServerImpl(reqBuilder, constructor, client).getEndpoint();
     }
+
 }

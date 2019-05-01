@@ -1,6 +1,7 @@
 package org.gwtproject.rpc.websockets.okhttp;
 
 import org.gwtproject.rpc.websockets.okhttp.impl.ServerBuilderImpl;
+import org.gwtproject.rpc.websockets.shared.Client;
 import org.gwtproject.rpc.websockets.shared.Server;
 import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl;
 
@@ -62,7 +63,7 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
      *
      * @return
      */
-    S start();
+    <C extends Client<C, ? extends S>>  S start(C client);
 
 //    /**
 //     * Specifies a handler to receive errors when a problem occurs around the protocol: the connection,
@@ -83,7 +84,7 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
      * Simple create method that takes the generated server endpoint's constructor and returns a functioning
      * server builder.
      */
-    static <E extends Server<? super E, ?>> ServerBuilder<E> of(AbstractEndpointImpl.EndpointImplConstructor<E> constructor) {
+    static <E extends Server<E, L>, L extends Client<L, E>> ServerBuilder<E> of(AbstractEndpointImpl.EndpointImplConstructor<E> constructor) {
         return new ServerBuilderImpl<E>(constructor);
     }
 }
