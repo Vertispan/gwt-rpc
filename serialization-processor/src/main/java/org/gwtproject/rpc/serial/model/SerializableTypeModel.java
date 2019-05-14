@@ -2,8 +2,10 @@ package org.gwtproject.rpc.serial.model;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import org.gwtproject.rpc.gwtapt.JTypeUtils;
 import org.gwtproject.rpc.serial.processor.CustomFieldSerializerValidator;
 import org.gwtproject.rpc.serial.processor.SerializableTypeOracleBuilder;
+import org.gwtproject.rpc.serial.processor.SerializableTypeOracleUnion;
 import org.gwtproject.rpc.serial.processor.SerializingTypes;
 
 import javax.annotation.processing.Messager;
@@ -87,18 +89,24 @@ public class SerializableTypeModel {
     private final List<Property> properties;
     private final List<Field> fields;//TODO do we need a real field? and how do we handle private?
 
-    public static SerializableTypeModel array(TypeMirror serializableType) {
-        return new SerializableTypeModel(null, serializableType, null, Collections.emptyList(), Collections.emptyList());
+    private boolean serializable;
+    private boolean maybeInstantiated;
+    private ClassName fieldSerializer;
+    private final ClassName superclassFieldSerializer;
+
+    public static SerializableTypeModel array(TypeMirror serializableType, SerializableTypeOracleUnion bidiOracle, SerializingTypes types) {
+        return new SerializableTypeModel(types, serializableType, null, Collections.emptyList(), Collections.emptyList(), true, true, getFieldSerializer(serializableType, bidiOracle, types), null);
     }
 
-    public static SerializableTypeModel create(SerializingTypes types, TypeElement serializableType, Messager messager) {
+    public static SerializableTypeModel create(SerializingTypes types, TypeElement serializableType, Messager messager, boolean serializable, boolean maybeInstantiated, SerializableTypeOracleUnion bidiOracle) {
         TypeElement customFieldSerializer = SerializableTypeOracleBuilder.findCustomFieldSerializer(types, serializableType.asType());
         List<Property> properties = new ArrayList<>();
         List<Field> fields = new ArrayList<>();
 
+        ClassName fieldSerializer = getFieldSerializer(serializableType.asType(), bidiOracle, types);
         if (serializableType.getKind() == ElementKind.ENUM || customFieldSerializer != null) {
             //nothing to serialize for enums, or custom field serializer will manage it
-            return new SerializableTypeModel(types, serializableType.asType(), customFieldSerializer, Collections.emptyList(), Collections.emptyList());
+            return new SerializableTypeModel(types, serializableType.asType(), customFieldSerializer, Collections.emptyList(), Collections.emptyList(), serializable, maybeInstantiated, fieldSerializer, null);
         }
 
         //rules of STOB are to look for fields,
@@ -129,7 +137,19 @@ public class SerializableTypeModel {
                 assert false : "field " + field + " is private";
             }
         }
-        return new SerializableTypeModel(types, serializableType.asType(), customFieldSerializer, properties, fields);
+
+        // We will delegate to our superclass, if it is serializable, so that it can handle its own fields
+        TypeMirror superclass = serializableType.getSuperclass();
+        ClassName superclassSerializer;
+        if (superclass.getKind() == TypeKind.NONE) {
+            superclassSerializer = null;
+        } else if (!bidiOracle.isSerializable(superclass)) {
+            superclassSerializer = null;
+        } else {
+            superclassSerializer = getFieldSerializer(superclass, bidiOracle, types);
+        }
+
+        return new SerializableTypeModel(types, serializableType.asType(), customFieldSerializer, properties, fields, serializable, maybeInstantiated, fieldSerializer, superclassSerializer);
     }
 
     private static ExecutableElement setter(VariableElement field) {
@@ -162,13 +182,74 @@ public class SerializableTypeModel {
         return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 
+    private static String arraySerializerPackage(TypeMirror componentType, SerializingTypes t) {
+        String commonPackage = "org.gwtproject.rpc.serialization.api.emul";
+        if (componentType.getKind().isPrimitive()) {
+            return commonPackage;
+        }
+        assert componentType.getKind() == TypeKind.DECLARED;
+        String packageName = t.getElements().getPackageOf(t.getTypes().asElement(componentType)).getQualifiedName().toString();
+        if (packageName.startsWith("java")) {
+            return commonPackage + packageName;
+        }
+        return packageName;
+    }
 
-    private SerializableTypeModel(SerializingTypes types, TypeMirror type, TypeElement customFieldSerializer, List<Property> properties, List<Field> fields) {
+    private static ClassName getFieldSerializer(TypeMirror type, SerializableTypeOracleUnion bidiOracle, SerializingTypes t) {
+        if (type.getKind() == TypeKind.ARRAY) {
+            //TODO no more null check
+            if (bidiOracle == null) {
+                return ClassName.get(
+                        arraySerializerPackage(JTypeUtils.getLeafType(type), t),
+                        arraySerializerName(JTypeUtils.getLeafType(type), JTypeUtils.getRank(type), t)
+                );
+            } else {
+                return ClassName.get(
+                        arraySerializerPackage(JTypeUtils.getLeafType(type), t),
+                        arraySerializerName(JTypeUtils.getLeafType(type), JTypeUtils.getRank(type), t),
+                        bidiOracle.getSpecificFieldSerializer(type)
+                );
+            }
+        }
+        assert type.getKind() == TypeKind.DECLARED;
+        Element elt = t.getTypes().asElement(type);
+
+        String packageName = t.getElements().getPackageOf(elt).getQualifiedName().toString();
+        if (packageName.startsWith("java")) {
+            packageName = "org.gwtproject.rpc.serialization.api.emul" + packageName;
+        }
+        String outerClassName = "FieldSerializer";
+        do {
+            outerClassName = elt.getSimpleName() + "_" + outerClassName;
+            elt = elt.getEnclosingElement();
+        } while (elt.getKind() != ElementKind.PACKAGE);
+        //TODO no more null check
+        if (bidiOracle == null) {
+            return ClassName.get(packageName, outerClassName);
+        } else {
+            return ClassName.get(packageName, outerClassName, bidiOracle.getSpecificFieldSerializer(elt.asType()));
+        }
+    }
+
+    private static String arraySerializerName(TypeMirror componentType, int rank, SerializingTypes t) {
+        if (componentType.getKind().isPrimitive()) {
+            return componentType.getKind().name() + "_ArrayRank_" + rank + "_FieldSerializer";
+        }
+        assert componentType.getKind() == TypeKind.DECLARED;
+        return t.getTypes().asElement(componentType).getSimpleName() + "_ArrayRank_" + rank + "_FieldSerializer";
+    }
+
+
+    private SerializableTypeModel(SerializingTypes types, TypeMirror type, TypeElement customFieldSerializer, List<Property> properties, List<Field> fields, boolean serializable, boolean maybeInstantiated, ClassName fieldSerializer, ClassName superclassFieldSerializer) {
         this.types = types;
         this.type = type;
         this.customFieldSerializer = customFieldSerializer;
         this.properties = properties;
         this.fields = fields;
+        this.serializable = serializable;
+        this.maybeInstantiated = maybeInstantiated;
+        this.fieldSerializer = fieldSerializer;
+        this.superclassFieldSerializer = superclassFieldSerializer;
     }
 
     public TypeName getTypeName() {
@@ -176,6 +257,26 @@ public class SerializableTypeModel {
             return ClassName.get(types.getTypes().erasure(type));
         }
         return ClassName.get(type);
+    }
+
+    public TypeElement getTypeElement() {
+        return (TypeElement) types.getTypes().asElement(type);
+    }
+
+    public boolean isSerializable() {
+        return serializable;
+    }
+
+    public boolean mayBeInstantiated() {
+        return maybeInstantiated;
+    }
+
+    public ClassName getFieldSerializer() {
+        return fieldSerializer;
+    }
+
+    public ClassName getSuperclassFieldSerializer() {
+        return superclassFieldSerializer;
     }
 
     public TypeElement getCustomFieldSerializer() {

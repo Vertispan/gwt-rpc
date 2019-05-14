@@ -25,7 +25,7 @@ final class SerializableTypeOracleImpl implements SerializableTypeOracle {
     }
 
     /**
-     * Returns <code>true</code> if the type's fields can be serializede.
+     * Returns <code>true</code> if the type's fields can be serialized.
      */
     public boolean isSerializable(TypeMirror type) {
         String typeName = TypeName.get(types.erasure(type)).toString();
