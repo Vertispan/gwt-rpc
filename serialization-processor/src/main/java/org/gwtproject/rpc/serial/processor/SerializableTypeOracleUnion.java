@@ -3,6 +3,9 @@ package org.gwtproject.rpc.serial.processor;
 import com.google.common.base.Preconditions;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 /**
@@ -20,8 +23,11 @@ public class SerializableTypeOracleUnion implements SerializableTypeOracle {
     }
 
     @Override
-    public TypeMirror[] getSerializableTypes() {
-        return Stream.of(read, write).flatMap(oracle -> Stream.of(oracle.getSerializableTypes())).distinct().toArray(TypeMirror[]::new);
+    public Set<TypeMirror> getSerializableTypes() {
+        TreeSet<TypeMirror> all = new TreeSet<>(new TypeMirrorNameComparator());
+        all.addAll(read.getSerializableTypes());
+        all.addAll(write.getSerializableTypes());
+        return Collections.unmodifiableSet(all);
     }
 
     @Override

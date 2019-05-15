@@ -1,6 +1,7 @@
 package org.gwtproject.rpc.serial.processor;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.Set;
 
 /**
  * Interface implemented by any class that wants to answer questions about
@@ -14,7 +15,7 @@ public interface SerializableTypeOracle {
      *
      * @return array of serializable types
      */
-    TypeMirror[] getSerializableTypes();
+    Set<TypeMirror> getSerializableTypes();
 
     /**
      * Returns true if the type is serializable. If a type is serializable then

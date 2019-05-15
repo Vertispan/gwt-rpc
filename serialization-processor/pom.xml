@@ -20,6 +20,11 @@
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
+      <artifactId>serialization-details</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
       <artifactId>serialization-api</artifactId>
       <version>${project.version}</version>
     </dependency>

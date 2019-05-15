@@ -156,6 +156,7 @@
         <!-- sample showing workers -->
         <module>workers-sample</module>
         <module>endpoint-client-okhttp</module>
+        <module>serialization-details</module>
     </modules>
 
 

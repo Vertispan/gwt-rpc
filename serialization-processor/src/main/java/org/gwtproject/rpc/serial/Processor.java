@@ -4,18 +4,22 @@ import com.google.auto.service.AutoService;
 import com.google.common.base.Charsets;
 import com.squareup.javapoet.*;
 import com.squareup.javapoet.TypeSpec.Builder;
+import org.dominokit.jacksonapt.DefaultJsonSerializationContext;
 import org.gwtproject.rpc.gwtapt.JTypeUtils;
-import org.gwtproject.rpc.serialization.api.impl.TypeSerializerImpl;
 import org.gwtproject.rpc.serial.model.SerializableTypeModel;
 import org.gwtproject.rpc.serial.model.SerializableTypeModel.Field;
 import org.gwtproject.rpc.serial.model.SerializableTypeModel.Property;
-import org.gwtproject.rpc.serialization.api.*;
 import org.gwtproject.rpc.serial.processor.*;
+import org.gwtproject.rpc.serialization.api.*;
+import org.gwtproject.rpc.serialization.api.impl.TypeSerializerImpl;
+import org.gwtproject.serial.json.Details;
+import org.gwtproject.serial.json.Type;
 
 import javax.annotation.Generated;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -28,6 +32,7 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -197,9 +202,8 @@ public class Processor extends AbstractProcessor {
 
         SerializableTypeOracleUnion bidiOracle = new SerializableTypeOracleUnion(readOracle, writeOracle);
         //write field serializers
-        TypeMirror[] allTypes = bidiOracle.getSerializableTypes();
         List<SerializableTypeModel> models = new ArrayList<>();
-        for (TypeMirror serializableType : allTypes) {
+        for (TypeMirror serializableType : bidiOracle.getSerializableTypes()) {
             SerializableTypeModel model;
             if (serializableType.getKind() == TypeKind.ARRAY) {
                 model = SerializableTypeModel.array(serializableType, bidiOracle, serializingTypes);
@@ -230,6 +234,73 @@ public class Processor extends AbstractProcessor {
         //write type serializer, pointing at required field serializers and their appropriate use in each direction
         //TODO consider only doing this once, later, so we can be sure classes are still needed? not sure...
         writeTypeSerializer(prefix, packageName, models);
+
+        // write out a JSON file describing which
+        writeJsonManifest(prefix, packageName, models);
+    }
+
+    private void writeJsonManifest(String prefix, String packageName, List<SerializableTypeModel> models) throws IOException {
+        Details d = new Details();
+        d.setSerializerPackage(packageName);
+        d.setSerializerInterface(prefix);
+
+        Map<String, Type> serializableTypes = models.stream().map(stm -> {
+            Type type = new Type();
+
+            type.setName(stm.getTypeName().toString());
+
+            if (stm.getCustomFieldSerializer() != null) {
+                type.setCustomFieldSerializer(ClassName.get(stm.getCustomFieldSerializer()).toString());
+            }
+
+            type.setCanInstantiate(stm.mayBeInstantiated());
+            type.setCanSerialize(stm.isSerializable());
+
+            if (stm.getType().getKind() == TypeKind.ARRAY) {
+                type.setKind(Type.Kind.ARRAY);
+                type.setComponentTypeId(ClassName.get(((ArrayType) stm.getType()).getComponentType()).toString());
+            } else if (stm.getTypeElement().getKind() == ElementKind.ENUM) {
+                type.setKind(Type.Kind.ENUM);
+                type.setEnumValues(stm.getTypeElement().getEnclosedElements().stream()
+                        .filter(e -> e.getKind() == ElementKind.ENUM_CONSTANT)
+                        .map(e -> e.getSimpleName().toString())
+                        .collect(Collectors.toList())
+                );
+            } else {
+                type.setKind(Type.Kind.COMPOSITE);
+
+                if (stm.getSuperclassFieldSerializer() != null) {
+                    type.setSuperTypeId(ClassName.get(stm.getTypeElement().getSuperclass()).toString());
+                }
+
+                List<org.gwtproject.serial.json.Property> properties = new ArrayList<>();
+                for (Field field : stm.getFields()) {
+                    org.gwtproject.serial.json.Property p = new org.gwtproject.serial.json.Property();
+                    p.setName(field.getName());
+                    p.setTypeId(field.getTypeName().toString());
+                    properties.add(p);
+                }
+                for (Property property : stm.getProperties()) {
+                    org.gwtproject.serial.json.Property p = new org.gwtproject.serial.json.Property();
+                    p.setName(property.getName());
+                    p.setTypeId(property.getTypeName().toString());
+                    properties.add(p);
+                }
+                type.setProperties(properties);
+            }
+
+            return type;
+        }).collect(Collectors.toMap(Type::getName, Function.identity()));
+
+        d.setSerializableTypes(serializableTypes);
+
+        FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT, packageName, prefix + ".json");
+        try (PrintWriter writer = new PrintWriter(resource.openOutputStream())) {
+            writer.print(Details.INSTANCE.write(d, DefaultJsonSerializationContext.builder()
+                    .serializeNulls(false)
+                    .indent(true)
+                    .build()));
+        }
     }
 
     private void writeSerializerImpl(String prefix, String packageName, Element serializationInterface) throws IOException {
@@ -307,7 +378,7 @@ public class Processor extends AbstractProcessor {
         CodeBlock.Builder clinit = CodeBlock.builder();
         for (SerializableTypeModel model : models) {
             if (model.mayBeInstantiated()) {
-                clinit.addStatement("fieldSerializer.put($S, new $T())", model.getTypeElement(), model.getFieldSerializer());
+                clinit.addStatement("fieldSerializer.put($S, new $T())", model.getType(), model.getFieldSerializer());
             }
         }
         typeSerializer.addStaticBlock(clinit.build());
@@ -323,9 +394,9 @@ public class Processor extends AbstractProcessor {
     }
 
     private void writeArraySerializer(SerializableTypeModel model) throws IOException {
-        int rank = JTypeUtils.getRank(model.getTypeElement().asType());
+        int rank = JTypeUtils.getRank(model.getType());
         assert rank > 0;
-        TypeMirror componentType = JTypeUtils.getLeafType(model.getTypeElement().asType());
+        TypeMirror componentType = JTypeUtils.getLeafType(model.getType());
 
         StringBuilder extraArrayRank = new StringBuilder();
         for (int i = 0; i < rank - 1; ++i) {
@@ -347,7 +418,7 @@ public class Processor extends AbstractProcessor {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(TypeName.VOID)
                 .addParameter(SerializationStreamReader.class, "reader")
-                .addParameter(ClassName.get(model.getTypeElement().asType()), "instance")
+                .addParameter(ClassName.get(model.getType()), "instance")
                 .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                 .addException(SerializationException.class);
 
@@ -365,7 +436,7 @@ public class Processor extends AbstractProcessor {
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .returns(TypeName.VOID)
                 .addParameter(SerializationStreamWriter.class, "writer")
-                .addParameter(ClassName.get(model.getTypeElement().asType()), "instance")
+                .addParameter(ClassName.get(model.getType()), "instance")
                 .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                 .addException(SerializationException.class);
 
@@ -381,7 +452,7 @@ public class Processor extends AbstractProcessor {
 
         MethodSpec.Builder instantiateMethodBuilder = MethodSpec.methodBuilder("instantiate")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-                .returns(ClassName.get(model.getTypeElement().asType()))
+                .returns(ClassName.get(model.getType()))
                 .addParameter(SerializationStreamReader.class, "reader")
                 .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                 .addException(SerializationException.class)
@@ -514,7 +585,7 @@ public class Processor extends AbstractProcessor {
                 .addException(com.google.gwt.user.client.rpc.SerializationException.class)
                 .addException(SerializationException.class);
 
-        if (model.getCustomFieldSerializer() != null && CustomFieldSerializerValidator.hasInstantiationMethod(types, model.getCustomFieldSerializer(), model.getTypeElement().asType())) {
+        if (model.getCustomFieldSerializer() != null && CustomFieldSerializerValidator.hasInstantiationMethod(types, model.getCustomFieldSerializer(), model.getType())) {
             instantiateMethodBuilder.addStatement("return $L.instantiate(reader)", model.getCustomFieldSerializer());
         } else {
             if (model.getTypeElement().getKind() == ElementKind.ENUM || (!model.getTypeElement().getModifiers().contains(Modifier.ABSTRACT) && JTypeUtils.isDefaultInstantiable(model.getTypeElement()))) {

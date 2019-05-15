@@ -220,15 +220,7 @@ public class SerializableTypeOracleBuilder {
         }
     }
 
-    /**
-     * Compares {@link TypeMirror}s according to their qualified source names.
-     */
-    static final Comparator<TypeMirror> JTYPE_COMPARATOR = new Comparator<TypeMirror>() {
-        @Override
-        public int compare(TypeMirror t1, TypeMirror t2) {
-            return ClassName.get(t1).toString().compareTo(ClassName.get(t2).toString());
-        }
-    };
+    static final Comparator<TypeMirror> JTYPE_COMPARATOR = new TypeMirrorNameComparator();
 
     /**
      * No type filtering by default..
@@ -1693,4 +1685,5 @@ public class SerializableTypeOracleBuilder {
             typeToTypeInfoComputed.remove(type);
         }
     }
+
 }

@@ -4,6 +4,7 @@ import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import java.util.Collections;
 import java.util.Set;
 
 final class SerializableTypeOracleImpl implements SerializableTypeOracle {
@@ -20,8 +21,8 @@ final class SerializableTypeOracleImpl implements SerializableTypeOracle {
         this.types = types;
     }
 
-    public TypeMirror[] getSerializableTypes() {
-        return serializableTypesSet.toArray(new TypeMirror[serializableTypesSet.size()]);
+    public Set<TypeMirror> getSerializableTypes() {
+        return Collections.unmodifiableSet(serializableTypesSet);
     }
 
     /**

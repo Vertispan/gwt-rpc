@@ -22,12 +22,14 @@ import java.util.Optional;
 public class SerializableTypeModel {
 
     public static class Property {
+        private final String fieldName;
         private final ExecutableElement setter;
         private final ExecutableElement getter;
 
-        Property(ExecutableElement setter, ExecutableElement getter) {
+        Property(ExecutableElement setter, ExecutableElement getter, String fieldName) {
             this.setter = setter;
             this.getter = getter;
+            this.fieldName = fieldName;
         }
 
         public ExecutableElement getSetter() {
@@ -40,6 +42,10 @@ public class SerializableTypeModel {
 
         public TypeName getTypeName() {
             return TypeName.get(getter.getReturnType());
+        }
+
+        public String getName() {
+            return fieldName;
         }
 
         //readFoo/writeFoo in stream reader and stream writer
@@ -74,6 +80,10 @@ public class SerializableTypeModel {
 
         public TypeName getTypeName() {
             return TypeName.get(field.asType());
+        }
+
+        public String getName() {
+            return field.getSimpleName().toString();
         }
 
         //readFoo/writeFoo in stream reader and stream writer
@@ -124,7 +134,7 @@ public class SerializableTypeModel {
             ExecutableElement setter = setter(field);
             ExecutableElement getter = getter(field);
             if (getter != null && setter != null) {
-                properties.add(new Property(setter, getter));
+                properties.add(new Property(setter, getter, field.getSimpleName().toString()));
                 continue;
             }
 
@@ -227,7 +237,7 @@ public class SerializableTypeModel {
         if (bidiOracle == null) {
             return ClassName.get(packageName, outerClassName);
         } else {
-            return ClassName.get(packageName, outerClassName, bidiOracle.getSpecificFieldSerializer(elt.asType()));
+            return ClassName.get(packageName, outerClassName, bidiOracle.getSpecificFieldSerializer(type));
         }
     }
 
@@ -257,6 +267,10 @@ public class SerializableTypeModel {
             return ClassName.get(types.getTypes().erasure(type));
         }
         return ClassName.get(type);
+    }
+
+    public TypeMirror getType() {
+        return type;
     }
 
     public TypeElement getTypeElement() {
