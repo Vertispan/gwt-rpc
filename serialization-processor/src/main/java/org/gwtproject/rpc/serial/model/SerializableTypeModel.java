@@ -23,12 +23,15 @@ public class SerializableTypeModel {
 
     public static class Property {
         private final String fieldName;
+        private final TypeName fieldType;
+
         private final ExecutableElement setter;
         private final ExecutableElement getter;
 
-        Property(ExecutableElement setter, ExecutableElement getter, String fieldName) {
+        Property(ExecutableElement setter, ExecutableElement getter, TypeName fieldType, String fieldName) {
             this.setter = setter;
             this.getter = getter;
+            this.fieldType = fieldType;
             this.fieldName = fieldName;
         }
 
@@ -40,8 +43,19 @@ public class SerializableTypeModel {
             return getter;
         }
 
+        /**
+         * Returns the type that the getter and setter are expected to use. Ideally this is the same
+         * as the field type, but this isn't actually required yet.
+         */
         public TypeName getTypeName() {
             return TypeName.get(getter.getReturnType());
+        }
+
+        /**
+         * Returns the actual type of the field, may be distinct from the getter/setter methods.
+         */
+        public TypeName getFieldTypeName() {
+            return fieldType;
         }
 
         public String getName() {
@@ -134,11 +148,12 @@ public class SerializableTypeModel {
             ExecutableElement setter = setter(field);
             ExecutableElement getter = getter(field);
             if (getter != null && setter != null) {
-                properties.add(new Property(setter, getter, field.getSimpleName().toString()));
-                continue;
-            }
-
-            if (!field.getModifiers().contains(Modifier.PRIVATE)) {
+                Property property = new Property(setter, getter, TypeName.get(field.asType()), field.getSimpleName().toString());
+                if (!property.getTypeName().equals(property.getFieldTypeName())) {
+                    messager.printMessage(Diagnostic.Kind.MANDATORY_WARNING, "Field " + field.getEnclosingElement() + "." + field + " doesn't match the type of its getter/setter methods: " + property.getFieldTypeName());
+                }
+                properties.add(property);
+            } else if (!field.getModifiers().contains(Modifier.PRIVATE)) {
                 //use it as a field, just assign it directly
                 fields.add(new Field(field));
             } else {

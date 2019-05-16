@@ -283,7 +283,7 @@ public class Processor extends AbstractProcessor {
                 for (Property property : stm.getProperties()) {
                     org.gwtproject.serial.json.Property p = new org.gwtproject.serial.json.Property();
                     p.setName(property.getName());
-                    p.setTypeId(property.getTypeName().toString());
+                    p.setTypeId(property.getFieldTypeName().toString());
                     properties.add(p);
                 }
                 type.setProperties(properties);
