@@ -222,19 +222,11 @@ public class SerializableTypeModel {
 
     private static ClassName getFieldSerializer(TypeMirror type, SerializableTypeOracleUnion bidiOracle, SerializingTypes t) {
         if (type.getKind() == TypeKind.ARRAY) {
-            //TODO no more null check
-            if (bidiOracle == null) {
-                return ClassName.get(
-                        arraySerializerPackage(JTypeUtils.getLeafType(type), t),
-                        arraySerializerName(JTypeUtils.getLeafType(type), JTypeUtils.getRank(type), t)
-                );
-            } else {
-                return ClassName.get(
-                        arraySerializerPackage(JTypeUtils.getLeafType(type), t),
-                        arraySerializerName(JTypeUtils.getLeafType(type), JTypeUtils.getRank(type), t),
-                        bidiOracle.getSpecificFieldSerializer(type)
-                );
-            }
+            return ClassName.get(
+                    arraySerializerPackage(JTypeUtils.getLeafType(type), t),
+                    arraySerializerName(JTypeUtils.getLeafType(type), JTypeUtils.getRank(type), t),
+                    bidiOracle.getSpecificFieldSerializer(type)
+            );
         }
         assert type.getKind() == TypeKind.DECLARED;
         Element elt = t.getTypes().asElement(type);
