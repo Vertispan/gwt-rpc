@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,6 +19,7 @@
  */
 package org.gwtproject.rpc.websockets.apt;
 
+import org.dominokit.jacksonapt.DefaultJsonSerializationContext;
 import org.gwtproject.rpc.websockets.apt.model.EndpointMethod;
 import org.gwtproject.rpc.websockets.apt.model.EndpointModel;
 import org.gwtproject.rpc.websockets.apt.model.EndpointPair;
@@ -45,16 +46,23 @@ import org.gwtproject.rpc.serialization.api.SerializationStreamReader;
 import org.gwtproject.rpc.serialization.api.SerializationStreamWriter;
 import org.gwtproject.rpc.serialization.api.SerializationWiring;
 import org.gwtproject.rpc.serialization.api.TypeSerializer;
+import org.gwtproject.serial.json.Details;
+import org.gwtproject.serial.json.EndpointInterface;
+import org.gwtproject.serial.json.EndpointMethodCallback;
+import org.gwtproject.serial.json.EndpointMethodParameter;
 
 import javax.annotation.Generated;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
-import javax.tools.Diagnostic.Kind;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -311,7 +319,11 @@ public class EndpointProcessingStep implements ProcessingStep {
 
 
 		try {
+			// write the type to disk
 			JavaFile.builder(packageName, builder.build()).build().writeTo(processingEnv.getFiler());
+
+			// write a JSON descriptor so other implementations can read from that instead of re-reading the annotations
+			writeJsonManifest(processingEnv, model, endpointMethods);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -371,5 +383,52 @@ public class EndpointProcessingStep implements ProcessingStep {
 
 	private String readMethodName(TypeName typeName) {
 		return "read" + typeName.toString().replaceAll("[^a-zA-Z0-9]", "_");
+	}
+
+	private void writeJsonManifest(ProcessingEnvironment processingEnv, EndpointModel model, List<EndpointMethod> endpointMethods) throws IOException {
+		EndpointInterface details = new EndpointInterface();
+		details.setEndpointPackage(model.getPackage(processingEnv));
+		details.setEndpointInterface(model.getInterface().simpleName());
+
+		List<org.gwtproject.serial.json.EndpointMethod> methods = new ArrayList<>();
+		for (EndpointMethod endpointMethod : endpointMethods) {
+			org.gwtproject.serial.json.EndpointMethod m = new org.gwtproject.serial.json.EndpointMethod();
+
+			m.setName(endpointMethod.getElement().getSimpleName().toString());
+
+			List<EndpointMethodParameter> params = new ArrayList<>();
+			List<? extends TypeMirror> parameterTypes = endpointMethod.getMirror().getParameterTypes();
+			for (int i = 0; i < parameterTypes.size(); i++) {
+				if (i == parameterTypes.size() - 1 && endpointMethod.hasCallback(processingEnv)) {
+					break;//callback, ignore it
+				}
+
+				EndpointMethodParameter param = new EndpointMethodParameter();
+				param.setName(endpointMethod.getElement().getParameters().get(i).getSimpleName().toString());
+				param.setTypeId(TypeName.get(parameterTypes.get(i)).toString());
+
+				params.add(param);
+			}
+			m.setParameters(params);
+
+			if (endpointMethod.hasCallback(processingEnv)) {
+				EndpointMethodCallback callback = new EndpointMethodCallback();
+				callback.setSuccessTypeId(endpointMethod.getCallbackSuccessType(processingEnv).toString());
+				callback.setFailureTypeId(endpointMethod.getCallbackFailureType(processingEnv).toString());
+				m.setCallback(callback);
+			}
+
+			methods.add(m);
+		}
+
+		details.setMethods(methods);
+
+		FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, details.getEndpointPackage(), details.getEndpointInterface() + ".json");
+		try (PrintWriter writer = new PrintWriter(resource.openOutputStream())) {
+			writer.print(EndpointInterface.INSTANCE.write(details, DefaultJsonSerializationContext.builder()
+					.serializeNulls(false)
+					.indent(true)
+					.build()));
+		}
 	}
 }

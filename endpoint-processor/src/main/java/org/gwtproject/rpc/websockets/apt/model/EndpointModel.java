@@ -178,8 +178,8 @@ public class EndpointModel implements Comparable<EndpointModel> {
 		return env.getElementUtils().getPackageOf(endpointElement).getQualifiedName().toString();
 	}
 
-	public TypeName getInterface() {
-		return ClassName.get(endpointElement.asType());
+	public ClassName getInterface() {
+		return ClassName.get((TypeElement) endpointElement);
 	}
 
 	public TypeName getSpecifiedSuperclass(ProcessingEnvironment env, EndpointModel remote) {
