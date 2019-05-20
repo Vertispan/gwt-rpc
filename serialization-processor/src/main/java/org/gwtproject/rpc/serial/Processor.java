@@ -536,8 +536,8 @@ public class Processor extends AbstractProcessor {
                 }
 
                 //walk up to superclass, if any
-                if (model.getTypeElement().getSuperclass().getKind() != TypeKind.NONE && model.isSerializable()) {
-                    deserializeMethodBuilder.addStatement("$L.deserialize(reader, instance)", model.getFieldSerializer().enclosingClassName());
+                if (model.getSuperclassFieldSerializer() != null) {
+                    deserializeMethodBuilder.addStatement("$L.deserialize(reader, instance)", model.getSuperclassFieldSerializer());
                 }
             }
 
