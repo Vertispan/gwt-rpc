@@ -73,10 +73,12 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 		server.onOpen(new Jsr356Connection(session), server.getClient());
 	}
 
-//	@OnMessage
-//	public void onMessage(String message) {
-//		handleMessage.accept(message);
-//	}
+	@OnMessage
+	public void onMessage(String message, Session session) throws IOException {
+		session.getBasicRemote().sendText("Error: This endpoint does not accept string messages, use binary messages instead.");
+
+		session.close();
+	}
 
 	@OnMessage
 	public void onMessage(ByteBuffer message) {
