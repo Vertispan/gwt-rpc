@@ -16,6 +16,8 @@ public class Type {
 
     private String superTypeId;
 
+    private List<String> interfaceTypeIds;
+
     private List<Property> properties;
 
     private boolean canInstantiate;
@@ -69,6 +71,14 @@ public class Type {
 
     public void setSuperTypeId(String superTypeId) {
         this.superTypeId = superTypeId;
+    }
+
+    public List<String> getInterfaceTypeIds() {
+        return interfaceTypeIds;
+    }
+
+    public void setInterfaceTypeIds(List<String> interfaceTypeIds) {
+        this.interfaceTypeIds = interfaceTypeIds;
     }
 
     public List<Property> getProperties() {

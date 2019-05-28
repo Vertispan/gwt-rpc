@@ -273,6 +273,8 @@ public class Processor extends AbstractProcessor {
                     type.setSuperTypeId(ClassName.get(stm.getTypeElement().getSuperclass()).toString());
                 }
 
+                type.setInterfaceTypeIds(stm.getTypeElement().getInterfaces().stream().map(i -> ClassName.get(i).toString()).collect(Collectors.toList()));
+
                 List<org.gwtproject.serial.json.Property> properties = new ArrayList<>();
                 for (Field field : stm.getFields()) {
                     org.gwtproject.serial.json.Property p = new org.gwtproject.serial.json.Property();
