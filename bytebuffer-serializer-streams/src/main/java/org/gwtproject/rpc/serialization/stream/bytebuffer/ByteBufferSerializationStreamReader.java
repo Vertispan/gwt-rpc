@@ -7,6 +7,7 @@ import org.gwtproject.rpc.serialization.api.impl.AbstractSerializationStreamRead
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 
 public class ByteBufferSerializationStreamReader extends AbstractSerializationStreamReader {
     private final TypeSerializer serializer;//b
@@ -61,7 +62,7 @@ public class ByteBufferSerializationStreamReader extends AbstractSerializationSt
                 }
                 byte[] bytes = new byte[stringLength];
                 bb.get(bytes);
-                strings[i] = new String(bytes);
+                strings[i] = new String(bytes, Charset.forName("UTF-8"));
             }
         }
 
