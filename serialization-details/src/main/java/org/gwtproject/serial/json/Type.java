@@ -18,6 +18,8 @@ public class Type {
 
     private List<String> interfaceTypeIds;
 
+    private boolean isAbstract;
+
     private List<Property> properties;
 
     private boolean canInstantiate;
@@ -79,6 +81,14 @@ public class Type {
 
     public void setInterfaceTypeIds(List<String> interfaceTypeIds) {
         this.interfaceTypeIds = interfaceTypeIds;
+    }
+
+    public boolean isIsAbstract() {
+        return isAbstract;
+    }
+
+    public void setIsAbstract(boolean anAbstract) {
+        isAbstract = anAbstract;
     }
 
     public List<Property> getProperties() {
