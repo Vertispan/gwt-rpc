@@ -47,5 +47,9 @@ public @interface RemoteService {
 		default NoRemoteEndpoint<?> noRemoteEndpoint() {
 			return null;
 		}
+
+		default void onError(Throwable throwable) {
+			throwable.printStackTrace();
+		}
 	}
 }

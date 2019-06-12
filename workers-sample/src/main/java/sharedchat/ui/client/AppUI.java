@@ -19,6 +19,7 @@
  */
 package sharedchat.ui.client;
 
+import elemental2.dom.DomGlobal;
 import org.gwtproject.rpc.worker.client.WorkerFactory;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.Style.Position;
@@ -56,6 +57,11 @@ public class AppUI implements EntryPoint {
 
 		ChatWorker sharedWorker = sharedWorkerFactory.createSharedWorker("sharedchat_worker/worker.js", new ChatPage() {
 			private ChatWorker chatWorker;
+
+			@Override
+			public void onError(Throwable error) {
+				DomGlobal.console.log("An error occurred", error);
+			}
 
 			@Override
 			public void init(String username, List<ChatEvent> events) {

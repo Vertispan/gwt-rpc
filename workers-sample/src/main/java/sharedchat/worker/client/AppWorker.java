@@ -19,6 +19,7 @@
  */
 package sharedchat.worker.client;
 
+import elemental2.dom.DomGlobal;
 import org.gwtproject.rpc.websockets.client.ServerBuilder;
 import org.gwtproject.rpc.worker.client.WorkerFactory;
 import org.gwtproject.rpc.worker.client.worker.MessagePort;
@@ -73,6 +74,11 @@ public class AppWorker implements EntryPoint {
 		self().setOnConnect(e -> {
 			pageCommunicationFactory.wrapRemoteMessagePort(e.ports[0], new ChatWorker() {
 				private ChatPage page;
+
+				@Override
+				public void onError(Throwable error) {
+					DomGlobal.console.log("An error occurred", error);
+				}
 
 				@Override
 				public void login(String username) {

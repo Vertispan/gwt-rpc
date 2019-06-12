@@ -19,6 +19,7 @@
  */
 package simpleworker.ui.client;
 
+import elemental2.dom.DomGlobal;
 import org.gwtproject.rpc.websockets.shared.Callback;
 import org.gwtproject.rpc.worker.client.WorkerFactory;
 import com.google.gwt.core.client.EntryPoint;
@@ -40,6 +41,11 @@ public class AppUI implements EntryPoint {
 
 		final MyWorker worker = factory.createDedicatedWorker(GWT.getModuleBaseForStaticFiles() + "../simpleworker_worker/worker.js", new MyHost() {
 			private MyWorker remote;
+
+			@Override
+			public void onError(Throwable error) {
+				DomGlobal.console.log("An error occurred", error);
+			}
 
 			@Override
 			public void setRemote(MyWorker myWorker) {

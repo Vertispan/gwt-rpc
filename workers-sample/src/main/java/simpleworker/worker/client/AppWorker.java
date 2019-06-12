@@ -19,6 +19,7 @@
  */
 package simpleworker.worker.client;
 
+import elemental2.dom.DomGlobal;
 import org.gwtproject.rpc.websockets.shared.Callback;
 import org.gwtproject.rpc.worker.client.WorkerFactory;
 import org.gwtproject.rpc.worker.client.worker.MessagePort;
@@ -38,6 +39,11 @@ public class AppWorker implements EntryPoint {
 		WorkerFactory<MyHost, MyWorker> factory = WorkerFactory.of(MyHost_Impl::new);
 
 		factory.wrapRemoteMessagePort(self(), new MyWorker() {
+			@Override
+			public void onError(Throwable error) {
+				DomGlobal.console.log("An error occurred", error);
+			}
+
 			@Override
 			public void ping() {
 				getRemote().pong();

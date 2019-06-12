@@ -48,6 +48,10 @@ public @interface Endpoint {
 		void setRemote(T remote);
 		@RemoteEndpointSupplier
 		T getRemote();
+
+		default void onError(Throwable throwable) {
+			throwable.printStackTrace();
+		}
 	}
 
 	/**

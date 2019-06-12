@@ -55,5 +55,9 @@ public abstract class AbstractWorkerEndpointImpl<E extends MessagePortEndpoint<?
 		return remote;
 	}
 
+	@Override
+	public void onError(Throwable error) {
+		throw new UnsupportedOperationException("This method cannot be called on a remote instance");
+	}
 }
 

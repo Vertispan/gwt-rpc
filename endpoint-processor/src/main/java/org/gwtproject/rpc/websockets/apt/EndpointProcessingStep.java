@@ -313,6 +313,7 @@ public class EndpointProcessingStep implements ProcessingStep {
 		builder.addMethod(MethodSpec.methodBuilder("__onError")
 				.addParameter(Throwable.class, "ex")
 				.addModifiers(Modifier.PROTECTED)
+				.addStatement("$L().onError(ex)", model.getRemoteEndpointGetterMethodName(processingEnv))
 				.build());
 
 		// any extra contract methods?
