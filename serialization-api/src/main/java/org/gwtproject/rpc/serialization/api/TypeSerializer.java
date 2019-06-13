@@ -7,6 +7,13 @@ package org.gwtproject.rpc.serialization.api;
 public interface TypeSerializer {
 
     /**
+     * Returns a string that will change if any of the types this serializer can handle changes
+     * in any meaningful way
+     * @return
+     */
+    String getChecksum();
+
+    /**
      * Restore an instantiated object from the serialized stream.
      */
     void deserialize(SerializationStreamReader stream, Object instance,

@@ -70,6 +70,8 @@ public abstract class AbstractWebSocketServerImpl<S extends Server<S,C>, C exten
 		this.client = client;
 	}
 
+	public abstract String getChecksum();
+
 	@Override
 	public void close() {
 		if (close == null) {

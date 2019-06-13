@@ -25,14 +25,12 @@ import org.gwtproject.rpc.websockets.shared.Client;
 import org.gwtproject.rpc.websockets.shared.Server;
 import org.gwtproject.rpc.websockets.shared.Server.Connection;
 import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointImplConstructor;
+import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketClientImpl;
 
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
+import javax.websocket.*;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
@@ -66,6 +64,26 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 					handleMessage = message -> onMessage.accept(new ByteBufferSerializationStreamReader(serializer, message));
 				}
 		);
+		List<String> hash = session.getRequestParameterMap().get("checksum");
+		try {
+			if (hash == null || hash.isEmpty()) {
+				session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "The checksum query parameter was not specified, cannot accept request"));
+				return;
+			} else if (hash.size() > 1) {
+				session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "More than one checksum query parameter specified, cannot accept request"));
+				return;
+			} else {
+				String expected = ((AbstractWebSocketClientImpl<?, ?>) instance).getChecksum();
+				String actual = hash.iterator().next();
+				if (!expected.equals(actual)) {
+					session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Expected checksum with value " + expected + ", but client sent " + actual + ", cannot accept request"));
+					return;
+				}
+			}
+		} catch (IOException e) {
+			onError(new IOException("Error when closing new connection", e));
+		}
+
 		server.setClient(instance);
 		instance.setServer(server);
 

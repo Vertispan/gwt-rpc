@@ -36,6 +36,7 @@ import playn.html.HasArrayBufferView;
 import playn.html.TypedArrayHelper;
 
 import java.nio.ByteBuffer;
+import java.util.function.Consumer;
 
 /**
  * Base interface to be extended and given a concrete Server interface in a client project,
@@ -118,10 +119,12 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 	 */
 	static <E extends Server<? super E, ?>> ServerBuilder<E> of(EndpointImplConstructor<E> constructor) {
 		return new ServerBuilderImpl<E>("", "") {
+
+			private WebSocket socket;
+			private Consumer<ArrayBuffer> onmessage;
+
 			@Override
 			public E start() {
-				WebSocket socket = new WebSocket(getUrl());
-				socket.binaryType = "arraybuffer";
 				E instance = constructor.create(
 						serializer -> {
 							ByteBufferSerializationStreamWriter writer = new ByteBufferSerializationStreamWriter(serializer);
@@ -130,20 +133,25 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 						},
 						stream -> socket.send(Js.<Int8Array>uncheckedCast(((HasArrayBufferView)stream.getFullPayload()).getTypedArray())),
 						(send, serializer) -> {
-							socket.onmessage = message -> {
-								ArrayBuffer data = (ArrayBuffer) message.data;
-								ByteBuffer bb = TypedArrayHelper.wrap(data);
+							onmessage = message -> {
+								ByteBuffer bb = TypedArrayHelper.wrap(message);
 								send.accept(new ByteBufferSerializationStreamReader(serializer, bb));
-								return null;
 							};
 						}
 				);
+
+				socket = new WebSocket(getUrl() + "?checksum=" + ((AbstractWebSocketServerImpl<?, ?>) instance).getChecksum());
+				socket.binaryType = "arraybuffer";
 				socket.onclose = e -> {
 					instance.getClient().onClose();
 					return null;
 				};
 				socket.onopen = e -> {
 					instance.getClient().onOpen();
+					return null;
+				};
+				socket.onmessage = event -> {
+					onmessage.accept((ArrayBuffer) event.data);
 					return null;
 				};
 				Js.<JsPropertyMap<OnopenFn>>cast(socket).set("onerror", e -> {

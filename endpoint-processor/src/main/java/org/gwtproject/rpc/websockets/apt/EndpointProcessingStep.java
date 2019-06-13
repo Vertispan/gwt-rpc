@@ -92,14 +92,22 @@ public class EndpointProcessingStep implements ProcessingStep {
 				.map(endpoint -> EndpointPair.fromOne(endpoint, processingEnv))
 				.distinct()
 				.forEach(pair -> {
-					implement(pair.getLeft(), pair.getRight());
-					implement(pair.getRight(), pair.getLeft());
+					// write a JSON descriptor so other implementations can read from that instead of re-reading the annotations
+					String hash;
+					try {
+						hash = writeJsonManifests(processingEnv, pair.getLeft(), pair.getRight());
+					} catch (IOException e) {
+						throw new UncheckedIOException("Error writing JSON manifests", e);
+					}
+
+					implement(pair.getLeft(), pair.getRight(), hash);
+					implement(pair.getRight(), pair.getLeft(), hash);
 				});
 
 		return Sets.newHashSet();
 	}
 
-	private void implement(EndpointModel model, EndpointModel remoteModel) {
+	private void implement(EndpointModel model, EndpointModel remoteModel, String hash) {
 		// set up basics, declare superclass (and extra contract wiring?)
 		String packageName = model.isPlaceholder() ? remoteModel.getPackage(processingEnv) : model.getPackage(processingEnv);
 		String generatedTypeName = model.isPlaceholder() ? remoteModel.getGeneratedTypeName() + "Remote" : model.getGeneratedTypeName();
@@ -316,15 +324,19 @@ public class EndpointProcessingStep implements ProcessingStep {
 				.addStatement("$L().onError(ex)", model.getRemoteEndpointGetterMethodName(processingEnv))
 				.build());
 
+		// build checksum method
+		builder.addMethod(MethodSpec.methodBuilder("getChecksum")
+				.addModifiers(Modifier.PUBLIC)
+				.returns(String.class)
+				.addStatement("return $S + s.createSerializer().getChecksum()", hash)
+				.build());
+
 		// any extra contract methods?
 
 
 		try {
 			// write the type to disk
 			JavaFile.builder(packageName, builder.build()).build().writeTo(processingEnv.getFiler());
-
-			// write a JSON descriptor so other implementations can read from that instead of re-reading the annotations
-			writeJsonManifest(processingEnv, model, endpointMethods);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -386,13 +398,36 @@ public class EndpointProcessingStep implements ProcessingStep {
 		return "read" + typeName.toString().replaceAll("[^a-zA-Z0-9]", "_");
 	}
 
-	private void writeJsonManifest(ProcessingEnvironment processingEnv, EndpointModel model, List<EndpointMethod> endpointMethods) throws IOException {
+	private String writeJsonManifests(ProcessingEnvironment processingEnv, EndpointModel left, EndpointModel right) throws IOException {
+		EndpointInterface leftDetails = buildEndpointManifest(processingEnv, left);
+		EndpointInterface rightDetails = buildEndpointManifest(processingEnv, right);
+
+		rightDetails.computeHash(leftDetails);
+		leftDetails.computeHash(rightDetails);
+
+		writeManifestToOutput(processingEnv, leftDetails);
+		writeManifestToOutput(processingEnv, rightDetails);
+
+		return leftDetails.getEndpointHash();
+	}
+
+	private void writeManifestToOutput(ProcessingEnvironment processingEnv, EndpointInterface details) throws IOException {
+		FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, details.getEndpointPackage(), details.getEndpointInterface() + ".json");
+		try (PrintWriter writer = new PrintWriter(resource.openOutputStream())) {
+			writer.print(EndpointInterface.INSTANCE.write(details, DefaultJsonSerializationContext.builder()
+					.serializeNulls(false)
+					.indent(true)
+					.build()));
+		}
+	}
+
+	private EndpointInterface buildEndpointManifest(ProcessingEnvironment processingEnv, EndpointModel model) {
 		EndpointInterface details = new EndpointInterface();
 		details.setEndpointPackage(model.getPackage(processingEnv));
 		details.setEndpointInterface(model.getInterface().simpleName());
 
 		List<org.gwtproject.serial.json.EndpointMethod> methods = new ArrayList<>();
-		for (EndpointMethod endpointMethod : endpointMethods) {
+		for (EndpointMethod endpointMethod : model.getEndpointMethods(processingEnv)) {
 			org.gwtproject.serial.json.EndpointMethod m = new org.gwtproject.serial.json.EndpointMethod();
 
 			m.setName(endpointMethod.getElement().getSimpleName().toString());
@@ -423,13 +458,6 @@ public class EndpointProcessingStep implements ProcessingStep {
 		}
 
 		details.setMethods(methods);
-
-		FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, details.getEndpointPackage(), details.getEndpointInterface() + ".json");
-		try (PrintWriter writer = new PrintWriter(resource.openOutputStream())) {
-			writer.print(EndpointInterface.INSTANCE.write(details, DefaultJsonSerializationContext.builder()
-					.serializeNulls(false)
-					.indent(true)
-					.build()));
-		}
+		return details;
 	}
 }

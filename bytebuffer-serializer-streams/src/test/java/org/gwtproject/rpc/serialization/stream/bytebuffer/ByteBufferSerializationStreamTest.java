@@ -13,6 +13,11 @@ public class ByteBufferSerializationStreamTest {
         protected FieldSerializer serializer(String name) {
             return null;
         }
+
+        @Override
+        public String getChecksum() {
+            return "";
+        }
     };
 
     private ByteBufferSerializationStreamWriter getStreamWriter() {

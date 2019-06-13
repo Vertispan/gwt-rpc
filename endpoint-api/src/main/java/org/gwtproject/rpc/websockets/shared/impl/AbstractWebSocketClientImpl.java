@@ -67,4 +67,6 @@ public abstract class AbstractWebSocketClientImpl<C extends Client<C,S>, S exten
 	public S getServer() {
 		return server;
 	}
+
+	public abstract String getChecksum();
 }

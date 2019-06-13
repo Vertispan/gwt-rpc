@@ -231,15 +231,16 @@ public class Processor extends AbstractProcessor {
         //TODO it would be lovely to have a metamodel...
         writeSerializerImpl(prefix, packageName, serializationInterface);
 
-        //write type serializer, pointing at required field serializers and their appropriate use in each direction
-        //TODO consider only doing this once, later, so we can be sure classes are still needed? not sure...
-        writeTypeSerializer(prefix, packageName, models);
+        // write out a JSON file describing which describes the serializable types so other tooling can be generated from this
+        String hash = writeJsonManifest(prefix, packageName, models);
 
-        // write out a JSON file describing which
-        writeJsonManifest(prefix, packageName, models);
+        // write type serializer, pointing at required field serializers and their appropriate use in each direction
+        //TODO consider only doing this once, later, so we can be sure classes are still needed? not sure...
+        writeTypeSerializer(prefix, packageName, models, hash);
+
     }
 
-    private void writeJsonManifest(String prefix, String packageName, List<SerializableTypeModel> models) throws IOException {
+    private String writeJsonManifest(String prefix, String packageName, List<SerializableTypeModel> models) throws IOException {
         Details d = new Details();
         d.setSerializerPackage(packageName);
         d.setSerializerInterface(prefix);
@@ -254,7 +255,9 @@ public class Processor extends AbstractProcessor {
             }
 
             type.setCanInstantiate(stm.mayBeInstantiated());
+            //TODO should check read vs write for these two, but for now this will work
             type.setCanSerialize(stm.isSerializable());
+            type.setCanDeserialize(stm.isSerializable());
 
             if (stm.getType().getKind() == TypeKind.ARRAY) {
                 type.setKind(Type.Kind.ARRAY);
@@ -298,6 +301,8 @@ public class Processor extends AbstractProcessor {
 
         d.setSerializableTypes(serializableTypes);
 
+        d.computeHash();
+
         FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT, packageName, prefix + ".json");
         try (PrintWriter writer = new PrintWriter(resource.openOutputStream())) {
             writer.print(Details.INSTANCE.write(d, DefaultJsonSerializationContext.builder()
@@ -305,6 +310,8 @@ public class Processor extends AbstractProcessor {
                     .indent(true)
                     .build()));
         }
+
+        return d.getSerializerHash();
     }
 
     private void writeSerializerImpl(String prefix, String packageName, Element serializationInterface) throws IOException {
@@ -367,7 +374,7 @@ public class Processor extends AbstractProcessor {
         JavaFile.builder(packageName, implTypeBuilder.build()).build().writeTo(filer);
     }
 
-    private void writeTypeSerializer(String prefix, String packageName, List<SerializableTypeModel> models) throws IOException {
+    private void writeTypeSerializer(String prefix, String packageName, List<SerializableTypeModel> models, String hash) throws IOException {
         Builder typeSerializer = TypeSpec.classBuilder(prefix + "_TypeSerializer")
                 .addAnnotation(AnnotationSpec.builder(Generated.class).addMember("value", "\"$L\"", Processor.class.getCanonicalName()).build())
                 .superclass(TypeSerializerImpl.class)
@@ -394,6 +401,13 @@ public class Processor extends AbstractProcessor {
                 .returns(FieldSerializer.class)
                 .addStatement("return fieldSerializer.computeIfAbsent(name, ignore -> {throw new IllegalArgumentException(name);})")
                 .build());
+
+        typeSerializer.addMethod(MethodSpec.methodBuilder("getChecksum")
+                .addModifiers(Modifier.PUBLIC)
+                .returns(String.class)
+                .addStatement("return $S", hash)
+                .build());
+
         JavaFile.builder(packageName, typeSerializer.build()).build().writeTo(filer);
     }
 

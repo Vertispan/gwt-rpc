@@ -17,6 +17,11 @@ public class ServerStreamTest {
         protected FieldSerializer serializer(String s) {
             return null;
         }
+
+        @Override
+        public String getChecksum() {
+            return "";
+        }
     };
 
     protected StringSerializationStreamWriter getStringStreamWriter() {
