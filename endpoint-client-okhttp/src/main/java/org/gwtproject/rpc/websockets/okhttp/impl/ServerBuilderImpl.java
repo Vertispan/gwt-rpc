@@ -65,7 +65,12 @@ public class ServerBuilderImpl<S extends Server<? super S, ?>> implements Server
             endpoint.setClient(client);
             client.setServer(endpoint);
 
-            websocket = new OkHttpClient().newWebSocket(reqBuilder.build(), listener);
+            // Append the checksum querystring. This should be entirely safe since the builder isn't exposed to client code at all
+            Request withoutQueryString = reqBuilder.build();
+            Request.Builder withQueryString = withoutQueryString.newBuilder()
+                    .url(withoutQueryString.url().toString() + "?checksum=" + ((AbstractWebSocketServerImpl<?, ?>) endpoint).getChecksum());
+
+            websocket = new OkHttpClient().newWebSocket(withQueryString.build(), listener);
 
             ((AbstractWebSocketServerImpl<?, ?>)endpoint).close = () -> websocket.close(1000, null);
         }
