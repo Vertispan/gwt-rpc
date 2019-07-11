@@ -4,7 +4,6 @@ import com.google.auto.service.AutoService;
 import com.google.common.base.Charsets;
 import com.squareup.javapoet.*;
 import com.squareup.javapoet.TypeSpec.Builder;
-import org.dominokit.jacksonapt.DefaultJsonSerializationContext;
 import org.gwtproject.rpc.gwtapt.JTypeUtils;
 import org.gwtproject.rpc.serial.model.SerializableTypeModel;
 import org.gwtproject.rpc.serial.model.SerializableTypeModel.Field;
@@ -305,10 +304,7 @@ public class Processor extends AbstractProcessor {
 
         FileObject resource = filer.createResource(StandardLocation.CLASS_OUTPUT, packageName, prefix + ".json");
         try (PrintWriter writer = new PrintWriter(resource.openOutputStream())) {
-            writer.print(Details.INSTANCE.write(d, DefaultJsonSerializationContext.builder()
-                    .serializeNulls(false)
-                    .indent(true)
-                    .build()));
+            writer.print(Details.INSTANCE.write(d, Details.CONTEXT));
         }
 
         return d.getSerializerHash();

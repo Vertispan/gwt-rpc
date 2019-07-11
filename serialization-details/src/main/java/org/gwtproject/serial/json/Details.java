@@ -1,5 +1,7 @@
 package org.gwtproject.serial.json;
 
+import org.dominokit.jacksonapt.DefaultJsonSerializationContext;
+import org.dominokit.jacksonapt.JsonSerializationContext;
 import org.dominokit.jacksonapt.ObjectMapper;
 import org.dominokit.jacksonapt.annotation.JSONMapper;
 
@@ -15,6 +17,10 @@ public class Details {
     public static interface TypeSerializationDetailsMapper extends ObjectMapper<Details> {
     }
     public static final TypeSerializationDetailsMapper INSTANCE = new Details_TypeSerializationDetailsMapperImpl();
+    public static final JsonSerializationContext CONTEXT = DefaultJsonSerializationContext.builder()
+            .serializeNulls(false)
+                    .indent(true)
+                    .build();
 
     private String serializerPackage;
     private String serializerInterface;

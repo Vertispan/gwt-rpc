@@ -1,5 +1,7 @@
 package org.gwtproject.serial.json;
 
+import org.dominokit.jacksonapt.DefaultJsonSerializationContext;
+import org.dominokit.jacksonapt.JsonSerializationContext;
 import org.dominokit.jacksonapt.ObjectMapper;
 import org.dominokit.jacksonapt.annotation.JSONMapper;
 
@@ -17,6 +19,10 @@ public class EndpointInterface {
     public interface EndpointInterfacesMapper extends ObjectMapper<EndpointInterface> {
     }
     public static final EndpointInterfacesMapper INSTANCE = new EndpointInterface_EndpointInterfacesMapperImpl();
+    public static final JsonSerializationContext CONTEXT = DefaultJsonSerializationContext.builder()
+            .serializeNulls(false)
+            .indent(true)
+            .build();
 
     private String endpointPackage;
     private String endpointInterface;

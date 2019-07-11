@@ -19,7 +19,6 @@
  */
 package org.gwtproject.rpc.websockets.apt;
 
-import org.dominokit.jacksonapt.DefaultJsonSerializationContext;
 import org.gwtproject.rpc.websockets.apt.model.EndpointMethod;
 import org.gwtproject.rpc.websockets.apt.model.EndpointModel;
 import org.gwtproject.rpc.websockets.apt.model.EndpointPair;
@@ -46,7 +45,6 @@ import org.gwtproject.rpc.serialization.api.SerializationStreamReader;
 import org.gwtproject.rpc.serialization.api.SerializationStreamWriter;
 import org.gwtproject.rpc.serialization.api.SerializationWiring;
 import org.gwtproject.rpc.serialization.api.TypeSerializer;
-import org.gwtproject.serial.json.Details;
 import org.gwtproject.serial.json.EndpointInterface;
 import org.gwtproject.serial.json.EndpointMethodCallback;
 import org.gwtproject.serial.json.EndpointMethodParameter;
@@ -414,10 +412,7 @@ public class EndpointProcessingStep implements ProcessingStep {
 	private void writeManifestToOutput(ProcessingEnvironment processingEnv, EndpointInterface details) throws IOException {
 		FileObject resource = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, details.getEndpointPackage(), details.getEndpointInterface() + ".json");
 		try (PrintWriter writer = new PrintWriter(resource.openOutputStream())) {
-			writer.print(EndpointInterface.INSTANCE.write(details, DefaultJsonSerializationContext.builder()
-					.serializeNulls(false)
-					.indent(true)
-					.build()));
+			writer.print(EndpointInterface.INSTANCE.write(details, EndpointInterface.CONTEXT));
 		}
 	}
 

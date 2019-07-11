@@ -75,6 +75,11 @@
 								<excludes>
 									<exclude>javax.annotation:javax.annotation-api</exclude>
 									<exclude>org.gwtproject.rpc:serialization-api</exclude>
+									<exclude>org.gwtproject.rpc:serialization-details</exclude>
+									<!-- dependencies of serialization-details which are shaded into it -->
+									<exclude>org.dominokit.jackson:jackson-apt</exclude>
+									<exclude>org.dominokit.jackson:jackson-super</exclude>
+
 									<exclude>org.gwtproject.rpc:endpoint-api</exclude>
 									<exclude>com.google.code.findbugs:jsr305</exclude>
 									<exclude>com.google.j2objc:j2objc-annotations</exclude>
@@ -103,10 +108,6 @@
 									<shadedPattern>gwtrpc.shaded.org.codehaus</shadedPattern>
 								</relocation>
 								<relocation>
-									<pattern>org.dominokit</pattern>
-									<shadedPattern>gwtrpc.shaded.org.dominokit</shadedPattern>
-								</relocation>
-								<relocation>
 									<pattern>afu</pattern>
 									<shadedPattern>gwtrpc.shaded.afu</shadedPattern>
 								</relocation>
@@ -132,21 +133,10 @@
 										<exclude>**/*.java</exclude>
 									</excludes>
 								</filter>
-								<filter>
-									<artifact>org.dominokit.jackson:jackson-apt</artifact>
-									<excludes>
-										<exclude>**/*.java</exclude>
-										<exclude>**/*.gwt.xml</exclude>
-										<exclude>META-INF/gwt/mainModule</exclude>
-									</excludes>
-								</filter>
 							</filters>
 						</configuration>
 					</execution>
 				</executions>
-				<dependencies>
-
-				</dependencies>
 			</plugin>
 		</plugins>
 	</build>

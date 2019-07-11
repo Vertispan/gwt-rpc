@@ -53,6 +53,79 @@
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+                <excludes>
+                  <exclude>javax.annotation:javax.annotation-api</exclude>
+                  <exclude>org.gwtproject.rpc:serialization-api</exclude>
+                  <exclude>org.gwtproject.rpc:serialization-details</exclude>
+                  <!-- dependencies of serialization-details which are shaded into it -->
+                  <exclude>org.dominokit.jackson:jackson-apt</exclude>
+                  <exclude>org.dominokit.jackson:jackson-super</exclude>
+
+                  <exclude>com.google.code.findbugs:jsr305</exclude>
+                  <exclude>com.google.j2objc:j2objc-annotations</exclude>
+                  <exclude>com.google.errorprone:error_prone_annotations</exclude>
+                </excludes>
+              </artifactSet>
+              <relocations>
+                <relocation>
+                  <pattern>com.google.auto</pattern>
+                  <shadedPattern>gwtrpc.shaded.com.google.auto</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.google.common</pattern>
+                  <shadedPattern>gwtrpc.shaded.com.google.common</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.google.thirdparty</pattern>
+                  <shadedPattern>gwtrpc.shaded.com.google.thirdparty</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.squareup</pattern>
+                  <shadedPattern>gwtrpc.shaded.com.squareup</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.codehaus</pattern>
+                  <shadedPattern>gwtrpc.shaded.org.codehaus</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>afu</pattern>
+                  <shadedPattern>gwtrpc.shaded.afu</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>org.checkerframework</pattern>
+                  <shadedPattern>gwtrpc.shaded.org.checkerframework</shadedPattern>
+                </relocation>
+              </relocations>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+              </transformers>
+              <createSourcesJar>true</createSourcesJar>
+              <filters>
+                <filter>
+                  <artifact>com.google.auto:auto-common</artifact>
+                  <excludes>
+                    <exclude>**/*.java</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
 
