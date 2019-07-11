@@ -11,6 +11,10 @@
 
 	<artifactId>endpoint-client-gwt</artifactId>
 
+	<properties>
+		<playn-html.version>2.0-rc4</playn-html.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -76,12 +80,12 @@
 		<dependency>
 			<groupId>io.playn</groupId>
 			<artifactId>playn-html</artifactId>
-			<version>2.1-SNAPSHOT</version>
+			<version>${playn-html.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.playn</groupId>
 			<artifactId>playn-html</artifactId>
-			<version>2.1-SNAPSHOT</version>
+			<version>${playn-html.version}</version>
 			<classifier>sources</classifier>
 		</dependency>
 	</dependencies>
