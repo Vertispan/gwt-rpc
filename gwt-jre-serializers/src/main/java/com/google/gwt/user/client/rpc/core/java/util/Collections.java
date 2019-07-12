@@ -30,7 +30,7 @@ import java.util.Set;
 public final class Collections {
 
   /**
-   * Custom field serializer for {@link java.util.Collections.EmptyList}.
+   * Custom field serializer for java.util.Collections.EmptyList.
    */
   @SuppressWarnings("rawtypes")
   public static final class EmptyList_CustomFieldSerializer extends
@@ -83,7 +83,7 @@ public final class Collections {
   }
 
   /**
-   * Custom field serializer for {@link java.util.Collections.EmptyMap}.
+   * Custom field serializer for java.util.Collections.EmptyMap.
    */
   @SuppressWarnings("rawtypes")
   public static final class EmptyMap_CustomFieldSerializer extends
@@ -136,7 +136,7 @@ public final class Collections {
   }
 
   /**
-   * Custom field serializer for {@link java.util.Collections.EmptySet}.
+   * Custom field serializer for java.util.Collections.EmptySet.
    */
   @SuppressWarnings("rawtypes")
   public static final class EmptySet_CustomFieldSerializer extends
@@ -189,7 +189,7 @@ public final class Collections {
   }
 
   /**
-   * Custom field serializer for {@link java.util.Collections.SingletonList}.
+   * Custom field serializer for java.util.Collections.SingletonList.
    */
   @SuppressWarnings("rawtypes")
   public static final class SingletonList_CustomFieldSerializer extends

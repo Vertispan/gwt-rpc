@@ -5,8 +5,7 @@ import java.util.Set;
 
 /**
  * Interface implemented by any class that wants to answer questions about
- * serializable types for a given
- * {@link com.google.gwt.user.client.rpc.RemoteService RemoteService}.
+ * serializable types for a given type serializer.
  */
 public interface SerializableTypeOracle {
 

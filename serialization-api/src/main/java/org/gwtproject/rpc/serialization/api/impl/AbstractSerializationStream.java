@@ -13,14 +13,7 @@ public abstract class AbstractSerializationStream {
     public static final int DEFAULT_FLAGS = 0;
 
     /**
-     * The character used to separate fields in client->server RPC messages.
-     *
-     * Note that this character is referenced in the following places not using
-     * this constant, and they must be changed if this is:
-     * <ul>
-     * <li>{@link ServerSerializationStreamWriter}.deserializeStringTable
-     * <li>{@link ClientSerializationStreamReader}.getQuotingRegex
-     * </ul>
+     * The character used to separate fields in client-&gt;server RPC messages.
      */
     public static final char RPC_SEPARATOR_CHAR = '|';
 

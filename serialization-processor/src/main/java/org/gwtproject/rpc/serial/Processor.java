@@ -35,8 +35,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * @todo this should probably be at least 2-4 other classes, not just one.
+ * Processes all classes in the current project and prepares serializers
+ * for any type reachable from a type serializer (as annotated with
+ * {@code @SerializationWiring} annotation).
  */
+//TODO this should probably be at least 2-4 other classes, not just one.
 @AutoService(javax.annotation.processing.Processor.class)
 public class Processor extends AbstractProcessor {
     private static final String knownTypesFilename = "knownTypes.txt";

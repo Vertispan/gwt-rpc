@@ -44,25 +44,7 @@ import java.util.zip.GZIPOutputStream;
  * wiring is absent, and this class must be created differently.
  */
 public abstract class RemoteServiceServlet<S extends RemoteServiceAsync> extends HttpServlet {
-	/**
-	 * Used by {@link #doSetContentType}.
-	 */
-	public static final String CONTENT_TYPE_HEADER = "Content-Type";
 
-	/**
-	 * Used by {@link #doFinish}.
-	 */
-	/*
-	 * NB: Also used by RpcServlet.
-	 */
-	public static final String MODULE_BASE_HEADER = "X-GWT-Module-Base";
-
-	/**
-	 * Used by {@link #doFinish}.
-	 */
-	/*
-	 * NB: Also used by AbstractRemoteServiceServlet.
-	 */
 	public static final String STRONG_NAME_HEADER = "X-GWT-Permutation";
 	//TODO move above to the shared interface
 
@@ -219,7 +201,7 @@ public abstract class RemoteServiceServlet<S extends RemoteServiceAsync> extends
 	 * Returns the strong name of the permutation, as reported by the client that
 	 * issued the request, or <code>null</code> if it could not be determined.
 	 * This information is encoded in the
-	 * {@value com.google.gwt.user.client.rpc.RpcRequestBuilder#STRONG_NAME_HEADER}
+	 * {@value STRONG_NAME_HEADER}
 	 * HTTP header.
 	 */
 	protected final String getPermutationStrongName() {
@@ -266,7 +248,7 @@ public abstract class RemoteServiceServlet<S extends RemoteServiceAsync> extends
 	 * SecurityException if {@link #getPermutationStrongName()} returns
 	 * <code>null</code>. This method can be overridden to be a no-op if there are
 	 * clients that are not expected to provide the
-	 * {@value com.google.gwt.user.client.rpc.RpcRequestBuilder#STRONG_NAME_HEADER}
+	 * {@value STRONG_NAME_HEADER}
 	 * header.
 	 *
 	 * @throws SecurityException if {@link #getPermutationStrongName()} returns
@@ -283,10 +265,8 @@ public abstract class RemoteServiceServlet<S extends RemoteServiceAsync> extends
 	 * Process a call originating from the given request. This method calls
 	 * {@link RemoteServiceServlet#checkPermutationStrongName()} to prevent
 	 * possible XSRF attacks and then decodes the <code>payload</code> using
-	 * {@link RPC#decodeRequest(String, Class, SerializationPolicyProvider)}
-	 * to do the actual work.
-	 * Once the request is decoded {@link RemoteServiceServlet#processCall(RPCRequest)}
-	 * will be called.
+	 * the generated serializers provided from the instance's constructor
+	 * arguments. Once deserialized, it calls directly to the server method.
 	 * <p>
 	 * Subclasses may optionally override this method to handle the payload in any
 	 * way they desire (by routing the request to a framework component, for
@@ -297,12 +277,10 @@ public abstract class RemoteServiceServlet<S extends RemoteServiceAsync> extends
 	 * This is public so that it can be unit tested easily without HTTP.
 	 *
 	 * @param payload the UTF-8 request payload
-	 * @return a string which encodes either the method's return, a checked
-	 *         exception thrown by the method, or an
-	 *         {@link IncompatibleRemoteServiceException}
+	 * @return a string which encodes either the invoked method's success callback or
+	 *         failure callback. Otherwise unhandled exceptions will just cause a 500
+	 *         to be passed to the client.
 	 * @throws SerializationException if we cannot serialize the response
-	 * @throws UnexpectedException if the invocation throws a checked exception
-	 *           that is not declared in the service method's signature
 	 * @throws RuntimeException if the service method throws an unchecked
 	 *           exception (the exception will be the one thrown by the service)
 	 */

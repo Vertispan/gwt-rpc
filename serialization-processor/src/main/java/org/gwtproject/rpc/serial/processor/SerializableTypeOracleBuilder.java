@@ -54,8 +54,8 @@ import java.util.stream.Collectors;
  * mark the class com.google.myapp.MyPersistentClass as enhanced, use:
  *
  * <pre>
- * <extend-configuration-property name='rpc.enhancedClasses'
- *     value='com.google.myapp.MyPersistentClass'/>
+ * &lt;extend-configuration-property name='rpc.enhancedClasses'
+ *     value='com.google.myapp.MyPersistentClass'/&gt;
  * </pre>
  *
  * <p>
@@ -720,10 +720,6 @@ public class SerializableTypeOracleBuilder {
 
     /**
      * Constructs a builder.
-     *
-     *
-     * @throws UnableToCompleteException if we fail to find one of our special
-     *           types
      */
     public SerializableTypeOracleBuilder(Elements elements, Messager messager, SerializingTypes serializingTypes)
             /*throws UnableToCompleteException */{

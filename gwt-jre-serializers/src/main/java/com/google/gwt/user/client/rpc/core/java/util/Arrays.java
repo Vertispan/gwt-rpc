@@ -27,7 +27,7 @@ import java.util.List;
 public final class Arrays {
 
   /**
-   * Custom field serializer for {@link java.util.Arrays.ArrayList}.
+   * Custom field serializer for java.util.Arrays.ArrayList.
    */
   @SuppressWarnings("rawtypes")
   public static final class ArrayList_CustomFieldSerializer {

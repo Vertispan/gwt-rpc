@@ -117,11 +117,13 @@ public interface SerializationStreamReader extends com.google.gwt.user.client.rp
      * could well be 64 times smaller than a long[], but this limits the attacker to only
      * consuming a constant factor more memory than the request itself uses. The check
      * might look something like this:
-     * 
-     *   if (alreadyClaimed + newlyClaimed > slotsInStream + stringsInTable) {
+     *
+     * <pre>
+     *   if (alreadyClaimed + newlyClaimed &gt; slotsInStream + stringsInTable) {
      *       throw new SerializationException("Request claims to be larger than it is");
      *   }
      *   alreadyClaimed += newlyClaimed;
+     * </pre>
      * @param slots the number of items in the collection being deserialized
      * @throws SerializationException if there are too few remaining pieces of data in the
      *                                stream to allow this collection to be deserialized
