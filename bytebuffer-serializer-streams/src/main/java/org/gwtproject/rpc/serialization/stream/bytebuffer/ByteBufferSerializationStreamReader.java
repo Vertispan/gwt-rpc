@@ -45,7 +45,7 @@ public class ByteBufferSerializationStreamReader extends AbstractSerializationSt
         String[] strings = new String[0];
         // see if there is a stringCount, and thus strings present
         if (bb.limit() > (3 << 2) + length) {
-            int stringsCount = bb.get((3 << 2) + length);
+            int stringsCount = bb.getInt((3 << 2) + length);
             if (stringsCount < 1) {
                 throw new IllegalArgumentException("Invalid string count in payload: " + stringsCount);
             }

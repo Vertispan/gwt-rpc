@@ -1,9 +1,13 @@
 package org.gwtproject.rpc.serialization.stream.bytebuffer;
 
 import org.gwtproject.rpc.serialization.api.FieldSerializer;
+import org.gwtproject.rpc.serialization.api.SerializationException;
 import org.gwtproject.rpc.serialization.api.TypeSerializer;
 import org.gwtproject.rpc.serialization.api.impl.TypeSerializerImpl;
 import org.junit.Test;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import static org.junit.Assert.*;
 
@@ -197,5 +201,18 @@ public class ByteBufferSerializationStreamTest {
         assertEquals("bar", reader.readString());
     }
 
+    @Test
+    public void testManyStrings() throws SerializationException {
+        ByteBufferSerializationStreamWriter writer = getStreamWriter();
+
+        for (int i = 0; i < 128; i++) {
+            writer.writeString("string #" + i);
+        }
+
+        ByteBufferSerializationStreamReader reader = getSinglePayloadStreamReader(writer);
+        for (int i = 0; i < 128; i++) {
+            assertEquals("string #" + i, reader.readString());
+        }
+    }
 
 }
