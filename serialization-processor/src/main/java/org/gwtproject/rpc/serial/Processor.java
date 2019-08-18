@@ -90,7 +90,7 @@ public class Processor extends AbstractProcessor {
                 allTypes.addAll(readTypes(Arrays.asList(knownSubtypes.split(File.pathSeparator))));
             }
         } catch (IOException e) {
-            messager.printMessage(Kind.ERROR, "Failed to read from " + knownTypesFilename);
+            messager.printMessage(Kind.ERROR, "Failed to read from serial.knownSubtypes: " + e.getMessage());
             e.printStackTrace();
         }
 
