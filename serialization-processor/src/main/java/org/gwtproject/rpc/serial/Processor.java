@@ -388,7 +388,7 @@ public class Processor extends AbstractProcessor {
         CodeBlock.Builder clinit = CodeBlock.builder();
         for (SerializableTypeModel model : models) {
             if (model.mayBeInstantiated()) {
-                clinit.addStatement("fieldSerializer.put($S, new $T())", model.getTypeElement(), model.getFieldSerializer());
+                clinit.addStatement("fieldSerializer.put($S, new $T())", types.erasure(model.getType()), model.getFieldSerializer());
             }
         }
         typeSerializer.addStaticBlock(clinit.build());
