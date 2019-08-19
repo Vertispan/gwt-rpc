@@ -588,10 +588,10 @@ public class Processor extends AbstractProcessor {
 
                 //walk up to superclass, if any
                 if (model.getSuperclassFieldSerializer() != null) {
-                    deserializeMethodBuilder.addStatement("$L.serialize(writer, instance)", model.getSuperclassFieldSerializer());
+                    serializeMethodBuilder.addStatement("$L.serialize(writer, instance)", model.getSuperclassFieldSerializer());
                 }
             }
-            
+
             fieldSerializerType.addMethod(serializeMethodBuilder.build());
         }
         //maybe write instantiate (if not abstract, and has default ctor) OR is an enum
