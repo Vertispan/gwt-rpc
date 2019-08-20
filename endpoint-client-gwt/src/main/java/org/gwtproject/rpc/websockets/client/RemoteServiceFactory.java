@@ -21,6 +21,8 @@ package org.gwtproject.rpc.websockets.client;
 
 import org.gwtproject.rpc.websockets.shared.RemoteService.RemoteServiceAsync;
 import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointImplConstructor;
+import org.gwtproject.rpc.websockets.shared.impl.AbstractRemoteServiceImpl;
+import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketServerImpl;
 import org.gwtproject.rpc.websockets.shared.impl.ServiceDefTarget;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamWriter;
@@ -56,8 +58,8 @@ public final class RemoteServiceFactory {
 					// set headers (content type, etc)
 					xmlHttpRequest.setRequestHeader("Content-Type", "text/x-gwt-rpc; charset=utf-8");
 
-					// xsrf header, should find a convention that works for gwt3
-					xmlHttpRequest.setRequestHeader("X-GWT-Permutation", "no-permutation");
+					// xsrf header, we'll pass the endpoint+serializer checksums here
+					xmlHttpRequest.setRequestHeader("X-GWT-RPC-Checksum", ((AbstractRemoteServiceImpl<?>) instance[0]).getChecksum());
 
 					// set with creds
 

@@ -50,9 +50,11 @@ public abstract class AbstractRemoteServiceImpl<R extends NoRemoteEndpoint<?>>
 		return server;
 	}
 
+	public abstract String getChecksum();
+
 	@Override
 	public String getSerializationPolicyName() {
-		throw new UnsupportedOperationException("getSerializationPolicyName is not supported");
+		throw new UnsupportedOperationException("getSerializationPolicyName is not supported, use getChecksum instead");
 	}
 
 	@Override

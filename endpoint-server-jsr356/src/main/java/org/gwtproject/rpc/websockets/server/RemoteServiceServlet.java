@@ -25,6 +25,7 @@ import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointIm
 import com.google.gwt.user.client.rpc.SerializationException;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamWriter;
+import org.gwtproject.rpc.websockets.shared.impl.AbstractNoRemoteImpl;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -45,7 +46,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public abstract class RemoteServiceServlet<S extends RemoteServiceAsync> extends HttpServlet {
 
-	public static final String STRONG_NAME_HEADER = "X-GWT-Permutation";
+	public static final String STRONG_NAME_HEADER = "X-GWT-RPC-Checksum";
 	//TODO move above to the shared interface
 
 	private static final String GWT_RPC_CONTENT_TYPE = "text/x-gwt-rpc";
@@ -251,14 +252,19 @@ public abstract class RemoteServiceServlet<S extends RemoteServiceAsync> extends
 	 * {@value STRONG_NAME_HEADER}
 	 * header.
 	 *
+	 * In the GWT3 version, this header is used to check that the client and
+	 * server are consistent. If you override this, be sure to return the client's
+	 * checksum, or just return null to make this a no-op.
+	 *
 	 * @throws SecurityException if {@link #getPermutationStrongName()} returns
 	 *           <code>null</code>
 	 */
-	protected void checkPermutationStrongName() throws SecurityException {
+	protected String checkPermutationStrongName() throws SecurityException {
 		if (getPermutationStrongName() == null) {
 			throw new SecurityException(
 					"Blocked request without GWT permutation header (XSRF attack?)");
 		}
+		return getPermutationStrongName();
 	}
 
 	/**
@@ -286,8 +292,9 @@ public abstract class RemoteServiceServlet<S extends RemoteServiceAsync> extends
 	 */
 	public String processCall(String payload) throws SerializationException {
 		// First, check for possible XSRF situation
-		checkPermutationStrongName();
+		String checksum = checkPermutationStrongName();
 
+		// Construct the client instance
 		String[] holder = new String[1];
 		Runnable[] executeCall = new Runnable[1];
 		NoRemoteEndpoint<S> c = clientFactory.create(
@@ -305,6 +312,14 @@ public abstract class RemoteServiceServlet<S extends RemoteServiceAsync> extends
 				}
 		);
 		c.setRemote(delegate);
+
+		if (checksum != null) {
+			// verify the client and server are speaking the same version
+			String expected = ((AbstractNoRemoteImpl<?>) c).getChecksum();
+			if (!checksum.equals(expected)) {
+				throw new IllegalStateException("Expected checksum with value " + expected);
+			}
+		}
 
 		// execute the stashed function, causing the payload to be parsed and executed
 		executeCall[0].run();

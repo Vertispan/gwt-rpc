@@ -37,6 +37,7 @@ public interface ServiceDefTarget {
 	 * Return the strong name of the serialization policy to be used with this RPC
 	 * instance.
 	 */
+	@Deprecated
 	String getSerializationPolicyName();
 
 	/**

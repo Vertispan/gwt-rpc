@@ -45,4 +45,6 @@ public abstract class AbstractNoRemoteImpl<R> extends AbstractEndpointImpl {
 	public R getRemote() {
 		return server;
 	}
+
+	public abstract String getChecksum();
 }
