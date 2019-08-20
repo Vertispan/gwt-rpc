@@ -76,7 +76,7 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 				String expected = ((AbstractWebSocketClientImpl<?, ?>) instance).getChecksum();
 				String actual = hash.iterator().next();
 				if (!expected.equals(actual)) {
-					session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Expected checksum with value " + expected + ", but client sent " + actual + ", cannot accept request"));
+					session.close(new CloseReason(CloseReason.CloseCodes.CANNOT_ACCEPT, "Expected checksum with value " + expected));
 					return;
 				}
 			}
