@@ -403,8 +403,12 @@ public class EndpointProcessingStep implements ProcessingStep {
 		rightDetails.computeHash(leftDetails);
 		leftDetails.computeHash(rightDetails);
 
-		writeManifestToOutput(processingEnv, leftDetails);
-		writeManifestToOutput(processingEnv, rightDetails);
+		if (!left.isPlaceholder()) {
+			writeManifestToOutput(processingEnv, leftDetails);
+		}
+		if (!right.isPlaceholder()) {
+			writeManifestToOutput(processingEnv, rightDetails);
+		}
 
 		return leftDetails.getEndpointHash();
 	}
