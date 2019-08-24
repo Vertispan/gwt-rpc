@@ -26,5 +26,5 @@ import org.gwtproject.rpc.websockets.shared.RemoteService.RemoteServiceAsync;
 
 @Endpoint(value = NoRemoteEndpoint.class)
 public interface ChatRemoteServiceAsync extends RemoteServiceAsync {
-	void send(String message, Callback<String, Throwable> callback);
+	void send(String message, Callback<String, String> callback);
 }
