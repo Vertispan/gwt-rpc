@@ -31,15 +31,15 @@ public class AjaxOnlyChatWidget {
 	public void onSendClicked() {
 		ChatRemoteServiceAsync service = RemoteServiceFactory.create(ChatRemoteServiceAsync_Impl::new);
 		((ServiceDefTarget) service).setServiceEntryPoint("/hello");
-		service.send("foo", new Callback<String, Throwable>() {
+		service.send("foo", new Callback<String, String>() {
 			@Override
 			public void onSuccess(String value) {
 				DomGlobal.alert("success: " + value);
 			}
 
 			@Override
-			public void onFailure(Throwable error) {
-				DomGlobal.alert("failure" + error);
+			public void onFailure(String error) {
+				DomGlobal.alert("failure: " + error);
 			}
 		});
 	}
