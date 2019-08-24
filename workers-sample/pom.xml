@@ -73,9 +73,6 @@
 						<goals>
 							<goal>compile</goal>
 						</goals>
-						<configuration>
-							<draftCompile>true</draftCompile>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
