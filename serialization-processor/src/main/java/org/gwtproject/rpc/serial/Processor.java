@@ -546,10 +546,10 @@ public class Processor extends AbstractProcessor {
             } else {
                 deserializeMethodBuilder.addParameter(model.getTypeName(), "instance");
                 for (Property property : model.getProperties()) {
-                    deserializeMethodBuilder.addStatement("instance.$L(($T) reader.read$L())", property.getSetter().getSimpleName(), property.getTypeName(), property.getStreamMethodName());
+                    deserializeMethodBuilder.addStatement("instance.$L(($T) reader.read$L())", property.getSetter().getSimpleName(), types.erasure(property.getGetter().getReturnType()), property.getStreamMethodName());
                 }
                 for (Field field : model.getFields()) {
-                    deserializeMethodBuilder.addStatement("instance.$L = ($T) reader.read$L()", field.getField().getSimpleName(), field.getTypeName(), field.getStreamMethodName());
+                    deserializeMethodBuilder.addStatement("instance.$L = ($T) reader.read$L()", field.getField().getSimpleName(), types.erasure(field.getField().asType()), field.getStreamMethodName());
                 }
 
                 //walk up to superclass, if any
