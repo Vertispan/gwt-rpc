@@ -24,6 +24,7 @@ import com.google.gwt.user.client.rpc.SerializationStreamReader;
 import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * Custom field serializer for BigDecimal.
@@ -41,12 +42,24 @@ public class BigDecimal_CustomFieldSerializer extends
 
   public static BigDecimal instantiate(SerializationStreamReader streamReader)
       throws SerializationException {
-    return new BigDecimal(streamReader.readString());
+
+    final int scale = streamReader.readInt();
+    final int length = streamReader.readInt();
+    final byte[] unscaledValue = new byte[length];
+    for (int i = 0; i < length; i++) {
+      unscaledValue[i] = streamReader.readByte();
+    }
+    return new BigDecimal(new BigInteger(unscaledValue), scale);
   }
 
   public static void serialize(SerializationStreamWriter streamWriter,
       BigDecimal instance) throws SerializationException {
-    streamWriter.writeString(instance.toString());
+    streamWriter.writeInt(instance.scale());
+    final byte[] unscaledValue = instance.unscaledValue().toByteArray();
+    streamWriter.writeInt(unscaledValue.length);
+    for (int i = 0; i < unscaledValue.length; i++) {
+      streamWriter.writeByte(unscaledValue[i]);
+    }
   }
 
   @Override
