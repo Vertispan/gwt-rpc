@@ -86,6 +86,13 @@ public class ServerStreamTest {
         writer.writeString("foo1");
         writer.writeString("foo");
         writer.writeString("bar");
+        writer.writeString("\"");
+        writer.writeString("!");
+        writer.writeString("|");
+        writer.writeString("\\");
+        writer.writeString("\\\\");
+        writer.writeString("✓");
+        writer.writeString("\0");
 
         StringSerializationStreamReader reader = getStreamReader(writer);
 
@@ -93,6 +100,13 @@ public class ServerStreamTest {
         assertEquals("foo1", reader.readString());
         assertEquals("foo", reader.readString());
         assertEquals("bar", reader.readString());
+        assertEquals("\"", reader.readString());
+        assertEquals("!", reader.readString());
+        assertEquals("|", reader.readString());
+        assertEquals("\\", reader.readString());
+        assertEquals("\\\\", reader.readString());
+        assertEquals("✓", reader.readString());
+        assertEquals("\0", reader.readString());
     }
 
 

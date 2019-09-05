@@ -175,9 +175,13 @@ public class StringSerializationStreamWriter extends AbstractSerializationStream
      */
     private static String quoteString(String str) {
         return str
-        //replace all slash with double-slash
-                .replaceAll("\\\\", "\\\\")
-        //replace all quote, with slash-quote
+                // replace all plain slash with double-slash (has to be first so we can add slashes later)
+                .replaceAll("\\\\", "\\\\\\\\")
+                // replace null char with literal slash, zero
+                .replaceAll("\0", "\\\\0")
+                // replace pipe char with literal slash, !
+                .replaceAll("\\|", "\\\\!")
+                //replace all quote, with slash-quote
                 .replaceAll("\"", "\\\"");
 
         //when reversed, replace slash-quote with quote, then undouble slashes
