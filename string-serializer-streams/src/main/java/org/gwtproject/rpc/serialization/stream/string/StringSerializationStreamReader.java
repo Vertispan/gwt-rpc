@@ -39,7 +39,6 @@ public class StringSerializationStreamReader extends AbstractSerializationStream
             int stringCount = readInt();
             claimItems(stringCount);
 
-//        List<String> buffer = new ArrayList<String>(stringCount);
             for (int typeNameIndex = 0; typeNameIndex < stringCount; ++typeNameIndex) {
                 String str = token();
                 // Change quoted characters back.

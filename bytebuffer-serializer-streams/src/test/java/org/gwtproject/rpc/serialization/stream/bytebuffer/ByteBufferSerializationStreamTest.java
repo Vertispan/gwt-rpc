@@ -192,6 +192,13 @@ public class ByteBufferSerializationStreamTest {
         writer.writeString("foo1");
         writer.writeString("foo");
         writer.writeString("bar");
+        writer.writeString("\"");
+        writer.writeString("!");
+        writer.writeString("|");
+        writer.writeString("\\");
+        writer.writeString("\\\\");
+        writer.writeString("✓");
+        writer.writeString("\0");
 
         ByteBufferSerializationStreamReader reader = getSinglePayloadStreamReader(writer);
 
@@ -199,6 +206,13 @@ public class ByteBufferSerializationStreamTest {
         assertEquals("foo1", reader.readString());
         assertEquals("foo", reader.readString());
         assertEquals("bar", reader.readString());
+        assertEquals("\"", reader.readString());
+        assertEquals("!", reader.readString());
+        assertEquals("|", reader.readString());
+        assertEquals("\\", reader.readString());
+        assertEquals("\\\\", reader.readString());
+        assertEquals("✓", reader.readString());
+        assertEquals("\0", reader.readString());
     }
 
     @Test
