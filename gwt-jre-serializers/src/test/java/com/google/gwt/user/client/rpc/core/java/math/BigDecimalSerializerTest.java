@@ -2,6 +2,7 @@ package com.google.gwt.user.client.rpc.core.java.math;
 
 import org.gwtproject.rpc.serialization.api.FieldSerializer;
 import org.gwtproject.rpc.serialization.api.SerializationStreamReader;
+import org.gwtproject.rpc.serialization.api.SerializationStreamWriter;
 import org.gwtproject.rpc.serialization.api.TypeSerializer;
 import org.gwtproject.rpc.serialization.api.impl.TypeSerializerImpl;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
@@ -13,8 +14,6 @@ import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializatio
 import java.math.BigDecimal;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import com.google.gwt.user.client.rpc.SerializationStreamWriter;
 
 public class BigDecimalSerializerTest {
 
