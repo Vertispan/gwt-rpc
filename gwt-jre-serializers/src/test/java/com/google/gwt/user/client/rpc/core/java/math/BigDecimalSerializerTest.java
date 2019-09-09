@@ -6,11 +6,12 @@ import org.gwtproject.rpc.serialization.api.SerializationStreamWriter;
 import org.gwtproject.rpc.serialization.api.TypeSerializer;
 import org.gwtproject.rpc.serialization.api.impl.TypeSerializerImpl;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
+import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamWriter;
 import org.junit.Assert;
 import org.junit.Test;
-import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
+
 import java.math.BigDecimal;
 import java.util.function.Function;
 import java.util.function.Supplier;
