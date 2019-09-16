@@ -41,21 +41,12 @@ public class BigInteger_CustomFieldSerializer extends
 
   public static BigInteger instantiate(SerializationStreamReader streamReader)
       throws SerializationException {
-    final int length = streamReader.readInt();
-    final byte[] unscaledValue = new byte[length];
-    for (int i = 0; i < length; i++) {
-      unscaledValue[i] = streamReader.readByte();
-    }
-    return new BigInteger(unscaledValue);
+    return new BigInteger(streamReader.readString());
   }
 
   public static void serialize(SerializationStreamWriter streamWriter,
       BigInteger instance) throws SerializationException {
-    final byte[] unscaledValue = instance.toByteArray();
-    streamWriter.writeInt(unscaledValue.length);
-    for (int i = 0; i < unscaledValue.length; i++) {
-      streamWriter.writeByte(unscaledValue[i]);
-    }
+    streamWriter.writeString(instance.toString());
   }
 
   @Override
