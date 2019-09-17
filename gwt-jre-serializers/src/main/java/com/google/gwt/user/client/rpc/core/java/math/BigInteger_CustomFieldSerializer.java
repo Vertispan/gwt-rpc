@@ -27,7 +27,10 @@ import java.math.BigInteger;
 
 /**
  * Custom field serializer for BigInteger.
+ *
+ * @deprecated Move to the org.gwtproject implementation instead
  */
+@Deprecated
 public class BigInteger_CustomFieldSerializer extends
     CustomFieldSerializer<BigInteger> {
 

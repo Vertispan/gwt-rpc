@@ -1,0 +1,4 @@
+<!-- Provides a package for GWT2 to see custom field serializers -->
+<module>
+    <source path=""/>
+</module>

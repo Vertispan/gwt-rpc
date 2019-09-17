@@ -27,7 +27,10 @@ import java.math.BigDecimal;
 
 /**
  * Custom field serializer for BigDecimal.
+ *
+ * @deprecated Move to the org.gwtproject implementation instead
  */
+@Deprecated
 public class BigDecimal_CustomFieldSerializer extends
     CustomFieldSerializer<BigDecimal> {
 

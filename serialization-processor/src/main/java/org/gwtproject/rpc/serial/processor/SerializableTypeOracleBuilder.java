@@ -340,6 +340,16 @@ public class SerializableTypeOracleBuilder {
     }
 
     /**
+     * Prefixes to check. First see if we can find the custom serializer in the class's own package, then
+     * check the updated gwt-rpc package, then fall back to the legacy com.google.gwt package.
+     */
+    private static final List<String> customFieldSerializerPrefixes = Arrays.asList(
+            "",
+            "org.gwtproject.rpc.core.",
+            "com.google.gwt.user.client.rpc.core."
+    );
+
+    /**
      * Finds the custom field serializer for a given qualified source name.
      *
      * @param typeOracle
@@ -349,16 +359,14 @@ public class SerializableTypeOracleBuilder {
      */
     public static TypeElement findCustomFieldSerializer(SerializingTypes typeOracle,
                                                        String customFieldSerializerName) {
-        TypeElement customSerializer = typeOracle.getElements().getTypeElement(customFieldSerializerName);
-        if (customSerializer == null) {
-            // If the type is in the java.lang or java.util packages then it will be
-            // mapped into com.google.gwt.user.client.rpc.core package
-            //TODO supprt arbitrary, layered mappings, or just go for it in the main package, since we're building our own jre too
-            customSerializer =
-                    typeOracle.getElements().getTypeElement("com.google.gwt.user.client.rpc.core." + customFieldSerializerName);
+        for (String prefix : customFieldSerializerPrefixes) {
+            TypeElement customSerializer = typeOracle.getElements().getTypeElement(prefix + customFieldSerializerName);
+            if (customSerializer != null) {
+                return customSerializer;
+            }
         }
 
-        return customSerializer;
+        return null;
     }
 
     /**

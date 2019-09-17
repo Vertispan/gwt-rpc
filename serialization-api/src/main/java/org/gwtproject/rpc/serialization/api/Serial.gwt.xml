@@ -1,5 +1,15 @@
+<!--
+Represents the basics required to make GWT2 able to compile just the serialization
+API. Additionally, one of these two modules to inherit, depending on how you are
+using GWT:
+
+  * com.google.gwt.user.client.rpc.GwtUserFallback - if you are currently still
+    using other classes from gwt-user, you must use this
+  * com.google.gwt.user.client.rpc.LegacyRpcClasses - if you do not use other
+    classes from gwt-user, use this module instead to better future-proof yourself
+-->
+
 <module>
-  <!--<inherits name="com.google.gwt.user.client.rpc.LegacyRpcClasses" />-->
-  <!--<inherits name="com.google.gwt.user.RemoteService" />-->
+  <inherits name="org.gwtproject.rpc.core.CustomSerializers" />
   <source path="" />
 </module>
