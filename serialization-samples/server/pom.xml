@@ -25,7 +25,6 @@
       <type>war</type>
       <scope>runtime</scope>
     </dependency>
-
   </dependencies>
   <build>
     <plugins>

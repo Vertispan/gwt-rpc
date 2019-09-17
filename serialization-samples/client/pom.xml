@@ -22,12 +22,39 @@
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-dev</artifactId>
     </dependency>
+
+    <!--
+    Include the serializable types and the generated serializers
+    -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>serialization-samples-shared</artifactId>
       <version>${project.version}</version>
     </dependency>
 
+    <!--
+    Additionally, add the source jars for some other dependencies,
+    which won't be needed on the server or other non-gwt platforms,
+    so we only list them here.
+    Note that these don't need to be listed when using the various
+    "endpoint" dependencies, since they are included automatically
+    -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>serialization-api</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>gwt-jre-serializers</artifactId>
+      <version>${project.version}</version>
+      <classifier>sources</classifier>
+    </dependency>
+
+    <!--
+    Pick a stream format to actually write the payload in some way.
+    -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>string-serializer-streams</artifactId>

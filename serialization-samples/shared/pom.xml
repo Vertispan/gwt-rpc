@@ -13,33 +13,32 @@
   <packaging>gwt-lib</packaging>
 
   <dependencies>
+    <!--
+    Depend on the serialization api itself, and the processor to turn
+    our serializer type into real code
+    -->
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>serialization-api</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>serialization-api</artifactId>
-      <version>${project.version}</version>
-      <classifier>sources</classifier>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>gwt-jre-serializers</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>gwt-jre-serializers</artifactId>
-      <version>${project.version}</version>
-      <classifier>sources</classifier>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>serialization-processor</artifactId>
       <version>${project.version}</version>
-      <optional>true</optional>
+      <scope>provided</scope>
+    </dependency>
+
+    <!--
+    Include the provided serializers for JRE types. This isn't enabled
+    by default, since it is not part of the API above, but uses it. If
+    you start from the "endpoint" dependencies, this is included
+    automatically.
+    -->
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>gwt-jre-serializers</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
   <build>
