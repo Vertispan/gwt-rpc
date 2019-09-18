@@ -229,4 +229,27 @@ public class ByteBufferSerializationStreamTest {
         }
     }
 
+    @Test
+    public void testLongStrings() throws SerializationException {
+        // if the test runs out of memory, this is too high - 28 lets us test a up to a 134mb string in a total payload
+        // of 270mb or so, which is a decent test of the capabilities of the stream and should not stretch a test JVM.
+        int maxLengthStringPowOf2 = 28;
+
+        ByteBufferSerializationStreamWriter writer = getStreamWriter();
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < maxLengthStringPowOf2; i++) {
+            for (int j = Math.max(0, (int) Math.pow(2, i - 1)); j < Math.pow(2, i); j++) {
+                sb.append(j % 10);
+            }
+            writer.writeString(sb.toString());
+        }
+
+        ByteBufferSerializationStreamReader reader = getSinglePayloadStreamReader(writer);
+
+        for (int i = 0; i < maxLengthStringPowOf2; i++) {
+            assertEquals(reader.readString().length(), (int)Math.pow(2, i));
+        }
+    }
+
 }
