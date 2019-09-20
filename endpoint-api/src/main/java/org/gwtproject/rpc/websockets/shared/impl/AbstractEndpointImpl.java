@@ -84,7 +84,7 @@ public abstract class AbstractEndpointImpl {
 			if (recipient >= 0) {
 				__invoke(recipient, reader);
 			} else {
-				ReadingCallback<?, ?> callback = callbacks.get(-recipient);
+				ReadingCallback<?, ?> callback = callbacks.remove(-recipient);
 				callback.handle(reader);
 			}
 		} catch (SerializationException ex) {
