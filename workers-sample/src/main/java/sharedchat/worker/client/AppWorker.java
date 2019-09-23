@@ -134,13 +134,12 @@ public class AppWorker implements EntryPoint {
 			}
 
 			@Override
-			public void onClose() {
+			public void onClose(int closeCode, String closeReason) {
 				//try reconnect...
 				//inform page of lost connection
 
 				connected = false;
 				broadcastToPages(ChatPage::disconnected);
-
 			}
 
 			@Override

@@ -88,8 +88,8 @@ public class ChatClientWidget extends AbstractClientImpl<ChatClient, ChatServer>
 	}
 
 	@Override
-	public void onClose() {
-		super.onClose();
+	public void onClose(int closeCode, String closeReason) {
+		super.onClose(closeCode, closeReason);
 		addMessage("You've left the chat");
 	}
 

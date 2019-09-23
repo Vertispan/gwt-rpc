@@ -29,6 +29,7 @@ import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketClientImpl;
 
 import javax.websocket.*;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.function.Consumer;
@@ -137,7 +138,16 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 			try {
 				session.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new UncheckedIOException(e);
+			}
+		}
+
+		@Override
+		public void close(int closeCode, String closeReason) {
+			try {
+				session.close(new CloseReason(CloseReason.CloseCodes.getCloseCode(closeCode), closeReason));
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
 			}
 		}
 	}

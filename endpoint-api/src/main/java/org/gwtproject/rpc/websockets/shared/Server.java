@@ -70,5 +70,7 @@ public interface Server<S extends Server<S,C>, C extends Client<C,S>> {
 		Object data(String key);
 
 		void close();
+
+		void close(int closeCode, String closeReason);
 	}
 }

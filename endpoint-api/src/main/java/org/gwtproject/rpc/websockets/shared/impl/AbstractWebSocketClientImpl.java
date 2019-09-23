@@ -49,7 +49,7 @@ public abstract class AbstractWebSocketClientImpl<C extends Client<C,S>, S exten
 	}
 
 	@Override
-	public void onClose() {
+	public void onClose(int closeCode, String closeReason) {
 		throw new UnsupportedOperationException("This method cannot be called from server code");
 	}
 

@@ -43,8 +43,11 @@ public interface Client<C extends Client<C,S>, S extends Server<S,C>> {
 	/**
 	 * Callback called when the connection to the server has been closed. Should not be called
 	 * directly from the server.
+	 *
+	 * @param closeCode the code the server sent indicating that the connection was closed
+	 * @param closeMessage the reason message the server sent with the close code
 	 */
-	void onClose();
+	void onClose(int closeCode, String closeMessage);
 
 	/**
 	 * Called when an error occurs while handling a message in one of the other client methods. If a

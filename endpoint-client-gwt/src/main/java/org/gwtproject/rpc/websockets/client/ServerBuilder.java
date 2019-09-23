@@ -143,7 +143,9 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 				socket = new WebSocket(getUrl() + "?checksum=" + ((AbstractWebSocketServerImpl<?, ?>) instance).getChecksum());
 				socket.binaryType = "arraybuffer";
 				socket.onclose = e -> {
-					instance.getClient().onClose();
+					int closeCode = Js.asPropertyMap(e).getAny("code").asInt();
+					String closeReason = Js.asPropertyMap(e).getAny("reason").asString();
+					instance.getClient().onClose(closeCode, closeReason);
 					return null;
 				};
 				socket.onopen = e -> {

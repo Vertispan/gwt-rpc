@@ -38,7 +38,7 @@ public class ServerBuilderImpl<S extends Server<? super S, ?>> implements Server
                 @Override
                 public void onClosing(WebSocket webSocket, int code, String reason) {
                     webSocket.close(code, "Server closed connection");
-                    endpoint.getClient().onClose();
+                    endpoint.getClient().onClose(code, reason);
                     super.onClosed(webSocket, code, reason);
                 }
 

@@ -36,9 +36,25 @@ public class ConnectionClosedEvent extends Event<ConnectionClosedHandler> {
 		return TYPE;
 	}
 
+	private final int closeCode;
+	private final String closeReason;
+
+	public ConnectionClosedEvent(int closeCode, String closeReason) {
+		this.closeCode = closeCode;
+		this.closeReason = closeReason;
+	}
+
 	@Override
 	public Event.Type<ConnectionClosedHandler> getAssociatedType() {
 		return getType();
+	}
+
+	public int getCloseCode() {
+		return closeCode;
+	}
+
+	public String getCloseReason() {
+		return closeReason;
 	}
 
 	@Override

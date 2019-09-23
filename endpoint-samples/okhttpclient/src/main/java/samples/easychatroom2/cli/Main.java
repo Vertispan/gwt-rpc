@@ -46,8 +46,8 @@ public class Main {
             }
 
             @Override
-            public void onClose() {
-                System.out.println("-- connection closed --");
+            public void onClose(int closeCode, String closeReason) {
+                System.out.println("-- connection closed, " + closeCode + ": " + closeReason + " --");
                 System.exit(0);
             }
 

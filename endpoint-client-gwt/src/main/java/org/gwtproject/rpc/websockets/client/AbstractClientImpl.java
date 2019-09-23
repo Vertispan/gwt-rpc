@@ -42,8 +42,8 @@ public abstract class AbstractClientImpl<C extends Client<C,S>, S extends Server
 	}
 
 	@Override
-	public void onClose() {
-		handlerManager.fireEventFromSource(new ConnectionClosedEvent(), this);
+	public void onClose(int closeCode, String closeReason) {
+		handlerManager.fireEventFromSource(new ConnectionClosedEvent(closeCode, closeReason), this);
 	}
 
 	@Override
