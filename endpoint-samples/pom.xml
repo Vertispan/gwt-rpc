@@ -16,6 +16,7 @@
 		<module>shared</module>
 		<module>client</module>
 		<module>server</module>
+		<module>vertx-server</module>
 		<module>okhttpclient</module>
   </modules>
 
