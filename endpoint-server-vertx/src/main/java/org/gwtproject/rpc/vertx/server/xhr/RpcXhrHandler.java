@@ -7,10 +7,17 @@ import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamW
 import org.gwtproject.rpc.websockets.shared.Endpoint;
 import org.gwtproject.rpc.websockets.shared.RemoteService;
 import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl;
+import org.gwtproject.rpc.websockets.shared.impl.AbstractNoRemoteImpl;
+import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketClientImpl;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 public class RpcXhrHandler<S extends RemoteService.RemoteServiceAsync> implements Handler<HttpServerRequest> {
+
+    public static final String STRONG_NAME_HEADER = "X-GWT-RPC-Checksum";
+    //TODO move above to the shared interface
+
     private static final String GWT_RPC_CONTENT_TYPE = "text/x-gwt-rpc";
     private static final String CHARSET_UTF8_NAME = "UTF-8";
 
@@ -33,11 +40,11 @@ public class RpcXhrHandler<S extends RemoteService.RemoteServiceAsync> implement
     public void handle(HttpServerRequest event) {
         String contentType = event.getHeader("Content-Type");
         if (contentType == null) {
-            event.response().setStatusCode(400).setStatusMessage("Content-Type was null, expected '" + GWT_RPC_CONTENT_TYPE + "'.");
+            event.response().setStatusCode(400).setStatusMessage("Content-Type was null, expected '" + GWT_RPC_CONTENT_TYPE + "'.").end();
             return;
         }
         if (!contentType.startsWith(GWT_RPC_CONTENT_TYPE)) {// allow a suffix with charset
-            event.response().setStatusCode(400).setStatusMessage("Content-Type was '" + contentType + "', expected '" + GWT_RPC_CONTENT_TYPE + "'.");
+            event.response().setStatusCode(400).setStatusMessage("Content-Type was '" + contentType + "', expected '" + GWT_RPC_CONTENT_TYPE + "'.").end();
             return;
         }
 
@@ -64,9 +71,24 @@ public class RpcXhrHandler<S extends RemoteService.RemoteServiceAsync> implement
                     });
                 }));
 
-        //TODO checksum
-
         S instance = serverFactory.get();
+
+        List<String> checksum = event.headers().getAll(STRONG_NAME_HEADER);
+        if (checksum == null || checksum.isEmpty()) {
+            event.response().setStatusCode(400).setStatusMessage("The checksum query parameter was not specified, cannot accept request").end();
+            return;
+        } else if (checksum.size() > 1) {
+            event.response().setStatusCode(400).setStatusMessage("More than one checksum query parameter specified, cannot accept request").end();
+            return;
+        } else {
+            String expected = ((AbstractNoRemoteImpl<?>) c).getChecksum();
+            String actual = checksum.iterator().next();
+            if (!expected.equals(actual)) {
+                event.response().setStatusCode(400).setStatusMessage("Expected checksum with value " + expected).end();
+                return;
+            }
+        }
+
         c.setRemote(instance);
 
     }
