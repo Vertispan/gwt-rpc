@@ -154,8 +154,10 @@
         <module>endpoint-processor</module>
         <!-- gwt-client wiring to create websocket, xhr endpoints -->
         <module>endpoint-client-gwt</module>
-        <!-- java server wiring to create websocket, xhr endpoints -->
+        <!-- servlet wiring to create websocket, xhr endpoints -->
         <module>endpoint-server-jsr356</module>
+        <!-- vertx wiring to create server websocket endpoint -->
+        <module>endpoint-server-vertx</module>
 
         <!-- servlet/gwt sample using these endpoints -->
         <module>endpoint-samples</module>

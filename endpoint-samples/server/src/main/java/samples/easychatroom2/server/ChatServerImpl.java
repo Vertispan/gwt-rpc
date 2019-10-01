@@ -32,7 +32,7 @@ import java.util.Map;
 
 @ServerEndpoint("/chat")
 public class ChatServerImpl extends AbstractServerImpl<ChatServer, ChatClient> implements ChatServer {
-	private static final Map<ChatClient, String> loggedIn = Collections.synchronizedMap(new HashMap<ChatClient, String>());
+	private static final Map<ChatClient, String> loggedIn = Collections.synchronizedMap(new HashMap<>());
 
 	public ChatServerImpl() {
 		super(ChatClient_Impl::new);
