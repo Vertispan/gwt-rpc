@@ -26,6 +26,8 @@ import org.gwtproject.rpc.serialization.api.TypeSerializer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -53,9 +55,8 @@ public abstract class AbstractEndpointImpl {
 	private final TypeSerializer serializer;
 
 	// count starts at 1, leaving zero for remote methods
-	private int nextCallbackId = 1;
-	private Map<Integer, ReadingCallback<?,?>> callbacks = new HashMap<>();
-
+	private AtomicInteger nextCallbackId = new AtomicInteger(1);
+	private Map<Integer, ReadingCallback<?,?>> callbacks = new ConcurrentHashMap<>();
 
 	protected <W extends SerializationStreamWriter> AbstractEndpointImpl(
 			Function<TypeSerializer, W> writerFactory,
@@ -124,7 +125,7 @@ public abstract class AbstractEndpointImpl {
 
 			// add the callbackId to the message to send so the remote end knows it will need a callback
 			// object when handling the rest of the body
-			int callbackId = nextCallbackId++;
+			int callbackId = nextCallbackId.getAndIncrement();
 			writer.writeInt(callbackId);
 			s.send(writer);
 
