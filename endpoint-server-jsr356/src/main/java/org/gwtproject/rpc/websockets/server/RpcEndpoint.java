@@ -88,8 +88,12 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 		server.setClient(instance);
 		instance.setServer(server);
 
-		session.setMaxIdleTimeout(0);
 		server.onOpen(new Jsr356Connection(session), server.getClient());
+
+		// Configure defaults present in some servlet containers to avoid some confusing limits. Subclasses
+		// can override this method to control those defaults on their own.
+		session.setMaxIdleTimeout(0);
+		session.setMaxBinaryMessageBufferSize(Integer.MAX_VALUE);
 	}
 
 	@OnMessage
