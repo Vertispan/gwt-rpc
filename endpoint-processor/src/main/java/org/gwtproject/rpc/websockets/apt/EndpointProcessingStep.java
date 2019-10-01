@@ -19,6 +19,16 @@
  */
 package org.gwtproject.rpc.websockets.apt;
 
+import com.google.auto.common.BasicAnnotationProcessor.ProcessingStep;
+import com.google.common.collect.SetMultimap;
+import com.google.common.collect.Sets;
+import com.google.gwt.user.client.rpc.SerializationException;
+import com.squareup.javapoet.*;
+import com.squareup.javapoet.TypeSpec.Builder;
+import org.gwtproject.rpc.serialization.api.SerializationStreamReader;
+import org.gwtproject.rpc.serialization.api.SerializationStreamWriter;
+import org.gwtproject.rpc.serialization.api.SerializationWiring;
+import org.gwtproject.rpc.serialization.api.TypeSerializer;
 import org.gwtproject.rpc.websockets.apt.model.EndpointMethod;
 import org.gwtproject.rpc.websockets.apt.model.EndpointModel;
 import org.gwtproject.rpc.websockets.apt.model.EndpointPair;
@@ -27,32 +37,14 @@ import org.gwtproject.rpc.websockets.shared.Endpoint.NoRemoteEndpoint;
 import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl;
 import org.gwtproject.rpc.websockets.shared.impl.AbstractNoRemoteImpl;
 import org.gwtproject.rpc.websockets.shared.impl.AbstractRemoteServiceImpl;
-import com.google.auto.common.BasicAnnotationProcessor.ProcessingStep;
-import com.google.common.collect.SetMultimap;
-import com.google.common.collect.Sets;
-import com.google.gwt.user.client.rpc.SerializationException;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import com.squareup.javapoet.TypeSpec.Builder;
-import com.squareup.javapoet.TypeVariableName;
-import org.gwtproject.rpc.serialization.api.SerializationStreamReader;
-import org.gwtproject.rpc.serialization.api.SerializationStreamWriter;
-import org.gwtproject.rpc.serialization.api.SerializationWiring;
-import org.gwtproject.rpc.serialization.api.TypeSerializer;
 import org.gwtproject.serial.json.EndpointInterface;
 import org.gwtproject.serial.json.EndpointMethodCallback;
 import org.gwtproject.serial.json.EndpointMethodParameter;
 
-import javax.annotation.Generated;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
@@ -60,16 +52,16 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UncheckedIOException;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class EndpointProcessingStep implements ProcessingStep {
+	private static final String GENERATED_ANNOTATION_JDK9 = "javax.annotation.processing.Generated";
+	private static final String GENERATED_ANNOTATION_LEGACY = "javax.annotation.Generated";
+
 	private final ProcessingEnvironment processingEnv;
 
 	public EndpointProcessingStep(ProcessingEnvironment processingEnv) {
@@ -111,8 +103,9 @@ public class EndpointProcessingStep implements ProcessingStep {
 		String generatedTypeName = model.isPlaceholder() ? remoteModel.getGeneratedTypeName() + "Remote" : model.getGeneratedTypeName();
 		Builder builder = TypeSpec.classBuilder(generatedTypeName)
 				.addSuperinterface(model.isPlaceholder() ? ParameterizedTypeName.get(ClassName.get(NoRemoteEndpoint.class), remoteModel.getInterface()) : model.getInterface())
-				.addAnnotation(AnnotationSpec.builder(Generated.class).addMember("value", "\"$L\"", EndpointProcessor.class.getCanonicalName()).build())
 				.addModifiers(Modifier.PUBLIC);
+
+		addGeneratedMetadata(builder);
 
 		// this is disgusting, need to find a way to make it part of the model, or
 		// fork this type?
@@ -337,6 +330,33 @@ public class EndpointProcessingStep implements ProcessingStep {
 			JavaFile.builder(packageName, builder.build()).build().writeTo(processingEnv.getFiler());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
+		}
+	}
+
+	/**
+	 * Appends the appropriate note about how this class was generated, in order of preference:
+	 *   * Java 9+ Generated annotation, if available
+	 *   * Legacy Generated annotation, if available
+	 *   * Javadoc comment on generated class
+	 */
+	private void addGeneratedMetadata(Builder builder) {
+		Optional<TypeElement> annotationToUse = Stream.of(
+//				GENERATED_ANNOTATION_JDK9,//Temporarily disabled while figuring out how to do this in GWT
+				GENERATED_ANNOTATION_LEGACY
+		)
+				.map(annName -> processingEnv.getElementUtils().getTypeElement(annName))
+				.filter(Objects::nonNull)
+				.findFirst();
+
+		if (annotationToUse.isPresent()) {
+			builder.addAnnotation(AnnotationSpec.builder(
+					ClassName.get(annotationToUse.get()))
+					.addMember("value", "\"$L\"", EndpointProcessor.class.getCanonicalName())
+					.build()
+			);
+		} else {
+			// failing that, add a comment
+			builder.addJavadoc("Generated by " + EndpointProcessor.class.getCanonicalName());
 		}
 	}
 

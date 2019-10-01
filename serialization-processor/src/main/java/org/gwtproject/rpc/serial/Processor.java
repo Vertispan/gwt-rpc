@@ -14,7 +14,6 @@ import org.gwtproject.rpc.serialization.api.impl.TypeSerializerImpl;
 import org.gwtproject.serial.json.Details;
 import org.gwtproject.serial.json.Type;
 
-import javax.annotation.Generated;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
@@ -33,6 +32,7 @@ import java.io.*;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Processes all classes in the current project and prepares serializers
@@ -43,6 +43,9 @@ import java.util.stream.Collectors;
 @AutoService(javax.annotation.processing.Processor.class)
 public class Processor extends AbstractProcessor {
     private static final String knownTypesFilename = "knownTypes.txt";
+
+    private static final String GENERATED_ANNOTATION_JDK9 = "javax.annotation.processing.Generated";
+    private static final String GENERATED_ANNOTATION_LEGACY = "javax.annotation.Generated";
 
     private TypeElement serializationStreamReader;
     private TypeElement serializationStreamWriter;
@@ -315,9 +318,9 @@ public class Processor extends AbstractProcessor {
 
     private void writeSerializerImpl(String prefix, String packageName, Element serializationInterface) throws IOException {
         Builder implTypeBuilder = TypeSpec.classBuilder(prefix + "_Impl")
-                .addAnnotation(AnnotationSpec.builder(Generated.class).addMember("value", "\"$L\"", Processor.class.getCanonicalName()).build())
                 .addSuperinterface(ClassName.get(serializationInterface.asType()))
                 .addModifiers(Modifier.PUBLIC);
+        addGeneratedMetadata(implTypeBuilder);
 
         //exactly one method should return a TypeSerializer
 
@@ -375,9 +378,9 @@ public class Processor extends AbstractProcessor {
 
     private void writeTypeSerializer(String prefix, String packageName, List<SerializableTypeModel> models, String hash) throws IOException {
         Builder typeSerializer = TypeSpec.classBuilder(prefix + "_TypeSerializer")
-                .addAnnotation(AnnotationSpec.builder(Generated.class).addMember("value", "\"$L\"", Processor.class.getCanonicalName()).build())
                 .superclass(TypeSerializerImpl.class)
                 .addModifiers(Modifier.PUBLIC);
+        addGeneratedMetadata(typeSerializer);
 
         //TODO this isn't optimal, but is easy to write quickly
         typeSerializer.addField(FieldSpec.builder(
@@ -427,8 +430,8 @@ public class Processor extends AbstractProcessor {
 
         TypeSpec.Builder fieldSerializerType = TypeSpec.classBuilder(fieldSerializerName)
                 .addSuperinterface(ClassName.get(fieldSerializer))
-                .addAnnotation(AnnotationSpec.builder(Generated.class).addMember("value", "\"$L\"", Processor.class.getCanonicalName()).build())
                 .addModifiers(Modifier.PUBLIC);//TODO originating element if it is an element
+        addGeneratedMetadata(fieldSerializerType);
 
         //write deserialize method
         MethodSpec.Builder deserializeMethodBuilder = MethodSpec.methodBuilder("deserialize")
@@ -494,9 +497,10 @@ public class Processor extends AbstractProcessor {
         //collect fields (err, properties for now)
         TypeSpec.Builder fieldSerializerType = TypeSpec.classBuilder(model.getFieldSerializerName())
                 .addSuperinterface(ClassName.get(fieldSerializer))
-                .addAnnotation(AnnotationSpec.builder(Generated.class).addMember("value", "\"$L\"", Processor.class.getCanonicalName()).build())
                 .addModifiers(Modifier.PUBLIC)
                 .addOriginatingElement(model.getTypeElement());
+        addGeneratedMetadata(fieldSerializerType);
+
         boolean writeSerialize = false, writeDeserialize = false, writeInstantiate = false;
         if (model.getTypeElement().getKind() == ElementKind.ENUM) {
             //write deserialize method
@@ -715,6 +719,35 @@ public class Processor extends AbstractProcessor {
 
         fieldSerializerType.addType(inner.build());
     }
+
+    /**
+     * Appends the appropriate note about how this class was generated, in order of preference:
+     *   * Java 9+ Generated annotation, if available
+     *   * Legacy Generated annotation, if available
+     *   * Javadoc comment on generated class
+     */
+    private void addGeneratedMetadata(Builder builder) {
+        Optional<TypeElement> annotationToUse = Stream.of(
+//                GENERATED_ANNOTATION_JDK9,//Temporarily disabled while figuring out how to do this in GWT
+                GENERATED_ANNOTATION_LEGACY
+        )
+                .map(annName -> processingEnv.getElementUtils().getTypeElement(annName))
+                .filter(Objects::nonNull)
+                .findFirst();
+
+        if (annotationToUse.isPresent()) {
+            builder.addAnnotation(AnnotationSpec.builder(
+                    ClassName.get(annotationToUse.get()))
+                    .addMember("value", "\"$L\"", Processor.class.getCanonicalName())
+                    .build()
+            );
+        } else {
+            // failing that, add a comment
+            builder.addJavadoc("Generated by " + Processor.class.getCanonicalName());
+        }
+    }
+
+
 
     // returns an object, to be read from the reader. Note that objects don't _have_ to be read this way, but it is an easy option
     private boolean isReadMethod(ExecutableElement method) {
