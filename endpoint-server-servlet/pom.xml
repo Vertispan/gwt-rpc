@@ -9,7 +9,7 @@
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>endpoint-server-jsr356</artifactId>
+	<artifactId>endpoint-server-servlet</artifactId>
 
 	<dependencies>
 		<dependency>

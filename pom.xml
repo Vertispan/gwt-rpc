@@ -155,7 +155,7 @@
         <!-- gwt-client wiring to create websocket, xhr endpoints -->
         <module>endpoint-client-gwt</module>
         <!-- servlet wiring to create websocket, xhr endpoints -->
-        <module>endpoint-server-jsr356</module>
+        <module>endpoint-server-servlet</module>
         <!-- vertx wiring to create server websocket endpoint -->
         <module>endpoint-server-vertx</module>
 
