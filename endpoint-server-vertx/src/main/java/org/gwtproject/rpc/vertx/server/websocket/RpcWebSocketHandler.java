@@ -4,13 +4,13 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import io.vertx.core.buffer.Buffer;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
-import org.gwtproject.rpc.websockets.shared.Client;
-import org.gwtproject.rpc.websockets.shared.Server;
+import org.gwtproject.rpc.api.Client;
+import org.gwtproject.rpc.api.Server;
 
 import io.vertx.core.Handler;
 import io.vertx.core.http.ServerWebSocket;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketClientImpl;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl;
+import org.gwtproject.rpc.api.impl.AbstractWebSocketClientImpl;
 
 import java.nio.ByteBuffer;
 import java.util.List;

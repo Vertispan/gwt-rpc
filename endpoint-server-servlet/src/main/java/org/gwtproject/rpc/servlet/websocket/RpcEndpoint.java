@@ -21,11 +21,11 @@ package org.gwtproject.rpc.servlet.websocket;
 
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
-import org.gwtproject.rpc.websockets.shared.Client;
-import org.gwtproject.rpc.websockets.shared.Server;
-import org.gwtproject.rpc.websockets.shared.Server.Connection;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointImplConstructor;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketClientImpl;
+import org.gwtproject.rpc.api.Client;
+import org.gwtproject.rpc.api.Server;
+import org.gwtproject.rpc.api.Server.Connection;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
+import org.gwtproject.rpc.api.impl.AbstractWebSocketClientImpl;
 
 import javax.websocket.*;
 import java.io.IOException;

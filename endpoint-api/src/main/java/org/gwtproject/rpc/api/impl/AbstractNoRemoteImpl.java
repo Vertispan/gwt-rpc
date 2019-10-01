@@ -17,9 +17,8 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.shared.impl;
+package org.gwtproject.rpc.api.impl;
 
-import org.gwtproject.rpc.websockets.shared.Endpoint.NoRemoteEndpoint;
 import org.gwtproject.rpc.serialization.api.SerializationStreamReader;
 import org.gwtproject.rpc.serialization.api.SerializationStreamWriter;
 import org.gwtproject.rpc.serialization.api.TypeSerializer;
@@ -28,12 +27,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class AbstractRemoteServiceImpl<R extends NoRemoteEndpoint<?>>
-		extends AbstractEndpointImpl implements ServiceDefTarget {
+public abstract class AbstractNoRemoteImpl<R> extends AbstractEndpointImpl {
 	private R server;
-	private String serviceEntryPoint;
-
-	protected <W extends SerializationStreamWriter> AbstractRemoteServiceImpl(
+	protected <W extends SerializationStreamWriter> AbstractNoRemoteImpl(
 			Function<TypeSerializer, W> writerFactory,
 			Consumer<W> send,
 			TypeSerializer serializer,
@@ -51,19 +47,4 @@ public abstract class AbstractRemoteServiceImpl<R extends NoRemoteEndpoint<?>>
 	}
 
 	public abstract String getChecksum();
-
-	@Override
-	public String getSerializationPolicyName() {
-		throw new UnsupportedOperationException("getSerializationPolicyName is not supported, use getChecksum instead");
-	}
-
-	@Override
-	public String getServiceEntryPoint() {
-		return serviceEntryPoint;
-	}
-
-	@Override
-	public void setServiceEntryPoint(String serviceEntryPoint) {
-		this.serviceEntryPoint = serviceEntryPoint;
-	}
 }

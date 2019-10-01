@@ -20,7 +20,7 @@
 package simpleworker.worker.client;
 
 import elemental2.dom.DomGlobal;
-import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.api.Callback;
 import org.gwtproject.rpc.worker.client.WorkerFactory;
 import org.gwtproject.rpc.worker.client.worker.MessagePort;
 import com.google.gwt.core.client.EntryPoint;

@@ -19,10 +19,10 @@
  */
 package samples.easychatroom2.shared;
 
-import org.gwtproject.rpc.websockets.shared.Callback;
-import org.gwtproject.rpc.websockets.shared.Endpoint;
-import org.gwtproject.rpc.websockets.shared.Endpoint.NoRemoteEndpoint;
-import org.gwtproject.rpc.websockets.shared.RemoteService.RemoteServiceAsync;
+import org.gwtproject.rpc.api.Callback;
+import org.gwtproject.rpc.api.Endpoint;
+import org.gwtproject.rpc.api.Endpoint.NoRemoteEndpoint;
+import org.gwtproject.rpc.api.RemoteService.RemoteServiceAsync;
 
 @Endpoint(value = NoRemoteEndpoint.class)
 public interface ChatRemoteServiceAsync extends RemoteServiceAsync {

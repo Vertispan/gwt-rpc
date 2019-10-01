@@ -19,9 +19,9 @@
  */
 package samples.easychatroom2.shared;
 
-import org.gwtproject.rpc.websockets.shared.Callback;
-import org.gwtproject.rpc.websockets.shared.Endpoint;
-import org.gwtproject.rpc.websockets.shared.Server;
+import org.gwtproject.rpc.api.Callback;
+import org.gwtproject.rpc.api.Endpoint;
+import org.gwtproject.rpc.api.Server;
 
 /**
  * Simple example of methods a server can have that can be invoked by a client.

@@ -20,11 +20,6 @@
 package org.gwtproject.rpc.worker.client;
 
 import com.google.gwt.junit.client.GWTTestCase;
-import org.gwtproject.rpc.websockets.shared.Callback;
-import org.gwtproject.rpc.websockets.shared.Endpoint;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by colin on 1/14/16.

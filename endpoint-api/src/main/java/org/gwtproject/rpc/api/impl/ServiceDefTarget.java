@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.shared.impl;
+package org.gwtproject.rpc.api.impl;
 
 public interface ServiceDefTarget {
 

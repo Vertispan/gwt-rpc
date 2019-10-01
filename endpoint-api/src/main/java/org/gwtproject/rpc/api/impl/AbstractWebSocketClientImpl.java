@@ -17,10 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.shared.impl;
+package org.gwtproject.rpc.api.impl;
 
-import org.gwtproject.rpc.websockets.shared.Client;
-import org.gwtproject.rpc.websockets.shared.Server;
+import org.gwtproject.rpc.api.Client;
+import org.gwtproject.rpc.api.Server;
 import org.gwtproject.rpc.serialization.api.SerializationStreamReader;
 import org.gwtproject.rpc.serialization.api.SerializationStreamWriter;
 import org.gwtproject.rpc.serialization.api.TypeSerializer;

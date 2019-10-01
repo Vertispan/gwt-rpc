@@ -20,7 +20,7 @@
 package samples.easychatroom2.server;
 
 import org.gwtproject.rpc.servlet.RemoteServiceServlet;
-import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.api.Callback;
 import samples.easychatroom2.shared.ChatRemoteServiceAsync;
 import samples.easychatroom2.shared.ChatRemoteServiceAsync_ImplRemote;
 

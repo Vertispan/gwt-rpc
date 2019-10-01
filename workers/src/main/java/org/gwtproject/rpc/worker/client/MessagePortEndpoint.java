@@ -19,8 +19,8 @@
  */
 package org.gwtproject.rpc.worker.client;
 
-import org.gwtproject.rpc.websockets.shared.Endpoint;
-import org.gwtproject.rpc.websockets.shared.Endpoint.BaseClass;
+import org.gwtproject.rpc.api.Endpoint;
+import org.gwtproject.rpc.api.Endpoint.BaseClass;
 import org.gwtproject.rpc.worker.client.impl.AbstractWorkerEndpointImpl;
 
 @BaseClass(AbstractWorkerEndpointImpl.class)

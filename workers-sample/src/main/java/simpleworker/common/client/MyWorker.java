@@ -19,8 +19,8 @@
  */
 package simpleworker.common.client;
 
-import org.gwtproject.rpc.websockets.shared.Callback;
-import org.gwtproject.rpc.websockets.shared.Endpoint;
+import org.gwtproject.rpc.api.Callback;
+import org.gwtproject.rpc.api.Endpoint;
 import org.gwtproject.rpc.worker.client.MessagePortEndpoint;
 
 /**

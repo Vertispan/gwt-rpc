@@ -19,8 +19,8 @@
  */
 package samples.easychatroom2.client;
 
-import org.gwtproject.rpc.websockets.client.AbstractClientImpl;
-import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.gwt.client.AbstractClientImpl;
+import org.gwtproject.rpc.api.Callback;
 import samples.easychatroom2.shared.ChatClient;
 
 import com.google.gwt.dom.client.Style.Unit;

@@ -17,10 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.client.impl;
+package org.gwtproject.rpc.gwt.client.impl;
 
-import org.gwtproject.rpc.websockets.client.ServerBuilder;
-import org.gwtproject.rpc.websockets.shared.Server;
+import org.gwtproject.rpc.gwt.client.ServerBuilder;
+import org.gwtproject.rpc.api.Server;
 import elemental2.dom.DomGlobal;
 
 public abstract class ServerBuilderImpl<S extends Server<? super S, ?>> implements ServerBuilder<S> {

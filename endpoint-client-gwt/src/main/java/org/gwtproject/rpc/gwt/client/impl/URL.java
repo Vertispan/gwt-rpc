@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.client.impl;
+package org.gwtproject.rpc.gwt.client.impl;
 
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsPackage;

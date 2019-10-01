@@ -17,12 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.shared;
+package org.gwtproject.rpc.api;
 
-import org.gwtproject.rpc.websockets.shared.Endpoint.BaseClass;
-import org.gwtproject.rpc.websockets.shared.Endpoint.NoRemoteEndpoint;
-import org.gwtproject.rpc.websockets.shared.Endpoint.RemoteEndpointSupplier;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractRemoteServiceImpl;
+import org.gwtproject.rpc.api.impl.AbstractRemoteServiceImpl;
 
 /**
  * GWT2 RPC-like annotation, to be used instead of extending RemoteService.
@@ -34,7 +31,7 @@ import org.gwtproject.rpc.websockets.shared.impl.AbstractRemoteServiceImpl;
 public @interface RemoteService {
 
 
-	@BaseClass(AbstractRemoteServiceImpl.class)
+	@Endpoint.BaseClass(AbstractRemoteServiceImpl.class)
 	public interface RemoteServiceAsync {
 
 		/**
@@ -43,8 +40,8 @@ public @interface RemoteService {
 		 *
 		 * Do not call this method or implement it.
 		 */
-		@RemoteEndpointSupplier
-		default NoRemoteEndpoint<?> noRemoteEndpoint() {
+		@Endpoint.RemoteEndpointSupplier
+		default Endpoint.NoRemoteEndpoint<?> noRemoteEndpoint() {
 			return null;
 		}
 

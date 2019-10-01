@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.client;
+package org.gwtproject.rpc.gwt.client;
 
-import org.gwtproject.rpc.websockets.client.ConnectionClosedEvent.ConnectionClosedHandler;
+import org.gwtproject.rpc.gwt.client.ConnectionClosedEvent.ConnectionClosedHandler;
 import org.gwtproject.event.shared.Event;
 import org.gwtproject.event.shared.HandlerRegistration;
 

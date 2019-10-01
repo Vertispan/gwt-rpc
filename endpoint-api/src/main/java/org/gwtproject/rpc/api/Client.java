@@ -17,11 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.shared;
+package org.gwtproject.rpc.api;
 
-import org.gwtproject.rpc.websockets.shared.Endpoint.BaseClass;
-import org.gwtproject.rpc.websockets.shared.Endpoint.RemoteEndpointSupplier;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketClientImpl;
+import org.gwtproject.rpc.api.impl.AbstractWebSocketClientImpl;
 
 /**
  * Starting interface for building the methods the server may call on the client. User code may
@@ -31,7 +29,7 @@ import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketClientImpl;
  * @see Server
  *
  */
-@BaseClass(AbstractWebSocketClientImpl.class)
+@Endpoint.BaseClass(AbstractWebSocketClientImpl.class)
 public interface Client<C extends Client<C,S>, S extends Server<S,C>> {
 
 	/**
@@ -59,6 +57,6 @@ public interface Client<C extends Client<C,S>, S extends Server<S,C>> {
 
 	void setServer(S server);
 
-	@RemoteEndpointSupplier
+	@Endpoint.RemoteEndpointSupplier
 	S getServer();
 }

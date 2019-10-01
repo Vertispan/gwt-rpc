@@ -1,13 +1,12 @@
 package samples.easychatroom2.cli;
 
 import org.gwtproject.rpc.websockets.okhttp.ServerBuilder;
-import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.api.Callback;
 import samples.easychatroom2.shared.ChatClient;
 import samples.easychatroom2.shared.ChatServer;
 import samples.easychatroom2.shared.ChatServer_Impl;
 
 import java.util.Scanner;
-import java.util.concurrent.Semaphore;
 
 public class Main {
 

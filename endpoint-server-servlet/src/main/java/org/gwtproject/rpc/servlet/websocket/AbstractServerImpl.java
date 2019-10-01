@@ -19,10 +19,10 @@
  */
 package org.gwtproject.rpc.servlet.websocket;
 
-import org.gwtproject.rpc.websockets.shared.Client;
-import org.gwtproject.rpc.websockets.shared.Server;
-import org.gwtproject.rpc.websockets.shared.Server.Connection;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointImplConstructor;
+import org.gwtproject.rpc.api.Client;
+import org.gwtproject.rpc.api.Server;
+import org.gwtproject.rpc.api.Server.Connection;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
 
 public abstract class AbstractServerImpl<S extends Server<S, C>, C extends Client<C, S>> extends RpcEndpoint<S, C> {
 	/** In JSR-356, each server socket instance has exactly one client */

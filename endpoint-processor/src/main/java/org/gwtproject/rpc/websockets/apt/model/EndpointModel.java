@@ -19,10 +19,10 @@
  */
 package org.gwtproject.rpc.websockets.apt.model;
 
-import org.gwtproject.rpc.websockets.shared.Endpoint;
-import org.gwtproject.rpc.websockets.shared.Endpoint.BaseClass;
-import org.gwtproject.rpc.websockets.shared.Endpoint.NoRemoteEndpoint;
-import org.gwtproject.rpc.websockets.shared.Endpoint.RemoteEndpointSupplier;
+import org.gwtproject.rpc.api.Endpoint;
+import org.gwtproject.rpc.api.Endpoint.BaseClass;
+import org.gwtproject.rpc.api.Endpoint.NoRemoteEndpoint;
+import org.gwtproject.rpc.api.Endpoint.RemoteEndpointSupplier;
 import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;

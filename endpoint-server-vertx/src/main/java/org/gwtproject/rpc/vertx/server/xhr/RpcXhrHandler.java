@@ -4,11 +4,10 @@ import io.vertx.core.Handler;
 import io.vertx.core.http.HttpServerRequest;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamWriter;
-import org.gwtproject.rpc.websockets.shared.Endpoint;
-import org.gwtproject.rpc.websockets.shared.RemoteService;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractNoRemoteImpl;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketClientImpl;
+import org.gwtproject.rpc.api.Endpoint;
+import org.gwtproject.rpc.api.RemoteService;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl;
+import org.gwtproject.rpc.api.impl.AbstractNoRemoteImpl;
 
 import java.util.List;
 import java.util.function.Supplier;

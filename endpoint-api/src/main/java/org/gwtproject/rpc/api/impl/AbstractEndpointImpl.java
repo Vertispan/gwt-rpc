@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.shared.impl;
+package org.gwtproject.rpc.api.impl;
 
 import com.google.gwt.user.client.rpc.SerializationException;
 import org.gwtproject.rpc.serialization.api.SerializationStreamReader;

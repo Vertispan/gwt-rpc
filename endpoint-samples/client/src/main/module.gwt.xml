@@ -21,7 +21,7 @@
 
 <module>
     <inherits name="com.google.gwt.user.User" />
-    <inherits name="org.gwtproject.rpc.websockets.RpcOverWebSockets"/>
+    <inherits name="org.gwtproject.rpc.RPC"/>
 
     <!--
     Since we're including RemoteService (in User above, but reiterated here for clarity),

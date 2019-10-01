@@ -19,8 +19,8 @@
  */
 package sharedchat.common.shared;
 
-import org.gwtproject.rpc.websockets.shared.Client;
-import org.gwtproject.rpc.websockets.shared.Endpoint;
+import org.gwtproject.rpc.api.Client;
+import org.gwtproject.rpc.api.Endpoint;
 
 /**
  * Created by colin on 2/7/17.

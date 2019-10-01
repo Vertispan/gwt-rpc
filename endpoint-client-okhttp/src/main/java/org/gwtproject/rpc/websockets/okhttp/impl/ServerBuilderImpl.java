@@ -5,10 +5,10 @@ import okio.ByteString;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 import org.gwtproject.rpc.websockets.okhttp.ServerBuilder;
-import org.gwtproject.rpc.websockets.shared.Client;
-import org.gwtproject.rpc.websockets.shared.Server;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketServerImpl;
+import org.gwtproject.rpc.api.Client;
+import org.gwtproject.rpc.api.Server;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl;
+import org.gwtproject.rpc.api.impl.AbstractWebSocketServerImpl;
 
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;

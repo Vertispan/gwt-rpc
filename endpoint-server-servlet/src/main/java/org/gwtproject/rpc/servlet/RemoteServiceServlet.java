@@ -19,13 +19,13 @@
  */
 package org.gwtproject.rpc.servlet;
 
-import org.gwtproject.rpc.websockets.shared.Endpoint.NoRemoteEndpoint;
-import org.gwtproject.rpc.websockets.shared.RemoteService.RemoteServiceAsync;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointImplConstructor;
+import org.gwtproject.rpc.api.Endpoint.NoRemoteEndpoint;
+import org.gwtproject.rpc.api.RemoteService.RemoteServiceAsync;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
 import com.google.gwt.user.client.rpc.SerializationException;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamWriter;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractNoRemoteImpl;
+import org.gwtproject.rpc.api.impl.AbstractNoRemoteImpl;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;

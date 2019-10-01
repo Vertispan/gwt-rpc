@@ -17,10 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.shared.impl;
+package org.gwtproject.rpc.api.impl;
 
-import org.gwtproject.rpc.websockets.shared.Client;
-import org.gwtproject.rpc.websockets.shared.Server;
+import org.gwtproject.rpc.api.Endpoint;
 import org.gwtproject.rpc.serialization.api.SerializationStreamReader;
 import org.gwtproject.rpc.serialization.api.SerializationStreamWriter;
 import org.gwtproject.rpc.serialization.api.TypeSerializer;
@@ -29,14 +28,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public abstract class AbstractWebSocketServerImpl<S extends Server<S,C>, C extends Client<C,S>>
-		extends AbstractEndpointImpl implements Server<S, C> {
+public abstract class AbstractRemoteServiceImpl<R extends Endpoint.NoRemoteEndpoint<?>>
+		extends AbstractEndpointImpl implements ServiceDefTarget {
+	private R server;
+	private String serviceEntryPoint;
 
-	private C client;
-
-	public Runnable close;
-
-	protected <W extends SerializationStreamWriter> AbstractWebSocketServerImpl(
+	protected <W extends SerializationStreamWriter> AbstractRemoteServiceImpl(
 			Function<TypeSerializer, W> writerFactory,
 			Consumer<W> send,
 			TypeSerializer serializer,
@@ -45,38 +42,28 @@ public abstract class AbstractWebSocketServerImpl<S extends Server<S,C>, C exten
 		super(writerFactory, send, serializer, onMessage);
 	}
 
-	@Override
-	public void onOpen(Connection connection, C client) {
-		throw new UnsupportedOperationException("Cannot be called from client code");
+	public void setRemote(R remote) {
+		this.server = remote;
 	}
 
-	@Override
-	public void onClose(Connection connection, C client) {
-		throw new UnsupportedOperationException("Cannot be called from client code");
-	}
-
-	@Override
-	public void onError(Throwable error) {
-		throw new UnsupportedOperationException("Cannot be called from client code");
-	}
-
-	@Override
-	public C getClient() {
-		return client;
-	}
-
-	@Override
-	public void setClient(C client) {
-		this.client = client;
+	public R getRemote() {
+		return server;
 	}
 
 	public abstract String getChecksum();
 
 	@Override
-	public void close() {
-		if (close == null) {
-			throw new IllegalStateException("Server factory failed to wire up close() behavior!");
-		}
-		close.run();
+	public String getSerializationPolicyName() {
+		throw new UnsupportedOperationException("getSerializationPolicyName is not supported, use getChecksum instead");
+	}
+
+	@Override
+	public String getServiceEntryPoint() {
+		return serviceEntryPoint;
+	}
+
+	@Override
+	public void setServiceEntryPoint(String serviceEntryPoint) {
+		this.serviceEntryPoint = serviceEntryPoint;
 	}
 }

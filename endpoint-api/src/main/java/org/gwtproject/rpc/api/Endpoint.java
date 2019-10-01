@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.shared;
+package org.gwtproject.rpc.api;
 
 /**
  * Marks an interface as part of a pair to have serializers generated, and

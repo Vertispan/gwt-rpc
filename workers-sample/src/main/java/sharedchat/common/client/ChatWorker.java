@@ -19,7 +19,7 @@
  */
 package sharedchat.common.client;
 
-import org.gwtproject.rpc.websockets.shared.Endpoint;
+import org.gwtproject.rpc.api.Endpoint;
 import org.gwtproject.rpc.worker.client.MessagePortEndpoint;
 
 /**

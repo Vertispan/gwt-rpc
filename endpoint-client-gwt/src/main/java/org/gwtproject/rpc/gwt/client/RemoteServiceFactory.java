@@ -17,13 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.client;
+package org.gwtproject.rpc.gwt.client;
 
-import org.gwtproject.rpc.websockets.shared.RemoteService.RemoteServiceAsync;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointImplConstructor;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractRemoteServiceImpl;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketServerImpl;
-import org.gwtproject.rpc.websockets.shared.impl.ServiceDefTarget;
+import org.gwtproject.rpc.api.RemoteService.RemoteServiceAsync;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
+import org.gwtproject.rpc.api.impl.AbstractRemoteServiceImpl;
+import org.gwtproject.rpc.api.impl.ServiceDefTarget;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.string.StringSerializationStreamWriter;
 import elemental2.dom.XMLHttpRequest;

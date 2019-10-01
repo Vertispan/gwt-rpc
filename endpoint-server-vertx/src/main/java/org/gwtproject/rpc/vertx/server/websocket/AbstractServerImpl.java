@@ -1,7 +1,7 @@
 package org.gwtproject.rpc.vertx.server.websocket;
 
-import org.gwtproject.rpc.websockets.shared.Client;
-import org.gwtproject.rpc.websockets.shared.Server;
+import org.gwtproject.rpc.api.Client;
+import org.gwtproject.rpc.api.Server;
 
 public abstract class AbstractServerImpl<S extends Server<S, C>, C extends Client<C, S>> {
     private C client;

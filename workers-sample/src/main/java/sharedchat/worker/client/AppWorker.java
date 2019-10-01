@@ -20,7 +20,7 @@
 package sharedchat.worker.client;
 
 import elemental2.dom.DomGlobal;
-import org.gwtproject.rpc.websockets.client.ServerBuilder;
+import org.gwtproject.rpc.gwt.client.ServerBuilder;
 import org.gwtproject.rpc.worker.client.WorkerFactory;
 import org.gwtproject.rpc.worker.client.worker.MessagePort;
 import com.google.gwt.core.client.EntryPoint;

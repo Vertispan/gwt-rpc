@@ -19,7 +19,7 @@
  */
 package org.gwtproject.rpc.worker.client.impl;
 
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl;
 import org.gwtproject.rpc.worker.client.MessagePortEndpoint;
 import org.gwtproject.rpc.serialization.api.SerializationStreamReader;
 import org.gwtproject.rpc.serialization.api.SerializationStreamWriter;

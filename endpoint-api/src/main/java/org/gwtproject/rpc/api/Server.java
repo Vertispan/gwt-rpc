@@ -17,9 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.shared;
+package org.gwtproject.rpc.api;
 
-import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketServerImpl;
+import org.gwtproject.rpc.api.impl.AbstractWebSocketServerImpl;
 
 @Endpoint.BaseClass(AbstractWebSocketServerImpl.class)
 public interface Server<S extends Server<S,C>, C extends Client<C,S>> {

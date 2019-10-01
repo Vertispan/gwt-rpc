@@ -19,7 +19,7 @@
  */
 package org.gwtproject.rpc.websockets.apt.model;
 
-import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.api.Callback;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -120,7 +120,7 @@ public class EndpointMethod {
 
 	public TypeName getReadingCallbackTypeName(ProcessingEnvironment processingEnv) {
 		return ParameterizedTypeName.get(
-				ClassName.get("org.gwtproject.rpc.websockets.shared.impl", "AbstractEndpointImpl", "ReadingCallback"),
+				ClassName.get("org.gwtproject.rpc.api.impl", "AbstractEndpointImpl", "ReadingCallback"),
 				getCallbackSuccessType(processingEnv),
 				getCallbackFailureType(processingEnv)
 		);

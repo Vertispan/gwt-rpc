@@ -1,9 +1,9 @@
 package org.gwtproject.rpc.websockets.okhttp;
 
 import org.gwtproject.rpc.websockets.okhttp.impl.ServerBuilderImpl;
-import org.gwtproject.rpc.websockets.shared.Client;
-import org.gwtproject.rpc.websockets.shared.Server;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl;
+import org.gwtproject.rpc.api.Client;
+import org.gwtproject.rpc.api.Server;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl;
 
 /**
  * Base interface to be extended and given a concrete Server interface in a client project,

@@ -21,7 +21,7 @@ package org.gwtproject.rpc.worker.client;
 
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointImplConstructor;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
 import org.gwtproject.rpc.worker.client.impl.AbstractWorkerFactoryImpl;
 import org.gwtproject.rpc.worker.client.worker.MessagePort;
 import elemental2.core.ArrayBuffer;

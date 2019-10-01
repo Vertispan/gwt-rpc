@@ -17,21 +17,21 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.client;
+package org.gwtproject.rpc.gwt.client;
 
 import com.google.gwt.typedarrays.shared.ArrayBuffer;
 import elemental2.core.Int8Array;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
-import org.gwtproject.rpc.websockets.client.impl.ServerBuilderImpl;
-import org.gwtproject.rpc.websockets.shared.Server;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointImplConstructor;
+import org.gwtproject.rpc.gwt.client.impl.ServerBuilderImpl;
+import org.gwtproject.rpc.api.Server;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.WebSocket;
 import elemental2.dom.WebSocket.OnopenFn;
 import jsinterop.base.Js;
 import jsinterop.base.JsPropertyMap;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketServerImpl;
+import org.gwtproject.rpc.api.impl.AbstractWebSocketServerImpl;
 import playn.html.HasArrayBufferView;
 import playn.html.TypedArrayHelper;
 
