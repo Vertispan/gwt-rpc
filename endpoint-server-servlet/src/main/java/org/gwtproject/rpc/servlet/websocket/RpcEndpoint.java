@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.server;
+package org.gwtproject.rpc.servlet.websocket;
 
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;

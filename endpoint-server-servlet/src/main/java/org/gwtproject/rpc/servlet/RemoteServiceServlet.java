@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.server;
+package org.gwtproject.rpc.servlet;
 
 import org.gwtproject.rpc.websockets.shared.Endpoint.NoRemoteEndpoint;
 import org.gwtproject.rpc.websockets.shared.RemoteService.RemoteServiceAsync;

@@ -19,7 +19,7 @@
  */
 package sharedchat.server;
 
-import org.gwtproject.rpc.websockets.server.AbstractServerImpl;
+import org.gwtproject.rpc.servlet.websocket.AbstractServerImpl;
 import sharedchat.common.shared.ChatClient;
 import sharedchat.common.shared.ChatClient_Impl;
 import sharedchat.common.shared.ChatServer;

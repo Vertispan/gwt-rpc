@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.websockets.server;
+package org.gwtproject.rpc.servlet.websocket;
 
 import org.gwtproject.rpc.websockets.shared.Client;
 import org.gwtproject.rpc.websockets.shared.Server;

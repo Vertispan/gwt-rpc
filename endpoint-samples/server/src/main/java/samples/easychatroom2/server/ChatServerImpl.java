@@ -19,7 +19,7 @@
  */
 package samples.easychatroom2.server;
 
-import org.gwtproject.rpc.websockets.server.AbstractServerImpl;
+import org.gwtproject.rpc.servlet.websocket.AbstractServerImpl;
 import org.gwtproject.rpc.websockets.shared.Callback;
 import samples.easychatroom2.shared.ChatClient;
 import samples.easychatroom2.shared.ChatClient_Impl;
