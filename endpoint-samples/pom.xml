@@ -18,6 +18,7 @@
 		<module>server</module>
 		<module>vertx-server</module>
 		<module>okhttpclient</module>
+		<module>teavmclient</module>
   </modules>
 
 	<build>
