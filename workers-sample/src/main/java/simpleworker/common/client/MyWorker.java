@@ -30,5 +30,5 @@ import org.gwtproject.rpc.worker.client.MessagePortEndpoint;
 public interface MyWorker extends MessagePortEndpoint<MyHost> {
 	void ping();
 
-	void split(String pattern, String input, Callback<String[], Throwable> callback);
+	void split(String pattern, String input, Callback<String[], String> callback);
 }

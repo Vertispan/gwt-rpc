@@ -75,10 +75,10 @@ public class AppUI implements EntryPoint {
 			public void onClick(ClickEvent clickEvent) {
 				String result = Window.prompt("Split this text on \",\"", "a,b,c,d");
 				if (result != null) {
-					worker.split(",", result, new Callback<String[], Throwable>() {
+					worker.split(",", result, new Callback<String[], String>() {
 						@Override
-						public void onFailure(Throwable throwable) {
-							Window.alert("failure: " + throwable.getMessage());
+						public void onFailure(String message) {
+							Window.alert("failure: " + message);
 						}
 						@Override
 						public void onSuccess(String[] strings) {

@@ -50,11 +50,11 @@ public class AppWorker implements EntryPoint {
 			}
 
 			@Override
-			public void split(String pattern, String input, Callback<String[], Throwable> callback) {
+			public void split(String pattern, String input, Callback<String[], String> callback) {
 				try {
 					callback.onSuccess(input.split(pattern));
 				} catch (Exception e) {
-					callback.onFailure(e);
+					callback.onFailure(e.getMessage() == null ? e.toString() : e.getMessage());
 				}
 			}
 
