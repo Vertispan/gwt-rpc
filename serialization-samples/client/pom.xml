@@ -94,6 +94,7 @@
         <configuration>
           <moduleName>com.example.rpcsample.App</moduleName>
           <style>PRETTY</style>
+          <failOnError>true</failOnError>
         </configuration>
       </plugin>
     </plugins>

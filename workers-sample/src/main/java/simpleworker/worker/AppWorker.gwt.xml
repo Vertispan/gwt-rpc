@@ -19,6 +19,8 @@
   -->
 <module rename-to="simpleworker_worker">
 	<inherits name="com.google.gwt.core.Core" />
+	<!-- Instead this should point to LegacyRpcClasses, but we still have PlayN, so we still have User -->
+	<inherits name="com.google.gwt.user.client.rpc.GwtUserFallback" />
 	<inherits name="org.gwtproject.rpc.worker.RpcToWorkers" />
 	<inherits name="prj.gwtwwlinker.workerlinker.WorkerLinker" />
 

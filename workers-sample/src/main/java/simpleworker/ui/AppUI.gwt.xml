@@ -19,6 +19,7 @@
   -->
 <module rename-to="simpleworker_ui">
 	<inherits name="com.google.gwt.user.User" />
+	<inherits name="com.google.gwt.user.client.rpc.GwtUserFallback" />
 	<inherits name="org.gwtproject.rpc.worker.RpcToWorkers" />
 
 	<inherits name="simpleworker.common.Common" />

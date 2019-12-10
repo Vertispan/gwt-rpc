@@ -75,6 +75,9 @@
 						</goals>
 					</execution>
 				</executions>
+				<configuration>
+					<failOnError>true</failOnError>
+				</configuration>
 			</plugin>
 		</plugins>
 		<pluginManagement>

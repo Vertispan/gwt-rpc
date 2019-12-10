@@ -18,6 +18,7 @@
   #L%
   -->
 <module rename-to="sharedchat_ui">
+	<inherits name="com.google.gwt.user.client.rpc.GwtUserFallback" />
 	<inherits name="com.google.gwt.user.User" />
 	<inherits name="org.gwtproject.rpc.worker.RpcToWorkers" />
 
