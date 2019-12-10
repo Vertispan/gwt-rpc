@@ -215,7 +215,7 @@ public class EndpointProcessingStep implements ProcessingStep {
 			methodBuilder.endControlFlow();
 			if (method.hasCallback(processingEnv)) {
 				TypeSpec readingCallback = TypeSpec.anonymousClassBuilder("")
-						.superclass(method.getReadingCallbackTypeName(processingEnv))
+						.superclass(ClassName.get("org.gwtproject.rpc.api.impl", "AbstractEndpointImpl", "ReadingCallback"))
 						.addMethod(MethodSpec.methodBuilder("success")
 								.addParameter(SerializationStreamReader.class, "reader")
 								.addModifiers(Modifier.PUBLIC)

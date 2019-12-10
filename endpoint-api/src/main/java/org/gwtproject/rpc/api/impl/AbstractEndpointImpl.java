@@ -56,7 +56,7 @@ public abstract class AbstractEndpointImpl {
 
 	// count starts at 1, leaving zero for remote methods
 	private AtomicInteger nextCallbackId = new AtomicInteger(1);
-	private Map<Integer, ReadingCallback<?,?>> callbacks = new ConcurrentHashMap<>();
+	private Map<Integer, ReadingCallback> callbacks = new ConcurrentHashMap<>();
 
 	protected <W extends SerializationStreamWriter> AbstractEndpointImpl(
 			Function<TypeSerializer, W> writerFactory,
@@ -85,7 +85,7 @@ public abstract class AbstractEndpointImpl {
 			if (recipient >= 0) {
 				__invoke(recipient, reader);
 			} else {
-				ReadingCallback<?, ?> callback = callbacks.remove(-recipient);
+				ReadingCallback callback = callbacks.remove(-recipient);
 				callback.handle(reader);
 			}
 		} catch (SerializationException ex) {
@@ -118,7 +118,7 @@ public abstract class AbstractEndpointImpl {
 			throw new RuntimeException(e);
 		}
 	}
-	protected void __send(int recipient, Send s, ReadingCallback<?, ?> callback) {
+	protected void __send(int recipient, Send s, ReadingCallback callback) {
 		SerializationStreamWriter writer = __startCall();
 		try {
 			writer.writeInt(recipient);
@@ -129,16 +129,22 @@ public abstract class AbstractEndpointImpl {
 			writer.writeInt(callbackId);
 			s.send(writer);
 
-			__endCall(writer);
-			//only after we've successfully sent, register the callback
-			callbacks.put(callbackId, callback);
+			try {
+				// register first, then send over the wire
+				callbacks.put(callbackId, callback);
+				__endCall(writer);
+			} catch (Throwable t) {
+				// if the send fails, remove the callback again and let the exception happen
+				callbacks.remove(callbackId);
+				throw t;
+			}
 		} catch (SerializationException e) {
-			//TODO report? can't actually pass to Callback.onFailure, since it might expect something else
+			__onError(e);
 			throw new RuntimeException(e);
 		}
 	}
 
-	protected static abstract class ReadingCallback<T, F> {
+	protected static abstract class ReadingCallback {
 		public final void handle(SerializationStreamReader reader) throws SerializationException {
 			boolean success = reader.readBoolean();
 			if (success) {

@@ -118,12 +118,4 @@ public class EndpointMethod {
 		return getTypesToRead(processingEnv).get(1);
 	}
 
-	public TypeName getReadingCallbackTypeName(ProcessingEnvironment processingEnv) {
-		return ParameterizedTypeName.get(
-				ClassName.get("org.gwtproject.rpc.api.impl", "AbstractEndpointImpl", "ReadingCallback"),
-				getCallbackSuccessType(processingEnv),
-				getCallbackFailureType(processingEnv)
-		);
-	}
-
 }
