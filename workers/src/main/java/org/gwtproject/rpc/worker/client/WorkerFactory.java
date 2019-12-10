@@ -19,6 +19,8 @@
  */
 package org.gwtproject.rpc.worker.client;
 
+import org.gwtproject.nio.HasArrayBufferView;
+import org.gwtproject.nio.TypedArrayHelper;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
@@ -29,8 +31,6 @@ import elemental2.core.JsArray;
 import elemental2.core.JsString;
 import jsinterop.base.Any;
 import jsinterop.base.Js;
-import playn.html.HasArrayBufferView;
-import playn.html.TypedArrayHelper;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -62,7 +62,7 @@ public interface WorkerFactory<R extends MessagePortEndpoint<L>, L extends Messa
 						ByteBufferSerializationStreamWriter::new,
 						stream -> {
 							JsString[] stringTable = Js.<JsArray<JsString>>uncheckedCast(stream.getFinishedStringTable()).slice();
-							ArrayBuffer payload = Js.cast(((HasArrayBufferView) stream.getPayloadBytes()).getTypedArray().buffer());
+							ArrayBuffer payload = Js.cast(((HasArrayBufferView) stream.getPayloadBytes()).getTypedArray().buffer);
 
 							worker.postMessage(new JsArray<>(payload, stringTable), new JsArray<>(payload));
 						},

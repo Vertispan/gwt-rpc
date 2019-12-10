@@ -19,16 +19,18 @@
  */
 package org.gwtproject.rpc.worker.client.pako;
 
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.typedarrays.shared.ArrayBuffer;
-import com.google.gwt.typedarrays.shared.ArrayBufferView;
+import elemental2.core.ArrayBuffer;
+import elemental2.core.ArrayBufferView;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 /**
- * TODO jsinterop
+ * JsInterop wrapper for nodeca/pako, "zlib port to javascript, very fast!"
+ *
+ * Not presently used, but could serve as an implementation to compress ByteBuffers
+ * when serializing for websockets.
  */
-@JsType(isNative = true, namespace = "pako")
+@JsType(isNative = true, name = "pako.Inflate")
 public class Inflate {
 	public native boolean push(ArrayBuffer array, boolean last);
 	public native boolean push(ArrayBufferView array, boolean last);

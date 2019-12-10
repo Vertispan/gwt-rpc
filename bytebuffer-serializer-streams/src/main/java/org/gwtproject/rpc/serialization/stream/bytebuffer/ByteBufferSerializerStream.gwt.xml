@@ -1,5 +1,5 @@
 <module>
     <inherits name="org.gwtproject.rpc.serialization.api.Serial" />
-    <inherits name="playn.Core" />
+    <inherits name="org.gwtproject.nio.GwtNioSupport" />
     <source path="" />
 </module>

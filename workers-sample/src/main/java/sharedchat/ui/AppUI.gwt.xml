@@ -24,5 +24,7 @@
 
 	<inherits name="sharedchat.common.Common" />
 
+	<collapse-all-properties />
+
 	<entry-point class="sharedchat.ui.client.AppUI" />
 </module>

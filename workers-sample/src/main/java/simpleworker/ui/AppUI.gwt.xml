@@ -24,5 +24,7 @@
 
 	<inherits name="simpleworker.common.Common" />
 
+	<collapse-all-properties />
+
 	<entry-point class="simpleworker.ui.client.AppUI" />
 </module>

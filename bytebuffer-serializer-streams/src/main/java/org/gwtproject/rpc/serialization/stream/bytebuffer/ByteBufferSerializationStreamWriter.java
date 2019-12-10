@@ -130,7 +130,8 @@ public class ByteBufferSerializationStreamWriter  extends AbstractSerializationS
 
     @Override
     public void writeDouble(double fieldValue) {
-        writeLong(Double.doubleToLongBits(fieldValue));
+        maybeGrow();
+        bb.putDouble(fieldValue);
     }
 
     @Override

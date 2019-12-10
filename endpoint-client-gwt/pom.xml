@@ -11,10 +11,6 @@
 
 	<artifactId>endpoint-client-gwt</artifactId>
 
-	<properties>
-		<playn-html.version>2.0-rc4</playn-html.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -93,19 +89,12 @@
 			<classifier>sources</classifier>
 		</dependency>
 
-		<!-- required dependency for bytebuffers -->
-		<!-- Support ByteBuffer emulation, currently managed by playn -->
 		<dependency>
-			<groupId>io.playn</groupId>
-			<artifactId>playn-html</artifactId>
-			<version>${playn-html.version}</version>
+			<groupId>com.vertispan.nio</groupId>
+			<artifactId>gwt-nio</artifactId>
+			<version>1.0-alpha-1</version>
 		</dependency>
-		<dependency>
-			<groupId>io.playn</groupId>
-			<artifactId>playn-html</artifactId>
-			<version>${playn-html.version}</version>
-			<classifier>sources</classifier>
-		</dependency>
+
 	</dependencies>
 
 	<build>

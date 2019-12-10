@@ -19,8 +19,10 @@
  */
 package org.gwtproject.rpc.gwt.client;
 
-import com.google.gwt.typedarrays.shared.ArrayBuffer;
+import elemental2.core.ArrayBuffer;
 import elemental2.core.Int8Array;
+import org.gwtproject.nio.HasArrayBufferView;
+import org.gwtproject.nio.TypedArrayHelper;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 import org.gwtproject.rpc.gwt.client.impl.ServerBuilderImpl;
@@ -32,8 +34,6 @@ import elemental2.dom.WebSocket.OnopenFn;
 import jsinterop.base.Js;
 import jsinterop.base.JsPropertyMap;
 import org.gwtproject.rpc.api.impl.AbstractWebSocketServerImpl;
-import playn.html.HasArrayBufferView;
-import playn.html.TypedArrayHelper;
 
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;

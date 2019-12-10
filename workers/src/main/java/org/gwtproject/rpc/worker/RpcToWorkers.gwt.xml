@@ -20,7 +20,7 @@
 <module>
 	<inherits name="org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializerStream" />
 	<inherits name="org.gwtproject.rpc.RPC" />
-	<inherits name="playn.Core"/>
+	<inherits name="org.gwtproject.nio.GwtNioSupport" />
 	<inherits name="elemental2.core.Core"/>
 
 </module>
