@@ -5,11 +5,11 @@ import org.dominokit.jacksonapt.JsonSerializationContext;
 import org.dominokit.jacksonapt.ObjectMapper;
 import org.dominokit.jacksonapt.annotation.JSONMapper;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Comparator;
 import java.util.Map;
 
 public class Details {
@@ -70,8 +70,10 @@ public class Details {
         }
 
         Charset charset = Charset.forName("UTF-8");
-
-        for (Map.Entry<String, Type> stringTypeEntry : serializableTypes.entrySet()) {
+        serializableTypes.entrySet()
+                .stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))
+                .forEach(stringTypeEntry -> {
             digest.update(stringTypeEntry.getKey().getBytes(charset));
 
             Type value = stringTypeEntry.getValue();
@@ -106,7 +108,7 @@ public class Details {
                     }
                     break;
             }
-        }
+        });
 
         setSerializerHash(new BigInteger(digest.digest()).toString(16));
     }
