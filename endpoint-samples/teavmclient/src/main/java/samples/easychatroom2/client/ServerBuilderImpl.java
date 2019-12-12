@@ -1,12 +1,12 @@
 package samples.easychatroom2.client;
 
+import org.gwtproject.rpc.api.Client;
+import org.gwtproject.rpc.api.Server;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
+import org.gwtproject.rpc.api.impl.AbstractWebSocketServerImpl;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
-import org.gwtproject.rpc.websockets.shared.Client;
-import org.gwtproject.rpc.websockets.shared.Server;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl.EndpointImplConstructor;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractWebSocketServerImpl;
 import org.teavm.jso.typedarrays.ArrayBuffer;
 import org.teavm.jso.typedarrays.Int8Array;
 import samples.easychatroom2.client.impl.WebSocket;

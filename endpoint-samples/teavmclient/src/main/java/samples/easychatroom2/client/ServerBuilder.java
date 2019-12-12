@@ -1,8 +1,8 @@
 package samples.easychatroom2.client;
 
-import org.gwtproject.rpc.websockets.shared.Client;
-import org.gwtproject.rpc.websockets.shared.Server;
-import org.gwtproject.rpc.websockets.shared.impl.AbstractEndpointImpl;
+import org.gwtproject.rpc.api.Client;
+import org.gwtproject.rpc.api.Server;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl;
 
 public interface ServerBuilder<S extends Server<? super S, ?>> {
     <C extends Client<C, ? extends S>> S start(C client);

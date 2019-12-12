@@ -1,11 +1,7 @@
 package samples.easychatroom2.client;
 
-import org.gwtproject.rpc.websockets.shared.Callback;
+import org.gwtproject.rpc.api.Callback;
 import org.teavm.jso.browser.Location;
-import org.teavm.jso.browser.Window;
-import org.teavm.jso.typedarrays.ArrayBuffer;
-import org.teavm.jso.typedarrays.Int8Array;
-import org.teavm.jso.websocket.WebSocket;
 import samples.easychatroom2.shared.ChatClient;
 import samples.easychatroom2.shared.ChatServer;
 import samples.easychatroom2.shared.ChatServer_Impl;
