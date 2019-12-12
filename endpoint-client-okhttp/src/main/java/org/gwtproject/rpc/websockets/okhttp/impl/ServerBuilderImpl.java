@@ -135,6 +135,7 @@ public class ServerBuilderImpl<S extends Server<? super S, ?>> implements Server
 
     @Override
     public <C extends Client<C, ? extends S>> S start(C client) {
+        //noinspection unchecked
         return (S) new ServerImpl(reqBuilder, constructor, client).getEndpoint();
     }
 

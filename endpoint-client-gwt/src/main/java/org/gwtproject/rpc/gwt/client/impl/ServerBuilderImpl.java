@@ -31,23 +31,8 @@ public abstract class ServerBuilderImpl<S extends Server<? super S, ?>> implemen
 	/**
 	 *
 	 */
-	public ServerBuilderImpl(String moduleBaseURL, String remoteServiceRelativePath) {
+	public ServerBuilderImpl() {
 		urlBuilder.protocol = DomGlobal.window.location.getProtocol().equals("https") ? "wss": "ws";
-
-		//TODO in a worker moduleBaseURL can be null...
-		if (remoteServiceRelativePath != null && moduleBaseURL != null) {
-
-			//assume full url, pull out the path
-			String basePath = moduleBaseURL.substring(moduleBaseURL.indexOf("/", moduleBaseURL.indexOf("://") + 3));
-			/*
-			 * If the module relative URL is not null we set the remote service URL to
-			 * be the module base URL plus the module relative remote service URL.
-			 * Otherwise an explicit call to
-			 * ServerBuilder.setPath(String) or setUrl(String) is required.
-			 */
-			setPath(basePath + remoteServiceRelativePath);
-		}
-
 	}
 
 	@Override

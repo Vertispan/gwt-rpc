@@ -117,7 +117,7 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 	 * server builder.
 	 */
 	static <E extends Server<? super E, ?>> ServerBuilder<E> of(EndpointImplConstructor<E> constructor) {
-		return new ServerBuilderImpl<E>("", "") {
+		return new ServerBuilderImpl<E>() {
 
 			private WebSocket socket;
 			private Consumer<ArrayBuffer> onmessage;
