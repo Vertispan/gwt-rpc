@@ -21,19 +21,18 @@ package org.gwtproject.rpc.gwt.client;
 
 import elemental2.core.ArrayBuffer;
 import elemental2.core.Int8Array;
-import org.gwtproject.nio.HasArrayBufferView;
-import org.gwtproject.nio.TypedArrayHelper;
-import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
-import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
-import org.gwtproject.rpc.gwt.client.impl.ServerBuilderImpl;
-import org.gwtproject.rpc.api.Server;
-import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.WebSocket;
 import elemental2.dom.WebSocket.OnopenFn;
 import jsinterop.base.Js;
 import jsinterop.base.JsPropertyMap;
+import org.gwtproject.nio.TypedArrayHelper;
+import org.gwtproject.rpc.api.Server;
+import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
 import org.gwtproject.rpc.api.impl.AbstractWebSocketServerImpl;
+import org.gwtproject.rpc.gwt.client.impl.ServerBuilderImpl;
+import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
+import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
@@ -131,7 +130,7 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 							writer.prepareToWrite();
 							return writer;
 						},
-						stream -> socket.send(Js.<Int8Array>uncheckedCast(((HasArrayBufferView)stream.getFullPayload()).getTypedArray())),
+						stream -> socket.send(Js.<Int8Array>uncheckedCast(TypedArrayHelper.unwrap(stream.getFullPayload()))),
 						(send, serializer) -> {
 							onmessage = message -> {
 								ByteBuffer bb = TypedArrayHelper.wrap(message);
