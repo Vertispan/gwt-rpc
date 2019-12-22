@@ -13,13 +13,13 @@ package org.gwtproject.rpc.serialization.api;
 public interface FieldSerializer {
     default void deserial(SerializationStreamReader reader, Object instance) throws
             SerializationException, com.google.gwt.user.client.rpc.SerializationException {
-        //default implementation does nothing
+        throw new IllegalStateException("Cannot deserialize instance of this type, as it was not marked to be read. " + toString());
     }
     default void serial(SerializationStreamWriter writer, Object instance) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException {
-        //default implementation does nothing
+        throw new IllegalStateException("Cannot serialize instance of this type, as it was not marked to be written. " + toString());
     }
     default Object create(SerializationStreamReader reader) throws SerializationException, com.google.gwt.user.client.rpc.SerializationException {
         //default implementation throws an exception to indicate that deserialization isn't possible
-        throw new IllegalStateException("Cannot create an instance of this type - abstract, has no default constructor, or only subtypes are whitelisted");
+        throw new IllegalStateException("Cannot create an instance of this type. Possible reasons: was not marked to be read, is abstract, has no default constructor, or only subtypes are whitelisted. " + toString());
     }
 }
