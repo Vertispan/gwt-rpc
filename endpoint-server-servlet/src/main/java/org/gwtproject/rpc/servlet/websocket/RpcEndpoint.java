@@ -143,11 +143,11 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 
 	public static class Jsr356Connection implements Connection {
 		private final Session session;
-        private final EndpointConfig endpointConfg;
+        private final EndpointConfig endpointConfig;
 
 		private Jsr356Connection(Session session, EndpointConfig endpointConfig) {
 			this.session = session;
-            this.endpointConfg = endpointConfig;
+            this.endpointConfig = endpointConfig;
 		}
 
 		@Override
@@ -183,8 +183,8 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
          * 
          * @return
          */
-        public Optional<EndpointConfig> getEndpointConfg() {
-            return Optional.ofNullable(endpointConfg);
+        public Optional<EndpointConfig> getEndpointConfig() {
+            return Optional.ofNullable(endpointConfig);
         }
 
 		/**
