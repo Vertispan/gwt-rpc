@@ -89,6 +89,16 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 	ServerBuilder<S> setProtocol(String protocol);
 
 	/**
+     * Sets the subprotocols which end up as the Sec-WebSocket-Protocol header in the handshake request.
+     * This is a comma separated list. Note that server side implementations have to echo back the 
+     * protocols in the handshake response.
+     *
+     * @param subprotocols
+     * @return
+     */
+    ServerBuilder<S> setSubProtocols(String subProtocols);
+
+	/**
 	 * Creates a new instance of the specified server type, starts, and returns it. May
 	 * be called more than once to create additional connections, such as after the first
 	 * is closed.
@@ -139,7 +149,7 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 						}
 				);
 
-				socket = new WebSocket(getUrl() + "?checksum=" + ((AbstractWebSocketServerImpl<?, ?>) instance).getChecksum());
+				socket = new WebSocket(getUrl() + "?checksum=" + ((AbstractWebSocketServerImpl<?, ?>) instance).getChecksum(), getSubProtocols());
 				socket.binaryType = "arraybuffer";
 				socket.onclose = e -> {
 					int closeCode = Js.asPropertyMap(e).getAny("code").asInt();
