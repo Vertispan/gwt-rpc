@@ -25,11 +25,6 @@ import org.gwtproject.rpc.api.RemoteService.RemoteServiceAsync;
 import org.gwtproject.rpc.gwt.client.HttpHeader;
 import org.gwtproject.rpc.gwt.client.RemoteServiceBuilder;
 
-import elemental2.dom.DomGlobal;
-import elemental2.dom.XMLHttpRequest;
-import elemental2.dom.XMLHttpRequest.OnerrorFn;
-import elemental2.dom.XMLHttpRequest.OntimeoutFn;
-
 public abstract class RemoteServiceBuilderImpl<T extends RemoteServiceAsync> implements RemoteServiceBuilder<T> {
     public static final String RPC_CONTENT_TYPE = "text/x-gwt-rpc; charset=utf-8";
     private String user;
@@ -38,26 +33,12 @@ public abstract class RemoteServiceBuilderImpl<T extends RemoteServiceAsync> imp
     private String method;
     private int timeout;
     private HashSet<HttpHeader> requestHeaders = new HashSet<>();
-    private HttpErrorHandler httpErrorHandler;
-    private XMLHttpRequest.OnerrorFn errorHandler;
-    private XMLHttpRequest.OntimeoutFn timeoutHandler;
+    private ErrorHandler errorHandler;
+    private RequestCallback requestCallback;
 
     public RemoteServiceBuilderImpl() {
         method = "POST";
         url = "";
-		httpErrorHandler = (statusCode, statusText) -> {
-			DomGlobal.console.log("RPC request error: statusCode=" + statusCode + ", statusText:" + statusText
-					+ " - To handle this add an HttpErrorHandler to the RemoteServiceBuilder instance.");
-		};
-        errorHandler = e -> {
-            DomGlobal.console.log("OnError: " + e
-                    + " - To handle this add an OnErrorHandler to the RemoteServiceBuilder instance.");
-            return null;
-        };
-        timeoutHandler = e -> {
-            DomGlobal.console.log("OnTimeout: " + e
-                    + " - To handle this add an OnTimeoutHandler to the RemoteServiceBuilder instance.");
-        };
     }
     
     @Override
@@ -98,21 +79,15 @@ public abstract class RemoteServiceBuilderImpl<T extends RemoteServiceAsync> imp
     }
     
     @Override
-    public RemoteServiceBuilder<T> setHttpErrorHandler(HttpErrorHandler rpcErrorCallback) {
-    	this.httpErrorHandler = rpcErrorCallback;
-    	return this;
-    }
-
-    @Override
-    public RemoteServiceBuilder<T> setOnErrorFn(OnerrorFn errorHandler) {
+    public RemoteServiceBuilder<T> setErrorHandler(ErrorHandler errorHandler) {
         this.errorHandler = errorHandler;
         return this;
     }
-    
+
     @Override
-    public RemoteServiceBuilder<T> setOnTimeoutFn(OntimeoutFn timeoutHandler) {
-        this.timeoutHandler = timeoutHandler;
-        return null;
+    public RemoteServiceBuilder<T> setRequestCallback(RequestCallback requestCallBack) {
+        this.requestCallback = requestCallBack;
+        return this;
     }
     
     public String getUser() {
@@ -139,16 +114,11 @@ public abstract class RemoteServiceBuilderImpl<T extends RemoteServiceAsync> imp
         return requestHeaders;
     }
 
-    public HttpErrorHandler getHttpErrorHandler() {
-		return httpErrorHandler;
-	}
-    
-    public OnerrorFn getErrorHandler() {
+    public ErrorHandler getErrorHandler() {
         return errorHandler;
     }
 
-    public OntimeoutFn getTimeoutHandler() {
-        return timeoutHandler;
+    public RequestCallback getRequestCallback() {
+        return requestCallback;
     }
-
 }
