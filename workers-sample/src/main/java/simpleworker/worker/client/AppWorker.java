@@ -35,6 +35,7 @@ public class AppWorker implements EntryPoint {
 
 	@Override
 	public void onModuleLoad() {
+		DomGlobal.console.log("Loaded module AppWorker");
 
 		WorkerFactory<MyHost, MyWorker> factory = WorkerFactory.of(MyHost_Impl::new);
 
