@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class Details {
     @JSONMapper
@@ -50,7 +51,8 @@ public class Details {
     }
 
     public void setSerializableTypes(Map<String, Type> serializableTypes) {
-        this.serializableTypes = serializableTypes;
+        this.serializableTypes = new TreeMap<>(Comparator.naturalOrder());
+        this.serializableTypes.putAll(serializableTypes);
     }
 
     public String getSerializerHash() {
