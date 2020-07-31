@@ -158,13 +158,14 @@ public class Processor extends AbstractProcessor {
             // void are for writing, and take data as well as a writer, methods that return a type are for
             // reading, and only take a reader.
             // Pretty gross, but it will get us off the ground...
-
+            Set<String> rootTypeIds = new HashSet<>();
             for (ExecutableElement method : ElementFilter.methodsIn(element.getEnclosedElements())) {
                 if (method.getModifiers().contains(Modifier.STATIC) || method.getModifiers().contains(Modifier.DEFAULT)) {
                     continue;
                 }
                 if (isReadMethod(method)) {
                     readStob.addRootType(method.getReturnType());
+                    rootTypeIds.add(TypeName.get(method.getReturnType()).toString());
                 } else if (isWriteMethod(method)) {
                     for (VariableElement param : method.getParameters()) {
                         if (processingEnv.getTypeUtils().isSameType(param.asType(), serializationStreamWriter.asType())) {
@@ -172,6 +173,7 @@ public class Processor extends AbstractProcessor {
                         }
 
                         writeStob.addRootType(param.asType());
+                        rootTypeIds.add(TypeName.get(param.asType()).toString());
                     }
                 } else {
                     //confirm is createSerializer method - no params, returns a Serializer, otherwise error
@@ -193,7 +195,7 @@ public class Processor extends AbstractProcessor {
             }
 
             try {
-                writeImpl(writeOracle, readOracle, element, serializingTypes);
+                writeImpl(writeOracle, readOracle, element, serializingTypes, rootTypeIds);
             } catch (IOException ex) {
                 throw new UncheckedIOException(ex);
             }
@@ -203,7 +205,7 @@ public class Processor extends AbstractProcessor {
         return false;
     }
 
-    private void writeImpl(SerializableTypeOracle writeOracle, SerializableTypeOracle readOracle, Element serializationInterface, SerializingTypes serializingTypes) throws IOException {
+    private void writeImpl(SerializableTypeOracle writeOracle, SerializableTypeOracle readOracle, Element serializationInterface, SerializingTypes serializingTypes, Set<String> rootTypeIds) throws IOException {
 
         SerializableTypeOracleUnion bidiOracle = new SerializableTypeOracleUnion(readOracle, writeOracle);
         //write field serializers
@@ -237,7 +239,7 @@ public class Processor extends AbstractProcessor {
         writeSerializerImpl(prefix, packageName, serializationInterface);
 
         // write out a JSON file describing which describes the serializable types so other tooling can be generated from this
-        String hash = writeJsonManifest(prefix, packageName, models);
+        String hash = writeJsonManifest(prefix, packageName, models, rootTypeIds);
 
         // write type serializer, pointing at required field serializers and their appropriate use in each direction
         //TODO consider only doing this once, later, so we can be sure classes are still needed? not sure...
@@ -245,10 +247,17 @@ public class Processor extends AbstractProcessor {
 
     }
 
-    private String writeJsonManifest(String prefix, String packageName, List<SerializableTypeModel> models) throws IOException {
+    private String writeJsonManifest(String prefix, String packageName, List<SerializableTypeModel> models, Set<String> rootTypeIds) throws IOException {
         Details d = new Details();
         d.setSerializerPackage(packageName);
         d.setSerializerInterface(prefix);
+
+        // pre-visit all properties to see what interfaces we reference, combine this set with the root types
+        Set<String> reachableTypeIds = new HashSet<>(rootTypeIds);
+        models.stream().flatMap(stm -> Stream.concat(
+                stm.getFields().stream().map(Field::getTypeName).map(TypeName::toString),
+                stm.getProperties().stream().map(Property::getFieldTypeName).map(TypeName::toString)
+        )).forEach(reachableTypeIds::add);
 
         Map<String, Type> serializableTypes = models.stream().map(stm -> {
             Type type = new Type();
@@ -266,7 +275,7 @@ public class Processor extends AbstractProcessor {
 
             if (stm.getType().getKind() == TypeKind.ARRAY) {
                 type.setKind(Type.Kind.ARRAY);
-                type.setComponentTypeId(ClassName.get(((ArrayType) stm.getType()).getComponentType()).toString());
+                type.setComponentTypeId(TypeName.get(((ArrayType) stm.getType()).getComponentType()).toString());
             } else if (stm.getTypeElement().getKind() == ElementKind.ENUM) {
                 type.setKind(Type.Kind.ENUM);
                 type.setEnumValues(stm.getTypeElement().getEnclosedElements().stream()
@@ -278,10 +287,15 @@ public class Processor extends AbstractProcessor {
                 type.setKind(Type.Kind.COMPOSITE);
 
                 if (stm.getSuperclassFieldSerializer() != null) {
-                    type.setSuperTypeId(ClassName.get(stm.getTypeElement().getSuperclass()).toString());
+                    type.setSuperTypeId(TypeName.get(stm.getTypeElement().getSuperclass()).toString());
                 }
 
-                type.setInterfaceTypeIds(stm.getTypeElement().getInterfaces().stream().map(i -> ClassName.get(i).toString()).collect(Collectors.toList()));
+                type.setInterfaceTypeIds(stm.getTypeElement().getInterfaces().stream()
+                        .map(TypeName::get)
+                        .map(TypeName::toString)
+                        // only show interfaces that are referenced somewhere
+                        .filter(reachableTypeIds::contains)
+                        .collect(Collectors.toList()));
 
                 type.setIsAbstract(stm.getTypeElement().getModifiers().contains(Modifier.ABSTRACT));
 
