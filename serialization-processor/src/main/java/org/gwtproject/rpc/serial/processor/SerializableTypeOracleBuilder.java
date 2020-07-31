@@ -2,6 +2,7 @@ package org.gwtproject.rpc.serial.processor;
 
 import com.google.auto.common.MoreTypes;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 import org.gwtproject.rpc.gwtapt.JTypeUtils;
 import org.gwtproject.rpc.serial.processor.TypePaths.TypePath;
 
@@ -701,7 +702,7 @@ public class SerializableTypeOracleBuilder {
      */
     private final DeclaredType mapClass;
 
-    private final Set<TypeMirror> rootTypes = new LinkedHashSet<TypeMirror>();
+    private final Map<String, TypeMirror> rootTypes = new LinkedHashMap<>();
 
     private final TypeConstrainer typeConstrainer;
     private TypeFilter typeFilter = DEFAULT_TYPE_FILTER;
@@ -748,10 +749,11 @@ public class SerializableTypeOracleBuilder {
         }
 
 //        JClassType clazz = (JClassType) type;
-        if (!rootTypes.contains(type)) {
+        TypeName typeName = TypeName.get(type);
+        if (!rootTypes.containsKey(typeName.toString())) {
             recordTypeParametersIn(type, typeParametersInRootTypes);
 
-            rootTypes.add(type);
+            rootTypes.put(typeName.toString(), type);
         } else {
 //            if (logger.isLoggable(TreeLogger.TRACE)) {
 //                logger.log(TreeLogger.TRACE, clazz.getParameterizedQualifiedSourceName()
@@ -774,7 +776,7 @@ public class SerializableTypeOracleBuilder {
 
         boolean allSucceeded = true;
 
-        for (TypeMirror type : rootTypes) {
+        for (TypeMirror type : rootTypes.values()) {
             ProblemReport problems = new ProblemReport(messager);
             problems.setContextType(type);
             boolean entrySucceeded =
