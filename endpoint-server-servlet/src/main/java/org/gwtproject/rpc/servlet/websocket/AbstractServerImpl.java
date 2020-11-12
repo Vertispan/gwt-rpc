@@ -24,6 +24,9 @@ import org.gwtproject.rpc.api.Server;
 import org.gwtproject.rpc.api.Server.Connection;
 import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
 
+/**
+ * <p>Provides default implementations of {@link Server} methods so that subclasses can only override what they need.<p>
+ */
 public abstract class AbstractServerImpl<S extends Server<S, C>, C extends Client<C, S>> extends RpcEndpoint<S, C> {
 	/** In JSR-356, each server socket instance has exactly one client */
 	private C client;
@@ -54,6 +57,6 @@ public abstract class AbstractServerImpl<S extends Server<S, C>, C extends Clien
 
 //	@Override
 	public final void close() {
-		throw new IllegalStateException("This method may not be called on the server, only on the client. To close the connection, invoke WebSocketConnection.close() on the connection you want to stop.");
+		throw new IllegalStateException("This method may not be called on the server, only on the client. To close the connection, invoke Connection.close() on the connection you want to stop.");
 	}
 }

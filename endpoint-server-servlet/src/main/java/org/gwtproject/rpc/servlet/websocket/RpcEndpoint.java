@@ -19,21 +19,41 @@
  */
 package org.gwtproject.rpc.servlet.websocket;
 
-import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
-import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+
+import javax.websocket.CloseReason;
+import javax.websocket.EndpointConfig;
+import javax.websocket.OnClose;
+import javax.websocket.OnError;
+import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
+import javax.websocket.Session;
+
 import org.gwtproject.rpc.api.Client;
 import org.gwtproject.rpc.api.Server;
 import org.gwtproject.rpc.api.Server.Connection;
 import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
 import org.gwtproject.rpc.api.impl.AbstractWebSocketClientImpl;
+import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
+import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 
-import javax.websocket.*;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.function.Consumer;
-
+/**
+ * <p>A server side EndPoint implementation using JSR356 websockets.</p>
+ * 
+ * <p>It may be necessary to adjust some of the default container settings especially setMaxBinaryMessageBufferSize.
+ *    This can be done by accessing the Session or EndPointConfig objects from the Connection object (typically obtained in Server.onOpen()):</p>
+ * <pre><code>
+ *      ((Jsr356Connection)connection).getSession().setMaxBinaryMessageBufferSize(someValue);
+ * </code></pre>
+ * 
+ * <p>On open and on close events are delegated to the {@link Server}.onOpen and {@link Server}.onClose implementations.</p>
+ * 
+ */
 public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 	private final S server;
 	private final EndpointImplConstructor<C> clientConstructor;
@@ -45,14 +65,15 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 		this.clientConstructor = clientConstructor;
 	}
 
-	RpcEndpoint(EndpointImplConstructor<C> clientConstructor) {
+	@SuppressWarnings("unchecked")
+    RpcEndpoint(EndpointImplConstructor<C> clientConstructor) {
 		this.server = (S) this;
 		this.clientConstructor = clientConstructor;
 	}
 
 
 	@OnOpen
-	public void onOpen(Session session) {
+	public void onOpen(Session session, EndpointConfig endpointConfig) {
 		C instance = clientConstructor.create(
 				serializer -> {
 					ByteBufferSerializationStreamWriter writer = new ByteBufferSerializationStreamWriter(serializer);
@@ -88,12 +109,11 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 		server.setClient(instance);
 		instance.setServer(server);
 
-		server.onOpen(new Jsr356Connection(session), server.getClient());
-
-		// Configure defaults present in some servlet containers to avoid some confusing limits. Subclasses
-		// can override this method to control those defaults on their own.
-		session.setMaxIdleTimeout(0);
-		session.setMaxBinaryMessageBufferSize(Integer.MAX_VALUE);
+        // Configure defaults present in some servlet containers to avoid some confusing limits. Subclasses
+        // can override this method to control those defaults on their own.
+        session.setMaxIdleTimeout(0);
+        
+		server.onOpen(new Jsr356Connection(session, null), server.getClient());
 	}
 
 	@OnMessage
@@ -107,10 +127,11 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 	public void onMessage(ByteBuffer message) {
 		handleMessage.accept(message);
 	}
+	
 	@OnClose
 	public void onClose(Session session) {
 		assert server.getClient() != null;
-		server.onClose(new Jsr356Connection(session), server.getClient());
+		server.onClose(new Jsr356Connection(session, null), server.getClient());
 	}
 
 	@OnError
@@ -120,11 +141,13 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 		}
 	}
 
-	private static class Jsr356Connection implements Connection {
+	public static class Jsr356Connection implements Connection {
 		private final Session session;
+        private final EndpointConfig endpointConfig;
 
-		private Jsr356Connection(Session session) {
+		private Jsr356Connection(Session session, EndpointConfig endpointConfig) {
 			this.session = session;
+            this.endpointConfig = endpointConfig;
 		}
 
 		@Override
@@ -154,6 +177,25 @@ public class RpcEndpoint<S extends Server<S, C>, C extends Client<C, S>> {
 				throw new UncheckedIOException(e);
 			}
 		}
+
+        /**
+         * Expose the underlying JS356 EndPointConfig object. This is not available when onClose is called.
+         * 
+         * @return
+         */
+        public Optional<EndpointConfig> getEndpointConfig() {
+            return Optional.ofNullable(endpointConfig);
+        }
+
+		/**
+		 * Expose the underlying JS356 Session object.
+		 * 
+		 * @return
+		 */
+		public Session getSession() {
+            return session;
+        }
+		
 	}
 
 }
