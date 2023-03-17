@@ -142,18 +142,15 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 				socket = new WebSocket(getUrl() + "?checksum=" + ((AbstractWebSocketServerImpl<?, ?>) instance).getChecksum());
 				socket.binaryType = "arraybuffer";
 				socket.onclose = e -> {
-					int closeCode = Js.asPropertyMap(e).getAny("code").asInt();
-					String closeReason = Js.asPropertyMap(e).getAny("reason").asString();
+					int closeCode = Js.asPropertyMap(e).getAsAny("code").asInt();
+					String closeReason = Js.asPropertyMap(e).getAsAny("reason").asString();
 					instance.getClient().onClose(closeCode, closeReason);
-					return null;
 				};
 				socket.onopen = e -> {
 					instance.getClient().onOpen();
-					return null;
 				};
 				socket.onmessage = event -> {
 					onmessage.accept((ArrayBuffer) event.data);
-					return null;
 				};
 				Js.<JsPropertyMap<OnopenFn>>cast(socket).set("onerror", e -> {
 					if (getErrorHandler() != null) {
@@ -161,7 +158,6 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 					} else {
 						DomGlobal.console.log("A transport error occurred - pass a error handler to your server builder to handle this yourself", e);
 					}
-					return null;
 				});
 				((AbstractWebSocketServerImpl<?, ?>) instance).close = socket::close;
 				return instance;

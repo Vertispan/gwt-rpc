@@ -71,8 +71,8 @@
                   <exclude>org.gwtproject.rpc:serialization-api</exclude>
                   <exclude>org.gwtproject.rpc:serialization-details</exclude>
                   <!-- dependencies of serialization-details which are shaded into it -->
-                  <exclude>org.dominokit.jackson:jackson-apt</exclude>
-                  <exclude>org.dominokit.jackson:jackson-super</exclude>
+                  <exclude>org.dominokit:domino-jackson</exclude>
+                  <exclude>org.dominokit:domino-jackson-super</exclude>
 
                   <exclude>com.google.code.findbugs:jsr305</exclude>
                   <exclude>com.google.j2objc:j2objc-annotations</exclude>
@@ -115,9 +115,11 @@
               <createSourcesJar>true</createSourcesJar>
               <filters>
                 <filter>
-                  <artifact>com.google.auto:auto-common</artifact>
+                  <artifact>*:*</artifact>
                   <excludes>
                     <exclude>**/*.java</exclude>
+                    <exclude>**/*.gwt.xml</exclude>
+                    <exclude>META-INF/gwt/mainModule</exclude>
                   </excludes>
                 </filter>
               </filters>
