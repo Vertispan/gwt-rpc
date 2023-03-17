@@ -1,0 +1,21 @@
+name: Build and test
+
+on:
+  pull_request:
+  push:
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version: [ '8', '11', '17' ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java-version }}
+          cache: 'maven'
+      - run: mvn verify -B -e
