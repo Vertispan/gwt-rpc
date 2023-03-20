@@ -1,9 +1,9 @@
 package org.gwtproject.serial.json;
 
-import org.dominokit.jacksonapt.DefaultJsonSerializationContext;
-import org.dominokit.jacksonapt.JsonSerializationContext;
-import org.dominokit.jacksonapt.ObjectMapper;
-import org.dominokit.jacksonapt.annotation.JSONMapper;
+import org.dominokit.jackson.DefaultJsonSerializationContext;
+import org.dominokit.jackson.JsonSerializationContext;
+import org.dominokit.jackson.ObjectMapper;
+import org.dominokit.jackson.annotation.JSONMapper;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;

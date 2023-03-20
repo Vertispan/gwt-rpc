@@ -61,7 +61,7 @@ public interface WorkerFactory<R extends MessagePortEndpoint<L>, L extends Messa
 				return constructor.create(
 						ByteBufferSerializationStreamWriter::new,
 						stream -> {
-							JsString[] stringTable = Js.<JsArray<JsString>>uncheckedCast(stream.getFinishedStringTable()).slice();
+							String[] stringTable = stream.getFinishedStringTable();
 							ArrayBuffer payload = Js.cast(((HasArrayBufferView) stream.getPayloadBytes()).getTypedArray().buffer);
 
 							worker.postMessage(new JsArray<>(payload, stringTable), new JsArray<>(payload));
