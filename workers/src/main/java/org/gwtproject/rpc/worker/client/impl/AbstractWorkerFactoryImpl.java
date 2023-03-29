@@ -19,11 +19,16 @@
  */
 package org.gwtproject.rpc.worker.client.impl;
 
+import elemental2.core.JsArray;
+import elemental2.core.Transferable;
+import elemental2.dom.DedicatedWorkerGlobalScope;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.MessagePort;
+import elemental2.dom.SharedWorker;
+import elemental2.dom.Worker;
+import jsinterop.annotations.JsFunction;
 import org.gwtproject.rpc.worker.client.MessagePortEndpoint;
 import org.gwtproject.rpc.worker.client.WorkerFactory;
-import org.gwtproject.rpc.worker.client.worker.MessagePort;
-import org.gwtproject.rpc.worker.client.worker.SharedWorker;
-import org.gwtproject.rpc.worker.client.worker.Worker;
 
 /**
  * base class for generated factories, with a hook to create the remote endpoint to connect to
@@ -32,10 +37,9 @@ public abstract class AbstractWorkerFactoryImpl<R extends MessagePortEndpoint<L>
 
 	@Override
 	public R createDedicatedWorker(String pathToJs, L local) {
-
 		Worker worker = new Worker(pathToJs);
 
-		R remote = create(worker);
+		R remote = create(fn -> worker.onmessage = fn::onInvoke, worker::postMessage);
 
 		remote.setRemote(local);
 		local.setRemote(remote);
@@ -46,17 +50,12 @@ public abstract class AbstractWorkerFactoryImpl<R extends MessagePortEndpoint<L>
 	@Override
 	public R createSharedWorker(String pathToJs, L local) {
 		SharedWorker worker = new SharedWorker(pathToJs, pathToJs);
-		R remote = create(worker.getPort());
-
-		remote.setRemote(local);
-		local.setRemote(remote);
-
-		return remote;
+		return wrapRemoteMessagePort(worker.port, local);
 	}
 
 	@Override
 	public R wrapRemoteMessagePort(MessagePort remote, L local) {
-		R r = create(remote);
+		R r = create(fn -> remote.onmessage = fn::onInvoke, remote::postMessage);
 
 		r.setRemote(local);
 		local.setRemote(r);
@@ -64,8 +63,26 @@ public abstract class AbstractWorkerFactoryImpl<R extends MessagePortEndpoint<L>
 		return r;
 	}
 
+	@Override
+	public R wrapDedicatedWorkerGlobalScope(L local) {
+		DedicatedWorkerGlobalScope scope = (DedicatedWorkerGlobalScope) DomGlobal.self;
+		R r = create(scope::setOnmessage, scope::postMessage);
+
+		r.setRemote(local);
+		local.setRemote(r);
+
+		return null;
+	}
+	@JsFunction
+	public interface EmitsMessages {
+		void setOnmessage(DedicatedWorkerGlobalScope.OnmessageFn onmessage);
+	}
+	@JsFunction
+	public interface PostMessage {
+		void send(Object message, JsArray<Transferable> transfer);
+	}
 	/**
-	 * build the actual instance to connect
+	 * Build the actual instance to connect to.
 	 */
-	protected abstract R create(MessagePort worker);
+	protected abstract R create(EmitsMessages emitsMessages, PostMessage postMessage);
 }

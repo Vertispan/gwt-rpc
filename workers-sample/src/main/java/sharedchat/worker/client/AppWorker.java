@@ -19,15 +19,12 @@
  */
 package sharedchat.worker.client;
 
+import com.google.gwt.core.client.EntryPoint;
 import elemental2.dom.DomGlobal;
+import elemental2.dom.MessageEvent;
+import elemental2.dom.SharedWorkerGlobalScope;
 import org.gwtproject.rpc.gwt.client.ServerBuilder;
 import org.gwtproject.rpc.worker.client.WorkerFactory;
-import org.gwtproject.rpc.worker.client.worker.MessagePort;
-import com.google.gwt.core.client.EntryPoint;
-import jsinterop.annotations.JsFunction;
-import jsinterop.annotations.JsPackage;
-import jsinterop.annotations.JsProperty;
-import jsinterop.annotations.JsType;
 import sharedchat.common.client.ChatPage;
 import sharedchat.common.client.ChatPage_Impl;
 import sharedchat.common.client.ChatWorker;
@@ -53,16 +50,16 @@ import java.util.function.Consumer;
 public class AppWorker implements EntryPoint {
 
 	//factories to handle communication
-	private ServerBuilder<ChatServer> serverBuilder = ServerBuilder.of(ChatServer_Impl::new);
-	private WorkerFactory<ChatPage, ChatWorker> pageCommunicationFactory = WorkerFactory.of(ChatPage_Impl::new);
+	private final ServerBuilder<ChatServer> serverBuilder = ServerBuilder.of(ChatServer_Impl::new);
+	private final WorkerFactory<ChatPage, ChatWorker> pageCommunicationFactory = WorkerFactory.of(ChatPage_Impl::new);
 
 	//app state
 	private String username;
-	private List<ChatEvent> events = new ArrayList<>();
+	private final List<ChatEvent> events = new ArrayList<>();
 	private boolean connected;
 
 	//pages that are probably still connected...
-	private List<ChatPage> connectedPages = new ArrayList<>();
+	private final List<ChatPage> connectedPages = new ArrayList<>();
 
 	private ChatServer serverConnection;
 
@@ -71,8 +68,8 @@ public class AppWorker implements EntryPoint {
 		serverBuilder.setPath("/chat");
 		serverConnection = serverBuilder.start();
 
-		self().setOnConnect(e -> {
-			pageCommunicationFactory.wrapRemoteMessagePort(e.ports[0], new ChatWorker() {
+		self().setOnconnect(e -> {
+			pageCommunicationFactory.wrapRemoteMessagePort(((MessageEvent<?>) e).ports.getAt(0), new ChatWorker() {
 				private ChatPage page;
 
 				@Override
@@ -122,6 +119,7 @@ public class AppWorker implements EntryPoint {
 					return page;
 				}
 			});
+			return null;
 		});
 
 		serverConnection.setClient(new ChatClient() {
@@ -206,27 +204,7 @@ public class AppWorker implements EntryPoint {
 		void acceptUnsafe(T t) throws Exception;
 	}
 
-	private native SharedWorkerGlobalScope self() /*-{
-        return $wnd;
-    }-*/;
-
-
-	@JsType(isNative = true, namespace = JsPackage.GLOBAL)
-	public interface SharedWorkerGlobalScope {
-		@JsFunction
-		public interface OnConnectCallback {
-			void onConnect(Event event);
-
-		}
-
-		@JsProperty(name="onconnect")
-		void setOnConnect(OnConnectCallback onconnect);
-
-		@JsProperty(name="onconnect")
-		OnConnectCallback getOnConnect();
-	}
-	@JsType(isNative = true, namespace = JsPackage.GLOBAL)
-	public static class Event {
-		MessagePort[] ports;
+	private SharedWorkerGlobalScope self() {
+		return (SharedWorkerGlobalScope) DomGlobal.self;
 	}
 }

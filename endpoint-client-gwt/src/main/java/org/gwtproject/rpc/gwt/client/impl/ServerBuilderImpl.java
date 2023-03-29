@@ -19,20 +19,20 @@
  */
 package org.gwtproject.rpc.gwt.client.impl;
 
-import org.gwtproject.rpc.gwt.client.ServerBuilder;
-import org.gwtproject.rpc.api.Server;
 import elemental2.dom.DomGlobal;
+import org.gwtproject.rpc.api.Server;
+import org.gwtproject.rpc.gwt.client.ServerBuilder;
 
 public abstract class ServerBuilderImpl<S extends Server<? super S, ?>> implements ServerBuilder<S> {
 	private String url;
-	private URL urlBuilder = new URL(DomGlobal.window.location.href);
+	private URL urlBuilder = new URL(DomGlobal.self.location.href);
 	private ConnectionErrorHandler errorHandler;
 
 	/**
 	 *
 	 */
 	public ServerBuilderImpl() {
-		urlBuilder.protocol = DomGlobal.window.location.protocol.equals("https") ? "wss": "ws";
+		urlBuilder.protocol = DomGlobal.self.location.protocol.equals("https") ? "wss": "ws";
 	}
 
 	@Override
