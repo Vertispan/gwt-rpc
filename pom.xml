@@ -159,7 +159,8 @@
         <!-- a simple example of the serializer wiring, without any endpoints -->
         <module>serialization-samples</module>
         <!-- experimental utility to find all types in a jar so that they can be referenced by a project expecting to rely on those types -->
-        <module>discovery</module>
+        <!-- temporarily disabled, since it doesn't seem to work any more, and has some out of date dependencies -->
+        <!--<module>discovery</module>-->
 
         <!-- gwt rpc endpoints api, base impls -->
         <module>endpoint-api</module>
