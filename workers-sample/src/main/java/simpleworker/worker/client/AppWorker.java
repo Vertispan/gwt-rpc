@@ -19,11 +19,10 @@
  */
 package simpleworker.worker.client;
 
+import com.google.gwt.core.client.EntryPoint;
 import elemental2.dom.DomGlobal;
 import org.gwtproject.rpc.api.Callback;
 import org.gwtproject.rpc.worker.client.WorkerFactory;
-import org.gwtproject.rpc.worker.client.worker.MessagePort;
-import com.google.gwt.core.client.EntryPoint;
 import simpleworker.common.client.MyHost;
 import simpleworker.common.client.MyHost_Impl;
 import simpleworker.common.client.MyWorker;
@@ -38,7 +37,7 @@ public class AppWorker implements EntryPoint {
 
 		WorkerFactory<MyHost, MyWorker> factory = WorkerFactory.of(MyHost_Impl::new);
 
-		factory.wrapRemoteMessagePort(self(), new MyWorker() {
+		factory.wrapDedicatedWorkerGlobalScope(new MyWorker() {
 			@Override
 			public void onError(Throwable error) {
 				DomGlobal.console.log("An error occurred", error);
@@ -71,9 +70,4 @@ public class AppWorker implements EntryPoint {
 			}
 		});
 	}
-
-	private native MessagePort self() /*-{
-		return $wnd;
-	}-*/;
-
 }

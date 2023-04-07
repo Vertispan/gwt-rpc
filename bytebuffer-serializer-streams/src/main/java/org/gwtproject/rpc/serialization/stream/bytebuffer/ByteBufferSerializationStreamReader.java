@@ -25,7 +25,7 @@ public class ByteBufferSerializationStreamReader extends AbstractSerializationSt
         int version = bb.getInt();
         int flags = bb.getInt();
         int length = bb.getInt();
-        assert length == bb.remaining();
+        bb.limit(bb.position() + length);
         setVersion(version);
         setFlags(flags);
     }
