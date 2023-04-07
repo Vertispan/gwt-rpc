@@ -19,9 +19,7 @@
  */
 package sharedchat.ui.client;
 
-import com.google.gwt.core.client.Callback;
 import com.google.gwt.dom.client.Style.Unit;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -40,6 +38,7 @@ public class ChatClientWidget implements IsWidget {
 	TextBox message = new TextBox();
 	DockLayoutPanel root;
 	Button send = new Button("Send");
+	Button logout;
 
 	public ChatClientWidget() {
 		root = new DockLayoutPanel(Unit.PX);
@@ -50,6 +49,12 @@ public class ChatClientWidget implements IsWidget {
 		input.add(send);
 
 		root.addSouth(input, 30);
+
+		logout = new Button("Logout");
+		FlowPanel eastPanel = new FlowPanel();
+		eastPanel.add(logout);
+		root.addEast(eastPanel, 100);
+
 		ScrollPanel scroll = new ScrollPanel();
 		scroll.add(panel);
 		root.add(scroll);

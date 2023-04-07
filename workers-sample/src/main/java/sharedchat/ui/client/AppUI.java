@@ -19,19 +19,16 @@
  */
 package sharedchat.ui.client;
 
-import elemental2.dom.DomGlobal;
-import org.gwtproject.rpc.worker.client.WorkerFactory;
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.dom.client.Style.Position;
-import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
+import elemental2.dom.DomGlobal;
+import org.gwtproject.rpc.worker.client.WorkerFactory;
 import sharedchat.common.client.ChatPage;
 import sharedchat.common.client.ChatWorker;
 import sharedchat.common.client.ChatWorker_Impl;
@@ -132,12 +129,9 @@ public class AppUI implements EntryPoint {
 			}
 		});
 
-		Button logout = new Button("Logout", (ClickHandler) e -> {
+		widget.logout.addClickHandler(e -> {
 			sharedWorker.logout();
 		});
-		logout.getElement().getStyle().setPosition(Position.ABSOLUTE);
-		logout.getElement().getStyle().setRight(0, Unit.PX);
-		RootPanel.get().add(logout);
 
 		popup = new PopupPanel();
 		popup.setGlassEnabled(true);
