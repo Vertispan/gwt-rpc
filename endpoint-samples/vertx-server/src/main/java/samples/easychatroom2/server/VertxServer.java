@@ -30,7 +30,7 @@ public class VertxServer {
         RpcWebSocketHandler<ChatServer, ChatClient> websocketHandler = new RpcWebSocketHandler<>(ChatClient_Impl::new, ChatServerImpl::new);
 
         // When any request comes in on the /chat route, try to upgrade to a websocket and send it off to the websocket handler
-        router.route("/chat").handler(req -> websocketHandler.handle(req.request().upgrade()));
+        router.route("/chat").handler(req -> req.request().toWebSocket().onSuccess(websocketHandler));
 
         // ==== XHR setup ====
         // Similarly to the above, we create a handler once, with simple ways to create client and server instances
