@@ -219,7 +219,11 @@ public class TypeConstrainer {
 //        }
 
         if (type2.getKind() == TypeKind.WILDCARD) {
-            return typesMatch(type1, ((WildcardType)type2).getExtendsBound(), constraints);
+            TypeMirror extendsBound = ((WildcardType) type2).getExtendsBound();
+            if (extendsBound == null) {
+                extendsBound = types.getJavaLangObject().asType();
+            }
+            return typesMatch(type1, extendsBound, constraints);
         }
 //        JWildcardType type2Wild = type2.isWildcard();
 //        if (type2Wild != null) {

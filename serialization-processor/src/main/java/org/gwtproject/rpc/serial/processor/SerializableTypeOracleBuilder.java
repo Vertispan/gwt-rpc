@@ -938,7 +938,11 @@ public class SerializableTypeOracleBuilder {
 
         if (type.getKind() == TypeKind.WILDCARD) {
             WildcardType wildcard = (WildcardType) type;
-            boolean success = computeTypeInstantiability(/*localLogger, */wildcard.getExtendsBound(), path, problems)
+            TypeMirror extendsBound = wildcard.getExtendsBound();
+            if (extendsBound == null) {
+                extendsBound = types.getJavaLangObject().asType();
+            }
+            boolean success = computeTypeInstantiability(/*localLogger, */extendsBound, path, problems)
                     .hasInstantiableSubtypes();
             tic = ensureTypeInfoComputed(type, path);
             tic.setInstantiableSubtypes(success);
@@ -1299,7 +1303,11 @@ public class SerializableTypeOracleBuilder {
                                       TypeMirror typeArg, TypePath parent, ProblemReport problems) {
         if (typeArg.getKind() == TypeKind.WILDCARD) {
             WildcardType isWildcard = (WildcardType) typeArg;
-            return checkTypeArgument(baseType, paramIndex, isWildcard.getExtendsBound(), parent,
+            TypeMirror bounds = isWildcard.getExtendsBound();
+            if (bounds == null) {
+                bounds = types.getJavaLangObject().asType();
+            }
+            return checkTypeArgument(baseType, paramIndex, bounds, parent,
                     problems);
         }
 
