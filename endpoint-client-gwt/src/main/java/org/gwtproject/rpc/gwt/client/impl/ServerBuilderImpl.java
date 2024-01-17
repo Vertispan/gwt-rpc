@@ -27,6 +27,7 @@ public abstract class ServerBuilderImpl<S extends Server<? super S, ?>> implemen
 	private String url;
 	private URL urlBuilder = new URL(DomGlobal.self.location.href);
 	private ConnectionErrorHandler errorHandler;
+	private String subProtocols;
 
 	/**
 	 *
@@ -56,6 +57,13 @@ public abstract class ServerBuilderImpl<S extends Server<? super S, ?>> implemen
 		return url == null ? urlBuilder.toString_() : url;
 	}
 
+   /**
+     * @return the websocket sub protocols
+     */
+    public String getSubProtocols() {
+        return subProtocols;
+    }
+
 	@Override
 	public ServerBuilder<S> setProtocol(String protocol) {
 		urlBuilder.protocol = protocol;
@@ -76,4 +84,9 @@ public abstract class ServerBuilderImpl<S extends Server<? super S, ?>> implemen
 		urlBuilder.pathname = path;
 		return this;
 	}
+    @Override
+    public ServerBuilder<S> setSubProtocols(String subProtocols) {
+        this.subProtocols = subProtocols;
+        return this;
+    }	
 }
