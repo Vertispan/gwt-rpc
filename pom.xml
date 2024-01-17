@@ -170,6 +170,7 @@
         <module>endpoint-client-gwt</module>
         <!-- servlet wiring to create websocket, xhr endpoints -->
         <module>endpoint-server-servlet</module>
+        <module>endpoint-server-servlet-jakarta</module>
         <!-- vertx wiring to create server websocket endpoint -->
         <module>endpoint-server-vertx</module>
 

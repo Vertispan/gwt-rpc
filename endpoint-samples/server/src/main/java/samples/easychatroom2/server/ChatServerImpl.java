@@ -19,13 +19,13 @@
  */
 package samples.easychatroom2.server;
 
-import org.gwtproject.rpc.servlet.websocket.AbstractServerImpl;
+import org.gwtproject.rpc.jakarta.servlet.websocket.AbstractServerImpl;
 import org.gwtproject.rpc.api.Callback;
 import samples.easychatroom2.shared.ChatClient;
 import samples.easychatroom2.shared.ChatClient_Impl;
 import samples.easychatroom2.shared.ChatServer;
 
-import javax.websocket.server.ServerEndpoint;
+import jakarta.websocket.server.ServerEndpoint;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;

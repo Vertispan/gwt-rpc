@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>endpoint-server-servlet</artifactId>
+            <artifactId>endpoint-server-servlet-jakarta</artifactId>
             <version>${project.version}</version>
         </dependency>
 

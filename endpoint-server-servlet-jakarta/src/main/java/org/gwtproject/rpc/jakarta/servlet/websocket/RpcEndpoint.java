@@ -17,8 +17,14 @@
  * limitations under the License.
  * #L%
  */
-package org.gwtproject.rpc.servlet.websocket;
+package org.gwtproject.rpc.jakarta.servlet.websocket;
 
+import jakarta.websocket.CloseReason;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
+import jakarta.websocket.Session;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamReader;
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 import org.gwtproject.rpc.api.Client;
@@ -27,12 +33,6 @@ import org.gwtproject.rpc.api.Server.Connection;
 import org.gwtproject.rpc.api.impl.AbstractEndpointImpl.EndpointImplConstructor;
 import org.gwtproject.rpc.api.impl.AbstractWebSocketClientImpl;
 
-import javax.websocket.CloseReason;
-import javax.websocket.OnClose;
-import javax.websocket.OnError;
-import javax.websocket.OnMessage;
-import javax.websocket.OnOpen;
-import javax.websocket.Session;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
