@@ -73,6 +73,7 @@ public class WorkerLinker extends AbstractLinker {
 		String[] javaScript = result.getJavaScript();
 		out.print("var $wnd = self, $doc, $entry, $workergwtbridge, $moduleName, $moduleBase;");
 		out.newline();
+		out.print("window = $wnd;");
 //		out.print("if(typeof(window) != 'undefined'){ $wnd = window;  $doc = $wnd.document; }");
 //		out.newline();
 //		out.print("else{ $wnd = {JSON: JSON}; }"); // gwtwwlinker - mind the $wnd.JSON passthrough used by autobeans
