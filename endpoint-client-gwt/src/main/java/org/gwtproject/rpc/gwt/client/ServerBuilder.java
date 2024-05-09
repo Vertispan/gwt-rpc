@@ -35,6 +35,7 @@ import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializatio
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -119,40 +120,39 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 	static <E extends Server<? super E, ?>> ServerBuilder<E> of(EndpointImplConstructor<E> constructor) {
 		return new ServerBuilderImpl<E>() {
 
-			private WebSocket socket;
-			private Consumer<ArrayBuffer> onmessage;
-
 			@Override
 			public E start() {
+				WebSocket[] socket = new WebSocket[1];
+				Consumer<ArrayBuffer>[] onmessage = new Consumer[1];
 				E instance = constructor.create(
 						serializer -> {
 							ByteBufferSerializationStreamWriter writer = new ByteBufferSerializationStreamWriter(serializer);
 							writer.prepareToWrite();
 							return writer;
 						},
-						stream -> socket.send(Js.<Int8Array>uncheckedCast(TypedArrayHelper.unwrap(stream.getFullPayload()))),
+						stream -> socket[0].send(Js.<Int8Array>uncheckedCast(TypedArrayHelper.unwrap(stream.getFullPayload()))),
 						(send, serializer) -> {
-							onmessage = message -> {
+							onmessage[0] = (message -> {
 								ByteBuffer bb = TypedArrayHelper.wrap(message);
 								send.accept(new ByteBufferSerializationStreamReader(serializer, bb));
-							};
+							});
 						}
 				);
 
-				socket = new WebSocket(getUrl() + "?checksum=" + ((AbstractWebSocketServerImpl<?, ?>) instance).getChecksum());
-				socket.binaryType = "arraybuffer";
-				socket.onclose = e -> {
+				socket[0] = new WebSocket(getUrl() + "?checksum=" + ((AbstractWebSocketServerImpl<?, ?>) instance).getChecksum());
+				socket[0].binaryType = "arraybuffer";
+				socket[0].onclose = e -> {
 					int closeCode = Js.asPropertyMap(e).getAny("code").asInt();
 					String closeReason = Js.asPropertyMap(e).getAny("reason").asString();
 					instance.getClient().onClose(closeCode, closeReason);
 					return null;
 				};
-				socket.onopen = e -> {
+				socket[0].onopen = e -> {
 					instance.getClient().onOpen();
 					return null;
 				};
-				socket.onmessage = event -> {
-					onmessage.accept((ArrayBuffer) event.data);
+				socket[0].onmessage = event -> {
+					onmessage[0].accept((ArrayBuffer) event.data);
 					return null;
 				};
 				Js.<JsPropertyMap<OnopenFn>>cast(socket).set("onerror", e -> {
@@ -163,7 +163,7 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 					}
 					return null;
 				});
-				((AbstractWebSocketServerImpl<?, ?>) instance).close = socket::close;
+				((AbstractWebSocketServerImpl<?, ?>) instance).close = socket[0]::close;
 				return instance;
 			}
 		};
