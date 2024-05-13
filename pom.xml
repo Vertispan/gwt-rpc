@@ -6,7 +6,7 @@
 
     <groupId>com.vertispan.rpc</groupId>
     <artifactId>gwt-rpc-parent</artifactId>
-    <version>1.0-alpha-6</version>
+    <version>1.0-alpha-6.1</version>
     <packaging>pom</packaging>
 
     <name>gwt-rpc</name>

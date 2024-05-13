@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.vertispan.rpc</groupId>
 		<artifactId>gwt-rpc-parent</artifactId>
-		<version>1.0-alpha-6</version>
+		<version>1.0-alpha-6.1</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
@@ -30,7 +30,7 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>bytebuffer-serializer-streams</artifactId>
-			<version>1.0-alpha-6</version>
+			<version>1.0-alpha-6.1</version>
 			<classifier>sources</classifier>
 		</dependency>
 
