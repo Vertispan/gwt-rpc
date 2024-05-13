@@ -35,6 +35,7 @@ import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializatio
 import org.gwtproject.rpc.serialization.stream.bytebuffer.ByteBufferSerializationStreamWriter;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 /**
@@ -119,38 +120,37 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 	static <E extends Server<? super E, ?>> ServerBuilder<E> of(EndpointImplConstructor<E> constructor) {
 		return new ServerBuilderImpl<E>() {
 
-			private WebSocket socket;
-			private Consumer<ArrayBuffer> onmessage;
-
 			@Override
 			public E start() {
+				AtomicReference<WebSocket> socket = new AtomicReference<>();
+				AtomicReference<Consumer<ArrayBuffer>> onmessage = new AtomicReference<>();
 				E instance = constructor.create(
 						serializer -> {
 							ByteBufferSerializationStreamWriter writer = new ByteBufferSerializationStreamWriter(serializer);
 							writer.prepareToWrite();
 							return writer;
 						},
-						stream -> socket.send(Js.<Int8Array>uncheckedCast(TypedArrayHelper.unwrap(stream.getFullPayload()))),
+						stream -> socket.get().send(Js.<Int8Array>uncheckedCast(TypedArrayHelper.unwrap(stream.getFullPayload()))),
 						(send, serializer) -> {
-							onmessage = message -> {
+							onmessage.set(message -> {
 								ByteBuffer bb = TypedArrayHelper.wrap(message);
 								send.accept(new ByteBufferSerializationStreamReader(serializer, bb));
-							};
+							});
 						}
 				);
 
-				socket = new WebSocket(getUrl() + "?checksum=" + ((AbstractWebSocketServerImpl<?, ?>) instance).getChecksum());
-				socket.binaryType = "arraybuffer";
-				socket.onclose = e -> {
+				socket.set(new WebSocket(getUrl() + "?checksum=" + ((AbstractWebSocketServerImpl<?, ?>) instance).getChecksum()));
+				socket.get().binaryType = "arraybuffer";
+				socket.get().onclose = e -> {
 					int closeCode = Js.asPropertyMap(e).getAsAny("code").asInt();
 					String closeReason = Js.asPropertyMap(e).getAsAny("reason").asString();
 					instance.getClient().onClose(closeCode, closeReason);
 				};
-				socket.onopen = e -> {
+				socket.get().onopen = e -> {
 					instance.getClient().onOpen();
 				};
-				socket.onmessage = event -> {
-					onmessage.accept((ArrayBuffer) event.data);
+				socket.get().onmessage = event -> {
+					onmessage.get().accept((ArrayBuffer) event.data);
 				};
 				Js.<JsPropertyMap<OnopenFn>>cast(socket).set("onerror", e -> {
 					if (getErrorHandler() != null) {
@@ -159,7 +159,7 @@ public interface ServerBuilder<S extends Server<? super S, ?>> {
 						DomGlobal.console.log("A transport error occurred - pass a error handler to your server builder to handle this yourself", e);
 					}
 				});
-				((AbstractWebSocketServerImpl<?, ?>) instance).close = socket::close;
+				((AbstractWebSocketServerImpl<?, ?>) instance).close = socket.get()::close;
 				return instance;
 			}
 		};
